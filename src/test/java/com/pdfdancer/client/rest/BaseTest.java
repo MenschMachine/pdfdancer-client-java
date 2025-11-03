@@ -20,21 +20,21 @@ public abstract class BaseTest {
     private static final String DEFAULT_TOKEN = "42";
 
     protected static PdfDancerHttpClient httpClient;
-    protected static URI baseUri;
+    protected static URI baseUrl;
 
     private static boolean availabilityChecked;
     private static boolean serverAvailable;
 
     @BeforeAll
     static void initClient() {
-        String baseUriValue = System.getProperty("pdfdancer.baseUri",
-                System.getenv().getOrDefault("PDFDANCER_BASE_URI", DEFAULT_BASE_URI));
-        baseUri = URI.create(baseUriValue);
+        String baseUrlValue = System.getProperty("pdfdancer.baseUrl",
+                System.getenv().getOrDefault("PDFDANCER_BASE_URL", DEFAULT_BASE_URI));
+        baseUrl = URI.create(baseUrlValue);
 
         HttpClient delegate = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
-        httpClient = PdfDancerHttpClient.create(delegate, baseUri);
+        httpClient = PdfDancerHttpClient.create(delegate, baseUrl);
     }
 
     private static synchronized boolean isServerAvailable() {
@@ -57,8 +57,8 @@ public abstract class BaseTest {
     @BeforeEach
     void ensureServerAvailable() {
         Assumptions.assumeTrue(isServerAvailable(),
-                () -> "PDFDancer API not available at " + baseUri
-                        + ". Set PDFDANCER_TESTS_ENABLED=true (and PDFDANCER_BASE_URI / PDFDANCER_TOKEN) to run integration tests.");
+                () -> "PDFDancer API not available at " + baseUrl
+                        + ". Set PDFDANCER_TESTS_ENABLED=true (and PDFDANCER_BASE_URL / PDFDANCER_TOKEN) to run integration tests.");
     }
 
     protected String getValidToken() {

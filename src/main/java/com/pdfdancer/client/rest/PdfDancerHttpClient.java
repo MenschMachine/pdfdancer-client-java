@@ -35,28 +35,28 @@ public final class PdfDancerHttpClient {
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
 
     private final HttpClient delegate;
-    private final URI baseUri;
+    private final URI baseUrl;
     private final ObjectMapper objectMapper;
 
-    private PdfDancerHttpClient(HttpClient delegate, URI baseUri, ObjectMapper objectMapper) {
+    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper) {
         this.delegate = delegate;
-        this.baseUri = baseUri;
+        this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
     }
 
-    public static PdfDancerHttpClient createDefault(URI baseUri) {
+    public static PdfDancerHttpClient createDefault(URI baseUrl) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUri, createObjectMapper());
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper());
     }
 
-    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUri) {
-        return new PdfDancerHttpClient(httpClient, baseUri, createObjectMapper());
+    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl) {
+        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper());
     }
 
-    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUri, ObjectMapper mapper) {
-        return new PdfDancerHttpClient(httpClient, baseUri, mapper == null ? createObjectMapper() : mapper);
+    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper) {
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper);
     }
 
     private static ObjectMapper createObjectMapper() {
@@ -109,7 +109,7 @@ public final class PdfDancerHttpClient {
     }
 
     private HttpRequest toJavaRequest(MutableHttpRequest<?> request) {
-        URI target = baseUri.resolve(request.path());
+        URI target = baseUrl.resolve(request.path());
         HttpRequest.Builder builder = HttpRequest.newBuilder(target)
                 .timeout(DEFAULT_TIMEOUT);
 

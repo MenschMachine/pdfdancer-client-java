@@ -141,8 +141,8 @@ public class PDFDancer {
     }
 
     @SuppressWarnings("unused")
-    public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient, URI baseUri) {
-        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, baseUri));
+    public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient, URI baseUrl) {
+        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, baseUrl));
     }
 
     /**
@@ -179,8 +179,8 @@ public class PDFDancer {
     }
 
     @SuppressWarnings("unused")
-    static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient, URI baseUri) {
-        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, baseUri));
+    static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient, URI baseUrl) {
+        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, baseUrl));
     }
 
     /**
@@ -251,8 +251,8 @@ public class PDFDancer {
     @SuppressWarnings("unused")
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
-                                      int initialPageCount, HttpClient httpClient, URI baseUri) {
-        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, baseUri));
+                                      int initialPageCount, HttpClient httpClient, URI baseUrl) {
+        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, baseUrl));
     }
 
     /**
