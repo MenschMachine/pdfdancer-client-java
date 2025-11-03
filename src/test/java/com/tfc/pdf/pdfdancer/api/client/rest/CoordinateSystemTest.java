@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class CoordinateSystemTest extends BaseTest {
 
@@ -84,16 +85,16 @@ public class CoordinateSystemTest extends BaseTest {
         }
 
         // -- Text markers at key positions --
-        pdf.newParagraph().text("TOP-LEFT").font("Courier", 9).color(new Color(200,0,0))
+        pdf.newParagraph().text("TOP-LEFT").font("Courier", 9).color(new Color(200, 0, 0))
                 .at(0, 4, height - 12).add();
-        pdf.newParagraph().text("TOP-RIGHT").font("Courier", 9).color(new Color(0,120,200))
+        pdf.newParagraph().text("TOP-RIGHT").font("Courier", 9).color(new Color(0, 120, 200))
                 .at(0, Math.max(0, width - 100), height - 12).add();
-        pdf.newParagraph().text("BOTTOM-LEFT").font("Courier", 9).color(new Color(0,160,0))
+        pdf.newParagraph().text("BOTTOM-LEFT").font("Courier", 9).color(new Color(0, 160, 0))
                 .at(0, 4, 4).add();
-        pdf.newParagraph().text("BOTTOM-RIGHT").font("Courier", 9).color(new Color(120,0,160))
+        pdf.newParagraph().text("BOTTOM-RIGHT").font("Courier", 9).color(new Color(120, 0, 160))
                 .at(0, Math.max(0, width - 110), 4).add();
         pdf.newParagraph().text("CENTER").font("Courier", 10).color(Color.BLACK)
-                .at(0, width/2, height/2).add();
+                .at(0, width / 2, height / 2).add();
 
         // -- Images at various positions (80x80 logo) --
         File logo = new File("src/test/resources/fixtures/logo-80.png");
@@ -106,7 +107,7 @@ public class CoordinateSystemTest extends BaseTest {
         // Bottom-right
         pdf.newImage().fromFile(logo).at(0, Math.max(0, width - 90), 10).add();
         // Center
-        pdf.newImage().fromFile(logo).at(0, Math.max(0, width/2 - 40), Math.max(0, height/2 - 40)).add();
+        pdf.newImage().fromFile(logo).at(0, Math.max(0, width / 2 - 40), Math.max(0, height / 2 - 40)).add();
 
         // Spot-check text and image placements
         assertFalse(pdf.page(0).selectParagraphsStartingWith("TOP-LEFT").isEmpty(), "Missing TOP-LEFT text");

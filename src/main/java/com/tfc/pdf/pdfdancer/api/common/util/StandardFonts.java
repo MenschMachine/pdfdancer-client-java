@@ -55,10 +55,6 @@ public enum StandardFonts {
         this.fontName = fontName;
     }
 
-    public String getFontName() {
-        return fontName;
-    }
-
     /**
      * Checks whether a given font name matches one of the standard PDF fonts.
      *
@@ -74,5 +70,9 @@ public enum StandardFonts {
             }
         }
         return false;
+    }
+
+    public String getFontName() {
+        return fontName;
     }
 }

@@ -31,7 +31,7 @@ class SnapshotTest extends BaseTest {
         PageSnapshot snapshot = pdf.getPageSnapshot(0);
         List<ObjectRef> snapshotParagraphs = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.PARAGRAPH)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
 
         // Get data via select method
         List<TextParagraphReference> selectedParagraphs = page.selectParagraphs();
@@ -57,7 +57,7 @@ class SnapshotTest extends BaseTest {
         PageSnapshot snapshot = pdf.getPageSnapshot(0);
         List<ObjectRef> snapshotImages = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.IMAGE)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
 
         List<ImageReference> selectedImages = page.selectImages();
 
@@ -83,7 +83,7 @@ class SnapshotTest extends BaseTest {
         PageSnapshot snapshot = pdf.getPageSnapshot(0);
         List<ObjectRef> snapshotForms = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.FORM_X_OBJECT)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
 
         List<FormXObjectReference> selectedForms = page.selectForms();
 
@@ -112,7 +112,7 @@ class SnapshotTest extends BaseTest {
                         e.getType() == ObjectType.TEXT_FIELD ||
                         e.getType() == ObjectType.CHECKBOX ||
                         e.getType() == ObjectType.RADIO_BUTTON)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
 
         List<FormFieldReference> selectedFormFields = page.selectFormFields();
 

@@ -1,11 +1,7 @@
 package com.tfc.pdf.pdfdancer.api.client.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
@@ -63,23 +59,6 @@ public final class PdfDancerHttpClient {
         return new PdfDancerHttpClient(httpClient, baseUri, mapper == null ? createObjectMapper() : mapper);
     }
 
-    public Blocking toBlocking() {
-        return new Blocking();
-    }
-
-    /**
-     * Blocking facade with {@code retrieve} helpers mirroring the Micronaut client.
-     */
-    public final class Blocking {
-        public <T> T retrieve(MutableHttpRequest<?> request, Class<T> responseType) {
-            return send(request, responseType, null);
-        }
-
-        public <T> T retrieve(MutableHttpRequest<?> request, Argument<T> argument) {
-            return send(request, null, argument);
-        }
-    }
-
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -87,6 +66,10 @@ public final class PdfDancerHttpClient {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
+    }
+
+    public Blocking toBlocking() {
+        return new Blocking();
     }
 
     private <T> T send(MutableHttpRequest<?> request, Class<T> responseType, Argument<T> argument) {
@@ -120,7 +103,7 @@ public final class PdfDancerHttpClient {
             T value = (T) readValueFixingTypes(body, javaType);
             return value;
         } catch (IOException e) {
-            String preview = body == null ? "<no-body>" : new String(body, StandardCharsets.UTF_8);
+            String preview = new String(body, StandardCharsets.UTF_8);
             throw new PdfDancerClientException("Failed to parse response body: " + preview, e);
         }
     }
@@ -140,15 +123,16 @@ public final class PdfDancerHttpClient {
             return builder.build();
         }
 
-        if (body instanceof byte[] bytes) {
+        if (body instanceof byte[]) {
             if (declaredContentType != null) {
                 builder.header("Content-Type", declaredContentType.value());
             }
-            builder.method(request.method(), BodyPublishers.ofByteArray(bytes));
+            builder.method(request.method(), BodyPublishers.ofByteArray((byte[]) body));
             return builder.build();
         }
 
-        if (body instanceof MultipartBody multipart) {
+        if (body instanceof MultipartBody) {
+            MultipartBody multipart = (MultipartBody) body;
             String boundary = multipart.boundary();
             String contentType = "multipart/form-data; boundary=" + boundary;
             builder.header("Content-Type", contentType);
@@ -234,9 +218,7 @@ public final class PdfDancerHttpClient {
             return null;
         }
         if (responseType == byte[].class) {
-            @SuppressWarnings("unchecked")
-            T cast = (T) body;
-            return cast;
+            return (T) body;
         }
         if (responseType == String.class) {
             @SuppressWarnings("unchecked")
@@ -249,7 +231,7 @@ public final class PdfDancerHttpClient {
         try {
             return responseType.cast(readValueFixingTypes(body, objectMapper.getTypeFactory().constructType(responseType)));
         } catch (IOException e) {
-            String preview = body == null ? "<no-body>" : new String(body, StandardCharsets.UTF_8);
+            String preview = new String(body, StandardCharsets.UTF_8);
             throw new PdfDancerClientException("Failed to parse response body: " + preview, e);
         }
     }
@@ -283,6 +265,19 @@ public final class PdfDancerHttpClient {
             objectNode.fields().forEachRemaining(entry -> ensureObjectRefType(entry.getValue()));
         } else if (node.isArray()) {
             node.forEach(this::ensureObjectRefType);
+        }
+    }
+
+    /**
+     * Blocking facade with {@code retrieve} helpers mirroring the Micronaut client.
+     */
+    public final class Blocking {
+        public <T> T retrieve(MutableHttpRequest<?> request, Class<T> responseType) {
+            return send(request, responseType, null);
+        }
+
+        public <T> T retrieve(MutableHttpRequest<?> request, Argument<T> argument) {
+            return send(request, null, argument);
         }
     }
 }

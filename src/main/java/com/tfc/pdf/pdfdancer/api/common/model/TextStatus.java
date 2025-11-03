@@ -1,14 +1,18 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.tfc.pdf.pdfdancer.api.common.model.text.Paragraph;
 import com.tfc.pdf.pdfdancer.api.common.model.text.TextElement;
 import com.tfc.pdf.pdfdancer.api.common.model.text.TextLine;
+
 import java.util.Objects;
 import java.util.stream.Stream;
+
 public class TextStatus {
     private boolean isModified = false;
     private boolean isEncodable = true;
     private FontType fontType;
     private DocumentFontInfoDto fontInfo;
+
     public TextStatus(boolean isModified,
                       boolean isEncodable,
                       FontType fontType,
@@ -19,19 +23,23 @@ public class TextStatus {
         this.fontType = fontType;
         this.fontInfo = fontInfo;
     }
+
     public TextStatus() {
         super();
     }
+
     public static TextStatus fromParagraph(Paragraph paragraph) {
         return accumulateTextStatus(
                 paragraph.getLines().stream().flatMap(line -> line.getTextElements().stream())
         );
     }
+
     public static TextStatus fromTextLine(TextLine textLine) {
         return accumulateTextStatus(
                 textLine.getTextElements().stream()
         );
     }
+
     private static TextStatus accumulateTextStatus(Stream<TextElement> elements) {
         return elements.reduce(
                 new TextStatus(),
@@ -39,6 +47,7 @@ public class TextStatus {
                 TextStatus::combineStatuses
         );
     }
+
     public static TextStatus mergeStatus(TextStatus base, TextStatus update) {
         if (update == null) {
             return base;
@@ -57,6 +66,7 @@ public class TextStatus {
         }
         return base;
     }
+
     public static TextStatus combineStatuses(TextStatus s1, TextStatus s2) {
         if (s2 == null) {
             return s1;
@@ -78,31 +88,39 @@ public class TextStatus {
         }
         return s1;
     }
+
     public boolean isModified() {
         return isModified;
     }
+
     public boolean isEncodable() {
         return isEncodable;
     }
+
     public FontType getFontType() {
         return fontType;
     }
+
     public DocumentFontInfoDto getFontInfoDto() {
         return fontInfo;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TextStatus that)) return false;
+        if (!(o instanceof TextStatus)) return false;
+        TextStatus that = (TextStatus) o;
         return isModified == that.isModified
                 && isEncodable == that.isEncodable
                 && fontType == that.fontType
                 && Objects.equals(fontInfo, that.fontInfo);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(isModified, isEncodable, fontType, fontInfo);
     }
+
     @Override
     public String toString() {
         return "TextStatus[" +
@@ -112,6 +130,7 @@ public class TextStatus {
                 ", fontInfo=" + fontInfo +
                 ']';
     }
+
     public String getWarning() {
         if (!isEncodable() && fontInfo != null) {
             return "Text is not encodable with your current font, we are using'" + getFontInfoDto().systemFontName() + "' as a fallback font instead.";

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tfc.pdf.pdfdancer.api.common.model.ObjectType;
 import com.tfc.pdf.pdfdancer.api.common.model.Point;
+
 /**
  * Represents a straight line path segment between two points.
  * This class defines a linear path element connecting two coordinate points,
@@ -38,9 +39,10 @@ public class Line extends PathSegment {
         this.p0 = p0;
         this.p1 = p1;
     }
+
     /**
      * Returns the ending point of this line segment.
-     * 
+     *
      * @return the line's end point
      */
     public Point getP1() {
@@ -50,9 +52,10 @@ public class Line extends PathSegment {
     public void setP1(Point p1) {
         this.p1 = p1;
     }
+
     /**
      * Returns the starting point of this line segment.
-     * 
+     *
      * @return the line's start point
      */
     public Point getP0() {
@@ -62,9 +65,10 @@ public class Line extends PathSegment {
     public void setP0(Point p0) {
         this.p0 = p0;
     }
+
     /**
      * Returns the object type for this line segment.
-     * 
+     *
      * @return ObjectType.LINE indicating this is a line segment
      */
     @Override

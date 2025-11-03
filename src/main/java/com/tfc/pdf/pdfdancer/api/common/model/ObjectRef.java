@@ -1,9 +1,7 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import com.fasterxml.jackson.annotation.*;
+
 /**
  * Lightweight reference to a PDF object providing identity and type information.
  * Object references enable efficient API operations by providing a way to identify
@@ -49,6 +47,19 @@ public class ObjectRef {
      * This may be updated as the object is moved or modified within the document.
      */
     private Position position;
+
+    protected ObjectRef(String internalId, Position position, ObjectType objectRefType, ObjectType type) {
+        this.internalId = internalId;
+        this.position = position;
+        ObjectType base = objectRefType != null ? objectRefType : type;
+        this.objectRefType = base;
+        this.type = type != null ? type : base;
+    }
+
+    protected ObjectRef(String internalId, Position position, ObjectType objectRefType) {
+        this(internalId, position, objectRefType, objectRefType);
+    }
+
     /**
      * Creates a new object reference with the specified properties.
      * This constructor initializes all the essential information needed
@@ -66,17 +77,6 @@ public class ObjectRef {
         return new ObjectRef(internalId, position, objectRefType, type);
     }
 
-    protected ObjectRef(String internalId, Position position, ObjectType objectRefType, ObjectType type) {
-        this.internalId = internalId;
-        this.position = position;
-        ObjectType base = objectRefType != null ? objectRefType : type;
-        this.objectRefType = base;
-        this.type = type != null ? type : base;
-    }
-
-    protected ObjectRef(String internalId, Position position, ObjectType objectRefType) {
-        this(internalId, position, objectRefType, objectRefType);
-    }
     /**
      * Returns the internal identifier for the referenced object.
      *
@@ -85,6 +85,7 @@ public class ObjectRef {
     public String getInternalId() {
         return internalId;
     }
+
     /**
      * Returns the current getPosition information for the referenced object.
      *
@@ -93,6 +94,7 @@ public class ObjectRef {
     public Position getPosition() {
         return position;
     }
+
     /**
      * Updates the getPosition information for the referenced object.
      * This method allows updating the object's spatial information
@@ -103,6 +105,7 @@ public class ObjectRef {
     public void setPosition(Position position) {
         this.position = position;
     }
+
     /**
      * Returns the type classification of the referenced object.
      *

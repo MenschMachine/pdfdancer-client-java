@@ -1,8 +1,11 @@
 package com.tfc.pdf.pdfdancer.api.common.model.text;
+
 import com.tfc.pdf.pdfdancer.api.common.model.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 /**
  * Represents a paragraph or text block within a PDF document.
  * This class encapsulates paragraph-level text content with unified formatting
@@ -20,12 +23,14 @@ public class Paragraph extends PDFObject {
     private List<Double> lineSpacings;
     private Font font;
     private String text;
+
     /**
      * Default constructor for serialization frameworks.
      */
     public Paragraph() {
         super();
     }
+
     /**
      * Creates a paragraph with specified text content and formatting.
      *
@@ -37,6 +42,7 @@ public class Paragraph extends PDFObject {
         super(id, position);
         this.lines.addAll(lines);
     }
+
     /**
      * Returns the object type for this paragraph.
      *
@@ -46,13 +52,16 @@ public class Paragraph extends PDFObject {
     protected ObjectType getObjectType() {
         return ObjectType.PARAGRAPH;
     }
+
     public List<TextLine> getLines() {
         return lines;
     }
+
     public void setLines(List<TextLine> lines) {
         this.lines.clear();
         this.lines.addAll(lines);
     }
+
     /**
      * Gets the line spacing factors between consecutive lines.
      *
@@ -61,6 +70,7 @@ public class Paragraph extends PDFObject {
     public List<Double> getLineSpacings() {
         return lineSpacings;
     }
+
     /**
      * Sets the line spacing factors between consecutive lines.
      *
@@ -71,18 +81,23 @@ public class Paragraph extends PDFObject {
     public void setLineSpacings(List<Double> lineSpacings) {
         this.lineSpacings = lineSpacings;
     }
-    public void setFont(Font font) {
-        this.font = font;
-    }
+
     public Font getFont() {
         return font;
     }
+
+    public void setFont(Font font) {
+        this.font = font;
+    }
+
     public void clearLines() {
         lines.clear();
     }
+
     public void addLine(TextLine textLine) {
         this.lines.add(textLine);
     }
+
     @Override
     public TextTypeObjectRef toObjectRef() {
         return new TextTypeObjectRef(this.getId(),
@@ -95,16 +110,19 @@ public class Paragraph extends PDFObject {
                 this.lineSpacings,
                 this.lines.stream().filter(l -> l.getColor() != null).findFirst().map(TextLine::getColor).orElse(null),
                 TextStatus.fromParagraph(this),
-                this.lines.stream().map(TextLine::toObjectRef).toList()
+                this.lines.stream().map(TextLine::toObjectRef).collect(Collectors.toUnmodifiableList())
         );
     }
+
     public String getText() {
+        //noinspection ReplaceNullCheck
         if (text != null) {
             return text;
         } else {
             return this.lines.stream().map(TextLine::getText).collect(Collectors.joining("\n"));
         }
     }
+
     public void setText(String text) {
         this.text = text;
     }

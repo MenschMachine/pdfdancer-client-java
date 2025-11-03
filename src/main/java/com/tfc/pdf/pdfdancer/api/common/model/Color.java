@@ -1,5 +1,7 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import java.util.Objects;
+
 /**
  * Represents color information using RGBA (Red, Green, Blue, Alpha) color model.
  * This class encapsulates color data for PDF objects, supporting both opaque and
@@ -26,11 +28,13 @@ public class Color {
      * Alpha (transparency) component (0-255, where 255 is fully opaque).
      */
     private int alpha;
+
     /**
      * Default constructor creating a transparent black color.
      */
     public Color() {
     }
+
     /**
      * Creates an opaque color with specified RGB values.
      * Alpha is automatically atPosition to 255 (fully opaque).
@@ -42,6 +46,7 @@ public class Color {
     public Color(int red, int green, int blue) {
         this(red, green, blue, 255);
     }
+
     /**
      * Creates a color with specified RGBA values.
      *
@@ -56,39 +61,51 @@ public class Color {
         this.blue = blue;
         this.alpha = alpha;
     }
+
     public int getRed() {
         return red;
     }
+
     public void setRed(int red) {
         this.red = red;
     }
+
     public int getGreen() {
         return green;
     }
+
     public void setGreen(int green) {
         this.green = green;
     }
+
     public int getBlue() {
         return blue;
     }
+
     public void setBlue(int blue) {
         this.blue = blue;
     }
+
     public int getAlpha() {
         return alpha;
     }
+
     public void setAlpha(int alpha) {
         this.alpha = alpha;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Color color)) return false;
+        if (!(o instanceof Color)) return false;
+        Color color = (Color) o;
         return red == color.red && green == color.green && blue == color.blue && alpha == color.alpha;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(red, green, blue, alpha);
     }
+
     @Override
     public String toString() {
         return "Color{" +
@@ -98,6 +115,7 @@ public class Color {
                 ", alpha=" + alpha +
                 '}';
     }
+
     /**
      * Converts the RGB components to a hexadecimal color string.
      * This method generates a standard hex color representation (e.g., #FF0000 for red)

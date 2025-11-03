@@ -1,4 +1,5 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 /**
  * Enumeration of PDF object types supported by the PDFDancer API.
  * This enum categorizes the different types of objects that can exist within

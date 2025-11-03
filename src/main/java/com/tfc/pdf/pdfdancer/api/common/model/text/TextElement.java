@@ -1,6 +1,9 @@
 package com.tfc.pdf.pdfdancer.api.common.model.text;
+
 import com.tfc.pdf.pdfdancer.api.common.model.*;
+
 import java.util.Collections;
+
 /**
  * Represents a single character or glyph within a PDF document.
  * This class encapsulates individual character properties including the character
@@ -21,12 +24,14 @@ public class TextElement extends PDFObject {
      */
     private Color color;
     private TextStatus status;
+
     /**
      * Default constructor for serialization frameworks.
      */
     public TextElement() {
         super();
     }
+
     /**
      * Creates a character with specified properties.
      *
@@ -42,24 +47,31 @@ public class TextElement extends PDFObject {
         this.font = font;
         this.color = color;
     }
+
     public String getText() {
         return text;
     }
+
     public void setText(String text) {
         this.text = text;
     }
+
     public Font getFont() {
         return font;
     }
+
     public void setFont(Font font) {
         this.font = font;
     }
+
     public Color getColor() {
         return color;
     }
+
     public void setColor(Color color) {
         this.color = color;
     }
+
     /**
      * Returns the object type for this character.
      *
@@ -69,12 +81,15 @@ public class TextElement extends PDFObject {
     protected ObjectType getObjectType() {
         return ObjectType.TEXT_ELEMENT;
     }
-    public void setStatus(TextStatus status) {
-        this.status = status;
-    }
+
     public TextStatus getStatus() {
         return status;
     }
+
+    public void setStatus(TextStatus status) {
+        this.status = status;
+    }
+
     @Override
     public TextTypeObjectRef toObjectRef() {
         return new TextTypeObjectRef(

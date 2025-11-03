@@ -50,7 +50,7 @@ public class LineTest extends BaseTest {
         TextLineReference ref = client
                 .page(0)
                 .selectTextLinesStartingWith("the complete")
-                .getFirst();
+                .get(0);
         assertNotNull(ref);
         assertTrue(ref.delete());
         assertTrue(client.page(0)
@@ -64,13 +64,13 @@ public class LineTest extends BaseTest {
         TextLineReference ref = client
                 .page(0)
                 .selectTextLinesStartingWith("the complete")
-                .getFirst();
+                .get(0);
 
         Double originalX = ref.getPosition().getX();
         Double originalY = ref.getPosition().getY();
         assertTrue(ref.moveX(100));
 
-        ref = client.page(0).selectTextLineAt(originalX + 100, originalY).getFirst();
+        ref = client.page(0).selectTextLineAt(originalX + 100, originalY).get(0);
         assertNotNull(ref);
         client.save("/tmp/moveLine.pdf");
     }
@@ -78,7 +78,7 @@ public class LineTest extends BaseTest {
     @Test
     public void modifyLine() {
         PDFDancer client = createClient();
-        TextLineReference ref = client.page(0).selectTextLinesStartingWith("The Complete").getFirst();
+        TextLineReference ref = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
 
         assertTrue(ref.edit().replace(" replaced "));
 
@@ -95,7 +95,7 @@ public class LineTest extends BaseTest {
     @Test
     public void modifyLineWithFont() {
         PDFDancer client = createClient();
-        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").getFirst();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
 
         assertTrue(line.edit().replace("modified"));
 
@@ -120,7 +120,7 @@ public class LineTest extends BaseTest {
         String lineText = "The Complete";
 
         for (int i = 0; i < 10; i++) {
-            TextLineReference line = client.page(0).selectTextLinesStartingWith(lineText).getFirst();
+            TextLineReference line = client.page(0).selectTextLinesStartingWith(lineText).get(0);
             lineText = i + " The Complete C";
             assertTrue(line.edit().replace(lineText));
         }

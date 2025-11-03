@@ -1,9 +1,11 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.tfc.pdf.pdfdancer.api.common.model.path.Path;
 import com.tfc.pdf.pdfdancer.api.common.model.text.Paragraph;
 import com.tfc.pdf.pdfdancer.api.common.model.text.TextLine;
+
 /**
  * Abstract base class for all PDF objects that can be manipulated within the API.
  * This class provides the fundamental properties and behaviors shared by all PDF content elements,
@@ -48,6 +50,7 @@ public abstract class PDFObject {
      * that defines where the object is located within the document.
      */
     private Position position;
+
     /**
      * Default constructor required for serialization frameworks.
      * Creates an uninitialized PDF object that should be populated
@@ -55,6 +58,7 @@ public abstract class PDFObject {
      */
     public PDFObject() {
     }
+
     /**
      * Constructs a PDF object with the specified identifier and getPosition.
      * This constructor initializes the fundamental properties that all
@@ -67,6 +71,7 @@ public abstract class PDFObject {
         this.id = id;
         this.position = position;
     }
+
     /**
      * Returns the unique identifier for this PDF object.
      *
@@ -75,6 +80,7 @@ public abstract class PDFObject {
     public String getId() {
         return id;
     }
+
     /**
      * Sets the unique identifier for this PDF object.
      *
@@ -83,6 +89,7 @@ public abstract class PDFObject {
     public void setId(String id) {
         this.id = id;
     }
+
     /**
      * Returns the spatial getPosition information for this object.
      *
@@ -91,6 +98,7 @@ public abstract class PDFObject {
     public Position getPosition() {
         return position;
     }
+
     /**
      * Updates the spatial getPosition information for this object.
      *
@@ -99,6 +107,7 @@ public abstract class PDFObject {
     public void setPosition(Position position) {
         this.position = position;
     }
+
     /**
      * Creates an object reference for this PDF object.
      * Object references provide a lightweight way to refer to PDF objects
@@ -109,6 +118,7 @@ public abstract class PDFObject {
     public ObjectRef toObjectRef() {
         return new ObjectRef(this.getId(), getPosition(), this.getObjectType());
     }
+
     /**
      * Returns the specific object type for this PDF object.
      * This method must be implemented by concrete subclasses to identify

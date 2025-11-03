@@ -1,5 +1,7 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Represents PDF page dimensions, supporting both standard sizes and custom dimensions.
  * Dimensions are specified in points (1/72 inch).
@@ -72,11 +74,13 @@ public class PageSize {
     private String name;
     private double width;
     private double height;
+
     /**
      * Default constructor for serialization.
      */
     public PageSize() {
     }
+
     /**
      * Creates a page size with specified dimensions.
      *
@@ -86,6 +90,7 @@ public class PageSize {
     public PageSize(double width, double height) {
         this(null, width, height);
     }
+
     /**
      * Creates a page size with name and dimensions.
      *
@@ -98,6 +103,7 @@ public class PageSize {
         this.width = width;
         this.height = height;
     }
+
     /**
      * Creates a custom page size with specified dimensions in points.
      *
@@ -108,6 +114,7 @@ public class PageSize {
     public static PageSize custom(double width, double height) {
         return new PageSize(null, width, height);
     }
+
     public static PageSize of(double pageWidth, double pageHeight) {
         // Allow small floating point differences (e.g., from rounding or rotation)
         final double tolerance = 0.5;
@@ -132,28 +139,36 @@ public class PageSize {
         // If not matching any standard, return a custom one
         return PageSize.custom(pageWidth, pageHeight);
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public double getWidth() {
         return width;
     }
+
     public void setWidth(double width) {
         this.width = width;
     }
+
     public double getHeight() {
         return height;
     }
+
     public void setHeight(double height) {
         this.height = height;
     }
+
     @JsonIgnore
     public boolean isStandard() {
         return name != null;
     }
+
     @JsonIgnore
     public boolean isCustom() {
         return name == null;

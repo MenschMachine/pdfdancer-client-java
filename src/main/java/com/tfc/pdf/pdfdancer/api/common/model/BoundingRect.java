@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
+
 /**
  * Represents a rectangular area defined by getPosition and dimensions.
  * This class encapsulates bounding box information for PDF objects,
@@ -27,6 +28,7 @@ public class BoundingRect {
      * Height of the rectangle extending upward from the origin.
      */
     private double height;
+
     /**
      * Creates a bounding rectangle with specified getPosition and dimensions.
      *
@@ -45,6 +47,7 @@ public class BoundingRect {
         this.width = width;
         this.height = height;
     }
+
     /**
      * Returns the origin point of this bounding rectangle.
      * The origin represents the bottom-left corner in PDF coordinate system.
@@ -54,30 +57,39 @@ public class BoundingRect {
     public Point getOrigin() {
         return new Point(x, y);
     }
+
     public double getX() {
         return x;
     }
+
     public void setX(double x) {
         this.x = x;
     }
+
     public double getY() {
         return y;
     }
+
     public void setY(double y) {
         this.y = y;
     }
+
     public double getWidth() {
         return width;
     }
+
     public void setWidth(double width) {
         this.width = width;
     }
+
     public double getHeight() {
         return height;
     }
+
     public void setHeight(double height) {
         this.height = height;
     }
+
     @Override
     public String toString() {
         return "BoundingRect{" +
@@ -87,11 +99,14 @@ public class BoundingRect {
                 ", height=" + height +
                 '}';
     }
+
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof BoundingRect that)) return false;
+        if (!(o instanceof BoundingRect)) return false;
+        BoundingRect that = (BoundingRect) o;
         return Double.compare(x, that.x) == 0 && Double.compare(y, that.y) == 0 && Double.compare(width, that.width) == 0 && Double.compare(height, that.height) == 0;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(x, y, width, height);

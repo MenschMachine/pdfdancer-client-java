@@ -1,7 +1,10 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.tfc.pdf.pdfdancer.api.common.util.ImageInfo;
+
 import java.io.File;
 import java.io.IOException;
+
 /**
  * Represents an image object within a PDF document.
  * This class encapsulates image data, format information, and dimensional properties
@@ -21,12 +24,14 @@ public class Image extends PDFObject {
      * Raw image data bytes.
      */
     private byte[] data;
+
     /**
      * Default constructor for serialization frameworks.
      */
     public Image() {
         super();
     }
+
     /**
      * Creates an image with specified properties and data.
      *
@@ -42,6 +47,7 @@ public class Image extends PDFObject {
         this.size = size;
         this.data = data;
     }
+
     /**
      * Creates an Image object by loading data from a file.
      * This factory method reads image file data, extracts format and dimension
@@ -59,24 +65,31 @@ public class Image extends PDFObject {
         image.setFormat(read.format());
         return image;
     }
+
     public String getFormat() {
         return format;
     }
+
     public void setFormat(String format) {
         this.format = format;
     }
+
     public Size getSize() {
         return size;
     }
+
     public void setSize(Size size) {
         this.size = size;
     }
+
     public byte[] getData() {
         return data;
     }
+
     public void setData(byte[] data) {
         this.data = data;
     }
+
     /**
      * Returns the object type for this image.
      *

@@ -1,4 +1,5 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 /**
  * Enumeration of page orientations.
  */

@@ -1,4 +1,5 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 /**
  * Represents font properties for text rendering in PDF documents.
  * This class encapsulates font characteristics including typeface name, size,
@@ -15,11 +16,13 @@ public class Font {
      */
     private double size;
     private boolean isEmbedded;
+
     /**
      * Default constructor creating an uninitialized font.
      */
     public Font() {
     }
+
     /**
      * Creates a font with specified name and size, using regular styling.
      *
@@ -31,24 +34,31 @@ public class Font {
         this.size = size;
         this.isEmbedded = isEmbedded;
     }
+
     public Font(String name, double size) {
         this(name, size, name.matches("^[A-Z]{6}\\+.*"));
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public double getSize() {
         return size;
     }
+
     public void setSize(double size) {
         this.size = size;
     }
+
     public boolean isEmbedded() {
         return isEmbedded;
     }
+
     public void setEmbedded(boolean embedded) {
         isEmbedded = embedded;
     }

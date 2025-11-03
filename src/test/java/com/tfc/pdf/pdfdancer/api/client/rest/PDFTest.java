@@ -95,7 +95,7 @@ public class PDFTest extends BaseTest {
 
         List<TextLineReference> selectedLines = pdf.page(0).selectTextLineAt(100, 201.5, 3d); // needs high tolerance, because y of line != y of paragraph
         assertEquals(1, selectedLines.size());
-        assertNotNull(selectedLines.getFirst().getInternalId());
+        assertNotNull(selectedLines.get(0).getInternalId());
         pdf.save("/tmp/test_create_blank_pdf_add_and_modify_content.pdf");
 
         try {
@@ -109,7 +109,7 @@ public class PDFTest extends BaseTest {
             for (int i = 0; i < 10; i++) {
                 List<TextLineReference> selectedLines2 = pdf2.page(0).selectTextLineAt(100, 201.5, 3);
                 assertEquals(1, selectedLines2.size());
-                TextLineReference line = selectedLines2.getFirst();
+                TextLineReference line = selectedLines2.get(0);
                 boolean success = line.edit().replace("hello " + i);
                 assertTrue(success);
             }

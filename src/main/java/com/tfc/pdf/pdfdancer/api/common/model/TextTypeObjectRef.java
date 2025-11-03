@@ -16,6 +16,7 @@ public class TextTypeObjectRef extends ObjectRef {
     private final Color color;
     private final String text;
     private final TextStatus status;
+
     /**
      * Creates a new object reference with the specified properties.
      * This constructor initializes all the essential information needed
@@ -52,6 +53,7 @@ public class TextTypeObjectRef extends ObjectRef {
         this.status = status;
         this.children = children != null ? new ArrayList<>(children) : new ArrayList<>();
     }
+
     public String getText() {
         if (this.text == null) {
             return this.children.stream().map(TextTypeObjectRef::getText).collect(Collectors.joining("\n"));
@@ -59,12 +61,15 @@ public class TextTypeObjectRef extends ObjectRef {
             return text;
         }
     }
+
     public String getFontName() {
         return fontName;
     }
+
     public Double getFontSize() {
         return fontSize;
     }
+
     /**
      * Gets the line spacing factors between consecutive lines.
      *
@@ -73,15 +78,19 @@ public class TextTypeObjectRef extends ObjectRef {
     public List<Double> getLineSpacings() {
         return lineSpacings;
     }
+
     public List<TextTypeObjectRef> getChildren() {
         return children;
     }
+
     public Color getColor() {
         return color;
     }
+
     public void addChild(TextTypeObjectRef child) {
         this.children.add(child);
     }
+
     public TextStatus getStatus() {
         return status;
     }

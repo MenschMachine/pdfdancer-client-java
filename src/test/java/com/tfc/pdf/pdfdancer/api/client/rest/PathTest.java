@@ -51,7 +51,7 @@ public class PathTest extends BaseTest {
         assertEquals(1, paths.size());
         assertEquals("PATH_000001", paths.get(0).getInternalId());
 
-        paths.getFirst().delete();
+        paths.get(0).delete();
         paths = client.page(0).selectPathAt(80, 720);
         assertEquals(0, paths.size());
         paths = client.selectPaths();

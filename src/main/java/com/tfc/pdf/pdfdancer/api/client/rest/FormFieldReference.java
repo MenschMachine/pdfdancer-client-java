@@ -27,6 +27,7 @@ public class FormFieldReference extends BaseReference {
     /**
      * Gets the current value of this form field.
      * Alias for value() to match Python client API.
+     *
      * @return the field value
      */
     public String getValue() {

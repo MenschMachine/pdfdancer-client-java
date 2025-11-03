@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tfc.pdf.pdfdancer.api.common.model.ObjectType;
 import com.tfc.pdf.pdfdancer.api.common.model.Point;
+
 /**
  * Represents a cubic Bezier curve path segment defined by four control points.
  * This class implements a cubic Bezier curve with start point, two control points,
@@ -28,7 +29,9 @@ public class Bezier extends PathSegment {
      */
     private Point p3;
 
-    /** Default constructor for deserialization. */
+    /**
+     * Default constructor for deserialization.
+     */
     public Bezier() {
         super();
     }
@@ -51,11 +54,12 @@ public class Bezier extends PathSegment {
         this.p2 = p2;
         this.p3 = p3;
     }
+
     /**
      * Evaluates a point on the Bezier curve for the given parameter value.
      * This method uses the cubic Bezier mathematical formula to calculate
      * the exact coordinates at any point along the curve.
-     * 
+     *
      * @param t parameter value between 0.0 and 1.0, where 0.0 is the start point
      *          and 1.0 is the end point
      * @return the calculated point on the curve at parameter t
@@ -74,33 +78,53 @@ public class Bezier extends PathSegment {
     }
     /**
      * Returns the object type for this Bezier curve segment.
-     * 
+     *
      * @return ObjectType.BEZIER indicating this is a Bezier curve segment
      */
     /**
      * Returns the starting point p0 of this Bezier segment.
      */
-    public Point getP0() { return p0; }
+    public Point getP0() {
+        return p0;
+    }
 
-    public void setP0(Point p0) { this.p0 = p0; }
+    public void setP0(Point p0) {
+        this.p0 = p0;
+    }
+
     /**
      * Returns the first control point p1 of this Bezier segment.
      */
-    public Point getP1() { return p1; }
+    public Point getP1() {
+        return p1;
+    }
 
-    public void setP1(Point p1) { this.p1 = p1; }
+    public void setP1(Point p1) {
+        this.p1 = p1;
+    }
+
     /**
      * Returns the second control point p2 of this Bezier segment.
      */
-    public Point getP2() { return p2; }
+    public Point getP2() {
+        return p2;
+    }
 
-    public void setP2(Point p2) { this.p2 = p2; }
+    public void setP2(Point p2) {
+        this.p2 = p2;
+    }
+
     /**
      * Returns the ending point p3 of this Bezier segment.
      */
-    public Point getP3() { return p3; }
+    public Point getP3() {
+        return p3;
+    }
 
-    public void setP3(Point p3) { this.p3 = p3; }
+    public void setP3(Point p3) {
+        this.p3 = p3;
+    }
+
     @Override
     protected ObjectType getObjectType() {
         return ObjectType.BEZIER;

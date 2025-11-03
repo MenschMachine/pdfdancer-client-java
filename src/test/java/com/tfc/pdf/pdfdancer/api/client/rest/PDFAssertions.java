@@ -7,6 +7,7 @@ import com.tfc.pdf.pdfdancer.api.common.model.PageRef;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -400,7 +401,7 @@ public class PDFAssertions {
         // Filter to page
         List<FormFieldReference> pageFormFields = formFields.stream()
                 .filter(f -> f.getPosition().getPageIndex() == pageIndex)
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
         assertEquals(1, pageFormFields.size(),
                 String.format("Expected 1 form field but got %d", pageFormFields.size()));
         assertEquals(fieldValue, pageFormFields.get(0).getValue(),
@@ -409,7 +410,7 @@ public class PDFAssertions {
     }
 
     public void assertParagraphHasColor(String text, Color color, int pageIndex) {
-        TextParagraphReference paragraph = pdf.page(pageIndex).selectParagraphsStartingWith(text).getFirst();
+        TextParagraphReference paragraph = pdf.page(pageIndex).selectParagraphsStartingWith(text).get(0);
         assertEquals(color, paragraph.getColor(),
                 String.format("%s != %s", color, paragraph.getColor()));
     }

@@ -1,10 +1,13 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FormFieldRef extends ObjectRef {
     private final String name;
     private final String value;
+
     @JsonCreator
     public FormFieldRef(@JsonProperty("internalId") String id,
                         @JsonProperty("position") Position position,
@@ -16,9 +19,11 @@ public class FormFieldRef extends ObjectRef {
         this.name = name;
         this.value = value;
     }
+
     public String getName() {
         return name;
     }
+
     public String getValue() {
         return value;
     }

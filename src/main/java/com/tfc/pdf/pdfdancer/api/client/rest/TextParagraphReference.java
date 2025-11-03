@@ -116,8 +116,8 @@ public class TextParagraphReference extends BaseReference {
                     // Use the paragraph's position (anchor/lower-left) as the baseline for delta calculation
                     builder.setOriginalParagraphPosition(ref.getPosition());
                     ref.getChildren().forEach(child -> {
-                        if (child instanceof TextTypeObjectRef textChild) {
-                            builder.addTextLine(textChild);
+                        if (child != null) {
+                            builder.addTextLine(child);
                         }
                     });
                 } else {

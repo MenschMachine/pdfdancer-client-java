@@ -1,6 +1,10 @@
 package com.tfc.pdf.pdfdancer.api.common.model.text;
+
 import com.tfc.pdf.pdfdancer.api.common.model.*;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Represents a paragraph or text block within a PDF document.
  * This class encapsulates paragraph-level text content with unified formatting
@@ -13,12 +17,14 @@ public class TextLine extends PDFObject {
     private Double fontSize;
     private String fontName;
     private String text;
+
     /**
      * Default constructor for serialization frameworks.
      */
     public TextLine() {
         super();
     }
+
     public static TextLine fromText(String line, Position position, Color color, Font font, TextStatus status) {
         TextLine textLine = new TextLine();
         textLine.setPosition(position);
@@ -30,6 +36,7 @@ public class TextLine extends PDFObject {
         textLine.setFontSize(font.getSize());
         return textLine;
     }
+
     public static TextLine fromObjectRef(TextTypeObjectRef text) {
         TextLine textLine = new TextLine();
         textLine.setPosition(text.getPosition());
@@ -43,18 +50,23 @@ public class TextLine extends PDFObject {
         textLine.setText(text.getText());
         return textLine;
     }
+
     public Double getFontSize() {
         return fontSize;
     }
-    public String getFontName() {
-        return fontName;
-    }
+
     public void setFontSize(Double fontSize) {
         this.fontSize = fontSize;
     }
+
+    public String getFontName() {
+        return fontName;
+    }
+
     public void setFontName(String fontName) {
         this.fontName = fontName;
     }
+
     /**
      * Returns the object type for this paragraph.
      *
@@ -64,18 +76,23 @@ public class TextLine extends PDFObject {
     protected ObjectType getObjectType() {
         return ObjectType.TEXT_LINE;
     }
+
     public List<TextElement> getTextElements() {
         return textElements;
     }
+
     public void setTextElements(List<TextElement> textElements) {
         this.textElements = textElements;
     }
+
     public Color getColor() {
         return color;
     }
+
     public void setColor(Color color) {
         this.color = color;
     }
+
     @Override
     public TextTypeObjectRef toObjectRef() {
         return new TextTypeObjectRef(this.getId(),
@@ -88,12 +105,14 @@ public class TextLine extends PDFObject {
                 List.of(),
                 this.getColor(),
                 TextStatus.fromTextLine(this),
-                this.getTextElements().stream().map(TextElement::toObjectRef).toList()
+                this.getTextElements().stream().map(TextElement::toObjectRef).collect(Collectors.toUnmodifiableList())
         );
     }
+
     public String getText() {
         return text;
     }
+
     public void setText(String text) {
         this.text = text;
     }

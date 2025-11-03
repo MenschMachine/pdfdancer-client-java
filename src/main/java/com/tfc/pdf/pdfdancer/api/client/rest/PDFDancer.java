@@ -1,18 +1,12 @@
 package com.tfc.pdf.pdfdancer.api.client.rest;
 
-import com.tfc.pdf.pdfdancer.api.client.http.Argument;
-import com.tfc.pdf.pdfdancer.api.client.http.HttpRequest;
-import com.tfc.pdf.pdfdancer.api.client.http.MediaType;
-import com.tfc.pdf.pdfdancer.api.client.http.MultipartBody;
-import com.tfc.pdf.pdfdancer.api.client.http.MutableHttpRequest;
+import com.tfc.pdf.pdfdancer.api.client.http.*;
 import com.tfc.pdf.pdfdancer.api.common.model.*;
 import com.tfc.pdf.pdfdancer.api.common.model.text.Paragraph;
 import com.tfc.pdf.pdfdancer.api.common.request.*;
 import com.tfc.pdf.pdfdancer.api.common.response.CommandResult;
 import com.tfc.pdf.pdfdancer.api.common.response.DocumentSnapshot;
 import com.tfc.pdf.pdfdancer.api.common.response.PageSnapshot;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +28,7 @@ import java.util.stream.Collectors;
 import static com.tfc.pdf.pdfdancer.api.common.model.ObjectType.FORM_FIELD;
 import static com.tfc.pdf.pdfdancer.api.common.util.ExceptionUtils.wrapCheckedException;
 import static com.tfc.pdf.pdfdancer.api.common.util.FileUtils.writeBytesToFile;
+
 /**
  * REST API client for interacting with the PDFDancer PDF manipulation service.
  * This client provides a convenient Java interface for performing PDF operations
@@ -41,9 +36,12 @@ import static com.tfc.pdf.pdfdancer.api.common.util.FileUtils.writeBytesToFile;
  * Handles authentication, session lifecycle, and HTTP communication transparently.
  */
 public class PDFDancer {
-    private static final Logger LOG = LoggerFactory.getLogger(PDFDancer.class);
     public static final double DEFAULT_EPSILON = 0.01;
     private static final String ENV_TOKEN = "PDFDANCER_TOKEN";
+    private static final URI DEFAULT_BASE_URI = URI.create("http://localhost:8080");
+    private static final String ALL_TYPES_KEY = "__ALL__";
+    private static final String TYPES_PARAGRAPH = "PARAGRAPH";
+    private static final String TYPES_TEXT_LINE = "TEXT_LINE";
     /**
      * Authentication token for API access.
      */
@@ -57,23 +55,11 @@ public class PDFDancer {
      */
     private final PdfDancerHttpClient httpClient;
     private final PdfDancerHttpClient.Blocking blockingClient;
-
-    private static final URI DEFAULT_BASE_URI = URI.create("http://localhost:8080");
-    private static final String ALL_TYPES_KEY = "__ALL__";
-    private static final String TYPES_PARAGRAPH = "PARAGRAPH";
-    private static final String TYPES_TEXT_LINE = "TEXT_LINE";
-    private static final String TYPES_IMAGE = "IMAGE";
-    private static final String TYPES_FORM_X_OBJECT = "FORM_X_OBJECT";
     private final Map<String, DocumentSnapshot> documentSnapshotCache = new HashMap<>();
     private final Map<PageSnapshotKey, PageSnapshot> pageSnapshotCache = new HashMap<>();
     private final Map<DocumentSnapshotKey, TypedDocumentSnapshot<?>> typedDocumentSnapshotCache = new HashMap<>();
     private final Map<TypedPageSnapshotKey, TypedPageSnapshot<?>> typedPageSnapshotCache = new HashMap<>();
-    private record PageSnapshotKey(int pageIndex, String typesKey) {
-    }
-    private record DocumentSnapshotKey(Class<? extends ObjectRef> elementClass, String typesKey) {
-    }
-    private record TypedPageSnapshotKey(int pageIndex, Class<? extends ObjectRef> elementClass, String typesKey) {
-    }
+
     /**
      * Private constructor for factory methods.
      * Initializes the client with a session ID from either existing PDF or blank PDF creation.
@@ -88,9 +74,7 @@ public class PDFDancer {
         this.httpClient = client;
         this.blockingClient = client.toBlocking();
     }
-    public String getToken() {
-        return token;
-    }
+
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
      * Uses default HTTP client configured for localhost:8080.
@@ -103,6 +87,7 @@ public class PDFDancer {
     public static PDFDancer createSession(String token, File pdfFile) {
         return createSession(token, readFile(pdfFile), getDefaultClient());
     }
+
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
      * Uses default HTTP client configured for localhost:8080.
@@ -120,6 +105,7 @@ public class PDFDancer {
         String token = envTokenOrNull();
         return token != null ? createSession(token, bytes, client) : createAnonSession(bytes, client);
     }
+
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
      * Uses default HTTP client configured for localhost:8080.
@@ -134,6 +120,7 @@ public class PDFDancer {
     public static PDFDancer createSession(String pdfFile) {
         return createSession(new File(pdfFile));
     }
+
     /**
      * Creates a new PDFDancer client by uploading an existing PDF.
      * This method initializes the client, uploads the PDF data to create
@@ -149,13 +136,16 @@ public class PDFDancer {
         return new PDFDancer(token, sessionId, client);
     }
 
+    @SuppressWarnings("unused")
     public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient) {
         return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
     }
 
+    @SuppressWarnings("unused")
     public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient, URI baseUri) {
         return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, baseUri));
     }
+
     /**
      * Creates a new PDFDancer client with a blank PDF.
      * Uses default page size (A4), orientation (PORTRAIT), and page count (1).
@@ -184,13 +174,16 @@ public class PDFDancer {
         return createSession(token.token(), testPdf, client);
     }
 
+    @SuppressWarnings("unused")
     static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient) {
         return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
     }
 
+    @SuppressWarnings("unused")
     static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient, URI baseUri) {
         return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, baseUri));
     }
+
     /**
      * Creates a new PDFDancer client with a blank PDF using custom parameters.
      * Uses default HTTP client configured for localhost:8080.
@@ -207,6 +200,7 @@ public class PDFDancer {
                                       int initialPageCount) {
         return createNew(token, pageSize, orientation, initialPageCount, getDefaultClient());
     }
+
     /**
      * Creates a new PDFDancer client with a blank PDF using custom parameters.
      * Uses default HTTP client configured for localhost:8080.
@@ -230,6 +224,7 @@ public class PDFDancer {
         }
         return createNew(token, pageSize, orientation, initialPageCount, client);
     }
+
     /**
      * Creates a new PDFDancer client with a blank PDF using custom HTTP client.
      *
@@ -247,17 +242,20 @@ public class PDFDancer {
         return new PDFDancer(token, sessionId, client);
     }
 
+    @SuppressWarnings("unused")
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
                                       int initialPageCount, HttpClient httpClient) {
         return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
     }
 
+    @SuppressWarnings("unused")
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
                                       int initialPageCount, HttpClient httpClient, URI baseUri) {
         return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, baseUri));
     }
+
     /**
      * Creates a default HTTP client configured for localhost development.
      * This method provides a preconfigured client for connecting to a local
@@ -269,10 +267,12 @@ public class PDFDancer {
     private static PdfDancerHttpClient getDefaultClient() {
         return PdfDancerHttpClient.createDefault(DEFAULT_BASE_URI);
     }
+
     private static String envTokenOrNull() {
         String token = System.getenv(ENV_TOKEN);
         return (token == null || token.isBlank()) ? null : token;
     }
+
     private static String obtainAnonymousToken(PdfDancerHttpClient client) {
         String fingerprint = buildFingerprint();
         MutableHttpRequest<?> request = HttpRequest.POST("/keys/anon", null)
@@ -280,6 +280,7 @@ public class PDFDancer {
         AnonTokenResponse token = client.toBlocking().retrieve(request, AnonTokenResponse.class);
         return token.token();
     }
+
     private static String buildFingerprint() {
         try {
             String ip = getLocalIp();
@@ -296,10 +297,11 @@ public class PDFDancer {
             // Fallback to a deterministic minimal fingerprint if anything goes wrong
             String fallback = Optional.ofNullable(System.getProperty("user.name")).orElse("unknown")
                     + Optional.ofNullable(System.getProperty("os.name")).orElse("unknown")
-                    + Optional.ofNullable(ZoneId.systemDefault().getId()).orElse("UTC");
+                    + Optional.of(ZoneId.systemDefault().getId()).orElse("UTC");
             return sha256Hex(fallback);
         }
     }
+
     private static String getLocalIp() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -307,6 +309,7 @@ public class PDFDancer {
             return "unknown";
         }
     }
+
     private static String getUid() {
         try {
             String user = System.getProperty("user.name");
@@ -317,6 +320,7 @@ public class PDFDancer {
             return "unknown";
         }
     }
+
     private static String getTimezone() {
         try {
             return ZoneId.systemDefault().getId();
@@ -324,6 +328,7 @@ public class PDFDancer {
             return "unknown";
         }
     }
+
     private static String getLocaleStr() {
         try {
             Locale loc = Locale.getDefault();
@@ -333,6 +338,7 @@ public class PDFDancer {
             return "unknown";
         }
     }
+
     private static String getHostname() {
         try {
             return InetAddress.getLocalHost().getHostName();
@@ -342,6 +348,7 @@ public class PDFDancer {
             return (env == null || env.isBlank()) ? "unknown" : env;
         }
     }
+
     private static String getOrCreateSalt() {
         try {
             Path home = Paths.get(System.getProperty("user.home"));
@@ -367,6 +374,7 @@ public class PDFDancer {
             return UUID.randomUUID().toString();
         }
     }
+
     private static String sha256Hex(String s) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -381,6 +389,7 @@ public class PDFDancer {
             return Integer.toHexString(s.hashCode());
         }
     }
+
     /**
      * Uploads PDF data to create a new session on the server.
      * This method uploads the PDF file to the server, which analyzes its structure
@@ -402,6 +411,7 @@ public class PDFDancer {
                 String.class
         );
     }
+
     /**
      * Creates a blank PDF session on the server.
      * This method requests the server to create a new blank PDF with the specified
@@ -425,109 +435,7 @@ public class PDFDancer {
                 String.class
         );
     }
-    /**
-     * Deletes a page from the PDF document.
-     * This method removes the specified page from the document permanently,
-     * updating the page numbering for subsequent pages.
-     *
-     * @param pageRef reference to the page to be deleted
-     * @return true if the page was successfully deleted, false otherwise
-     */
-    public Boolean deletePage(ObjectRef pageRef) {
-        String path = "/pdf/page/delete";
-        Boolean result = blockingClient.retrieve(
-                HttpRequest.DELETE(path, pageRef)
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Boolean.class
-        );
-        invalidateSnapshotCaches();
-        return result;
-    }
-    /**
-     * Searches for PDF objects matching the specified criteria.
-     * This method provides flexible search capabilities across all PDF content,
-     * allowing filtering by object type and getPosition constraints.
-     *
-     * @param type     the type of objects to find (null for all types)
-     * @param position positional constraints for the search (null for all positions)
-     * @return list of object references matching the search criteria
-     */
-    private List<ObjectRef> find(ObjectType type, Position position) {
-        String path = "/pdf/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(type, position, null))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(ObjectRef.class)
-        );
-    }
-    /**
-     * Searches for image objects at the specified getPosition.
-     * This convenience method filters search results to include only images.
-     *
-     * @param position positional constraints for the search
-     * @return list of image object references matching the getPosition criteria
-     */
-    /**
-     * Deletes the specified PDF object from the document.
-     * This method permanently removes the object from the PDF document,
-     * updating the document structure accordingly.
-     *
-     * @param objectRef reference to the object to be deleted
-     * @return true if the object was successfully deleted, false otherwise
-     */
-    protected boolean delete(ObjectRef objectRef) {
-        String path = "/pdf/delete";
-        Boolean result = blockingClient.retrieve(
-                HttpRequest.DELETE(path, new DeleteRequest(objectRef))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Boolean.class
-        );
-        invalidateSnapshotCaches();
-        return Boolean.TRUE.equals(result);
-    }
-    /**
-     * Retrieves references to all pages in the PDF document.
-     * This method returns a list of object references for every page
-     * in the current document, enabling page-level operations.
-     *
-     * @return list of object references for all pages in the document
-     */
-    public List<PageRef> getPages() {
-        String path = "/pdf/page/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, null)
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(PageRef.class)
-        );
-    }
-    /**
-     * Retrieves a reference to a specific page by its page number.
-     * This method returns an object reference for the specified page,
-     * enabling targeted page operations.
-     *
-     * @param pageIndex the page number to retrieve (1-based indexing)
-     * @return object reference for the specified page, or null if not found
-     */
-    public ObjectRef getPage(int pageIndex) {
-        String path = "/pdf/page/find?pageIndex=" + pageIndex;
-        List<ObjectRef> result = blockingClient.retrieve(
-                HttpRequest.POST(path, null)
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(ObjectRef.class)
-        );
-        if (result.isEmpty()) return null;
-        else return result.get(0);
-    }
+
     /**
      * Reads a file completely into a byte array.
      * This utility method safely reads the entire contents of a file
@@ -548,6 +456,112 @@ public class PDFDancer {
             throw wrapCheckedException(e);
         }
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * Deletes a page from the PDF document.
+     * This method removes the specified page from the document permanently,
+     * updating the page numbering for subsequent pages.
+     *
+     * @param pageRef reference to the page to be deleted
+     * @return true if the page was successfully deleted, false otherwise
+     */
+    public Boolean deletePage(ObjectRef pageRef) {
+        String path = "/pdf/page/delete";
+        Boolean result = blockingClient.retrieve(
+                HttpRequest.DELETE(path, pageRef)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    /**
+     * Searches for PDF objects matching the specified criteria.
+     * This method provides flexible search capabilities across all PDF content,
+     * allowing filtering by object type and getPosition constraints.
+     *
+     * @param type     the type of objects to find (null for all types)
+     * @param position positional constraints for the search (null for all positions)
+     * @return list of object references matching the search criteria
+     */
+    private List<ObjectRef> find(ObjectType type, Position position) {
+        String path = "/pdf/find";
+        return blockingClient.retrieve(
+                HttpRequest.POST(path, new FindRequest(type, position, null))
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Argument.listOf(ObjectRef.class)
+        );
+    }
+
+    /**
+     * Deletes the specified PDF object from the document.
+     * This method permanently removes the object from the PDF document,
+     * updating the document structure accordingly.
+     *
+     * @param objectRef reference to the object to be deleted
+     * @return true if the object was successfully deleted, false otherwise
+     */
+    protected boolean delete(ObjectRef objectRef) {
+        String path = "/pdf/delete";
+        Boolean result = blockingClient.retrieve(
+                HttpRequest.DELETE(path, new DeleteRequest(objectRef))
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+        invalidateSnapshotCaches();
+        return Boolean.TRUE.equals(result);
+    }
+
+    /**
+     * Retrieves references to all pages in the PDF document.
+     * This method returns a list of object references for every page
+     * in the current document, enabling page-level operations.
+     *
+     * @return list of object references for all pages in the document
+     */
+    public List<PageRef> getPages() {
+        String path = "/pdf/page/find";
+        return blockingClient.retrieve(
+                HttpRequest.POST(path, null)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Argument.listOf(PageRef.class)
+        );
+    }
+
+    /**
+     * Retrieves a reference to a specific page by its page number.
+     * This method returns an object reference for the specified page,
+     * enabling targeted page operations.
+     *
+     * @param pageIndex the page number to retrieve (1-based indexing)
+     * @return object reference for the specified page, or null if not found
+     */
+    public ObjectRef getPage(int pageIndex) {
+        String path = "/pdf/page/find?pageIndex=" + pageIndex;
+        List<ObjectRef> result = blockingClient.retrieve(
+                HttpRequest.POST(path, null)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Argument.listOf(ObjectRef.class)
+        );
+        if (result.isEmpty()) return null;
+        else return result.get(0);
+    }
+
     /**
      * Downloads the current state of the PDF document with all modifications applied.
      * This method retrieves the complete PDF file as binary data, reflecting
@@ -563,6 +577,7 @@ public class PDFDancer {
                 byte[].class
         );
     }
+
     /**
      * Moves a PDF object to a new getPosition within the document.
      * This method relocates the specified object to the given coordinates
@@ -584,6 +599,7 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result;
     }
+
     /**
      * Adds an image to the PDF document at the specified getPosition.
      * This convenience method sets the image getPosition and adds it to the document
@@ -597,6 +613,7 @@ public class PDFDancer {
         image.setPosition(position);
         return this.addImage(image);
     }
+
     /**
      * Adds an image to the PDF document.
      * This method adds the image object to the document at its current getPosition.
@@ -612,6 +629,7 @@ public class PDFDancer {
         }
         return addObject(image);
     }
+
     protected Boolean addObject(PDFObject object) {
         String path = "/pdf/add";
         MutableHttpRequest<AddRequest> request = HttpRequest.POST(path, new AddRequest(object))
@@ -622,67 +640,18 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result;
     }
+
     private <T> T retrieve(MutableHttpRequest<?> request, Class<T> returnType) {
         return blockingClient.retrieve(request, returnType);
     }
-    private static final class TypedPageSnapshot<T extends ObjectRef> {
-        private PageRef pageRef;
-        private List<T> elements;
-        TypedPageSnapshot() {
-        }
-        TypedPageSnapshot(PageRef pageRef, List<T> elements) {
-            this.pageRef = pageRef;
-            this.elements = elements;
-        }
-        public PageRef getPageRef() {
-            return pageRef;
-        }
-        public void setPageRef(PageRef pageRef) {
-            this.pageRef = pageRef;
-        }
-        public List<T> getElements() {
-            return elements;
-        }
-        public void setElements(List<T> elements) {
-            this.elements = elements;
-        }
-    }
-    private static final class TypedDocumentSnapshot<T extends ObjectRef> {
-        private int pageCount;
-        private List<FontRecommendationDto> fonts;
-        private List<TypedPageSnapshot<T>> pages;
-        TypedDocumentSnapshot() {
-        }
-        TypedDocumentSnapshot(int pageCount, List<FontRecommendationDto> fonts, List<TypedPageSnapshot<T>> pages) {
-            this.pageCount = pageCount;
-            this.fonts = fonts;
-            this.pages = pages;
-        }
-        public int getPageCount() {
-            return pageCount;
-        }
-        public void setPageCount(int pageCount) {
-            this.pageCount = pageCount;
-        }
-        public List<FontRecommendationDto> getFonts() {
-            return fonts;
-        }
-        public void setFonts(List<FontRecommendationDto> fonts) {
-            this.fonts = fonts;
-        }
-        public List<TypedPageSnapshot<T>> getPages() {
-            return pages;
-        }
-        public void setPages(List<TypedPageSnapshot<T>> pages) {
-            this.pages = pages;
-        }
-    }
+
     private void invalidateSnapshotCaches() {
         documentSnapshotCache.clear();
         pageSnapshotCache.clear();
         typedDocumentSnapshotCache.clear();
         typedPageSnapshotCache.clear();
     }
+
     private String normalizeTypes(String types) {
         if (types == null || types.isBlank()) {
             return ALL_TYPES_KEY;
@@ -695,6 +664,7 @@ public class PDFDancer {
                 .collect(Collectors.joining(","));
         return normalized.isBlank() ? ALL_TYPES_KEY : normalized;
     }
+
     private DocumentSnapshot getDocumentSnapshotCached(String types) {
         String key = normalizeTypes(types);
         DocumentSnapshot cached = documentSnapshotCache.get(key);
@@ -710,6 +680,7 @@ public class PDFDancer {
         }
         return snapshot;
     }
+
     private PageSnapshot getPageSnapshotCached(int pageIndex, String types) {
         String key = normalizeTypes(types);
         PageSnapshotKey cacheKey = new PageSnapshotKey(pageIndex, key);
@@ -721,6 +692,7 @@ public class PDFDancer {
         pageSnapshotCache.put(cacheKey, snapshot);
         return snapshot;
     }
+
     private DocumentSnapshot fetchDocumentSnapshot(String types) {
         String path = "/pdf/document/snapshot";
         if (types != null && !types.isBlank()) {
@@ -733,6 +705,7 @@ public class PDFDancer {
                 DocumentSnapshot.class
         );
     }
+
     private PageSnapshot fetchPageSnapshot(int pageIndex, String types) {
         String path = "/pdf/page/" + pageIndex + "/snapshot";
         if (types != null && !types.isBlank()) {
@@ -745,6 +718,7 @@ public class PDFDancer {
                 PageSnapshot.class
         );
     }
+
     private <T extends ObjectRef> TypedDocumentSnapshot<T> getTypedDocumentSnapshot(Class<T> elementClass, String types) {
         String key = normalizeTypes(types);
         DocumentSnapshotKey cacheKey = new DocumentSnapshotKey(elementClass, key);
@@ -761,6 +735,7 @@ public class PDFDancer {
         }
         return snapshot;
     }
+
     private <T extends ObjectRef> TypedPageSnapshot<T> getTypedPageSnapshot(int pageIndex,
                                                                             Class<T> elementClass,
                                                                             String types) {
@@ -775,6 +750,7 @@ public class PDFDancer {
         typedPageSnapshotCache.put(cacheKey, snapshot);
         return snapshot;
     }
+
     private <T extends ObjectRef> TypedDocumentSnapshot<T> fetchTypedDocumentSnapshot(Class<T> elementClass, String types) {
         String path = "/pdf/document/snapshot";
         if (types != null && !types.isBlank()) {
@@ -787,6 +763,7 @@ public class PDFDancer {
                 Argument.of(TypedDocumentSnapshot.class, elementClass)
         );
     }
+
     private <T extends ObjectRef> TypedPageSnapshot<T> fetchTypedPageSnapshot(int pageIndex,
                                                                               Class<T> elementClass,
                                                                               String types) {
@@ -801,6 +778,7 @@ public class PDFDancer {
                 Argument.of(TypedPageSnapshot.class, elementClass)
         );
     }
+
     private <T extends ObjectRef> List<T> getTypedElements(TypedPageSnapshot<T> page, Class<T> elementClass) {
         List<T> rawElements = page.getElements();
         if (rawElements == null || rawElements.isEmpty()) {
@@ -813,6 +791,7 @@ public class PDFDancer {
         }
         return rawElements;
     }
+
     private <T extends ObjectRef> List<T> flattenTypedDocument(TypedDocumentSnapshot<T> snapshot, Class<T> elementClass) {
         List<T> results = new ArrayList<>();
         for (TypedPageSnapshot<T> page : snapshot.getPages()) {
@@ -821,6 +800,7 @@ public class PDFDancer {
         }
         return results;
     }
+
     private List<FormFieldRef> collectFormFieldRefsFromDocument() {
         List<FormFieldRef> results = new ArrayList<>();
         for (Form.FormType filter : Form.FormType.values()) {
@@ -833,6 +813,7 @@ public class PDFDancer {
         }
         return results;
     }
+
     private List<FormFieldRef> collectFormFieldRefsFromPage(int pageIndex) {
         List<FormFieldRef> results = new ArrayList<>();
         for (Form.FormType filter : Form.FormType.values()) {
@@ -887,6 +868,7 @@ public class PDFDancer {
                 childCopies
         );
     }
+
     private List<TextTypeObjectRef> findParagraphs(Position position) {
         String path = "/pdf/find";
         return blockingClient.retrieve(
@@ -897,6 +879,7 @@ public class PDFDancer {
                 Argument.listOf(TextTypeObjectRef.class)
         );
     }
+
     private List<TextTypeObjectRef> findTextLines(Position position) {
         String path = "/pdf/find";
         return blockingClient.retrieve(
@@ -907,6 +890,7 @@ public class PDFDancer {
                 Argument.listOf(TextTypeObjectRef.class)
         );
     }
+
     private List<FormFieldRef> findFormFields(Position position) {
         String path = "/pdf/find";
         return blockingClient.retrieve(
@@ -917,10 +901,12 @@ public class PDFDancer {
                 Argument.listOf(FormFieldRef.class)
         );
     }
+
     @SuppressWarnings("unused")
     private List<FormFieldRef> findFormFields() {
         return findFormFields(null);
     }
+
     private List<ObjectRef> collectAllElements(DocumentSnapshot snapshot) {
         List<ObjectRef> results = new ArrayList<>();
         if (snapshot == null || snapshot.pages() == null) {
@@ -973,9 +959,11 @@ public class PDFDancer {
             }
         }
     }
+
     private boolean containsPoint(ObjectRef ref, double x, double y) {
         return containsPoint(ref, x, y, DEFAULT_EPSILON);
     }
+
     private boolean containsPoint(ObjectRef ref, double x, double y, double epsilon) {
         Position position = ref.getPosition();
         if (position == null || position.getBoundingRect() == null) {
@@ -993,12 +981,14 @@ public class PDFDancer {
         double maxY = rectY + rectHeight + epsilon;
         return x >= minX && x <= maxX && y >= minY && y <= maxY;
     }
+
     private boolean startsWithIgnoreCase(String value, String prefix) {
         if (value == null || prefix == null) {
             return false;
         }
         return value.regionMatches(true, 0, prefix, 0, prefix.length());
     }
+
     protected boolean modifyParagraph(ObjectRef ref, Paragraph newParagraph) {
         String path = "/pdf/modify";
         MutableHttpRequest<ModifyRequest> request = HttpRequest.PUT(path, new ModifyRequest(ref, newParagraph))
@@ -1009,6 +999,7 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result.success();
     }
+
     protected boolean modifyTextLine(ObjectRef ref, String newTextLine) {
         String path = "/pdf/text/line";
         CommandResult result = blockingClient.retrieve(
@@ -1021,6 +1012,7 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result.success();
     }
+
     protected boolean modifyParagraph(ObjectRef ref, String newText) {
         String path = "/pdf/text/paragraph";
         CommandResult result = blockingClient.retrieve(
@@ -1033,6 +1025,7 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result.success();
     }
+
     protected boolean addParagaph(Paragraph newParagraph) {
         if (newParagraph.getPosition() == null) {
             throw new IllegalArgumentException("Paragraph getPosition is null");
@@ -1045,6 +1038,7 @@ public class PDFDancer {
         }
         return addObject(newParagraph);
     }
+
     public List<Font> findFonts(String fontName, int fontSize) {
         String path = "/font/find?fontName=" + fontName;
         List<String> fonts = blockingClient.retrieve(
@@ -1053,8 +1047,9 @@ public class PDFDancer {
                         .header("X-Session-Id", sessionId),
                 Argument.listOf(String.class)
         );
-        return fonts.stream().map(name -> new Font(name, fontSize)).toList();
+        return fonts.stream().map(name -> new Font(name, fontSize)).collect(Collectors.toUnmodifiableList());
     }
+
     public String registerFont(File ttfFile) {
         String path = "/font/register";
         byte[] bytes = readFile(ttfFile);
@@ -1069,12 +1064,15 @@ public class PDFDancer {
                 String.class
         );
     }
+
     public ParagraphBuilder newParagraph() {
         return new ParagraphBuilder(this);
     }
+
     public ImageBuilder newImage() {
         return new ImageBuilder(this);
     }
+
     public void save(String filePath) {
         try {
             writeBytesToFile(this.getFileBytes(), filePath);
@@ -1082,6 +1080,7 @@ public class PDFDancer {
             throw wrapCheckedException(e);
         }
     }
+
     /**
      * Retrieves a complete snapshot of the entire PDF document.
      * This method returns all pages with their elements, document metadata,
@@ -1092,6 +1091,7 @@ public class PDFDancer {
     public DocumentSnapshot getDocumentSnapshot() {
         return getDocumentSnapshotCached(null);
     }
+
     /**
      * Retrieves a complete snapshot of the entire PDF document with type filtering.
      * Only elements matching the specified types will be included in the snapshot.
@@ -1102,6 +1102,7 @@ public class PDFDancer {
     public DocumentSnapshot getDocumentSnapshot(String types) {
         return getDocumentSnapshotCached(types);
     }
+
     /**
      * Retrieves a snapshot of a single PDF page.
      * This method returns the page metadata and all elements in a single response.
@@ -1112,6 +1113,7 @@ public class PDFDancer {
     public PageSnapshot getPageSnapshot(int pageIndex) {
         return getPageSnapshotCached(pageIndex, null);
     }
+
     /**
      * Retrieves a snapshot of a single PDF page with type filtering.
      * Only elements matching the specified types will be included in the snapshot.
@@ -1123,6 +1125,7 @@ public class PDFDancer {
     public PageSnapshot getPageSnapshot(int pageIndex, String types) {
         return getPageSnapshotCached(pageIndex, types);
     }
+
     protected boolean changeFormField(FormFieldRef objectRef, String value) {
         String path = "/pdf/modify/formField";
         MutableHttpRequest<ChangeFormFieldRequest> request = HttpRequest.PUT(path, new ChangeFormFieldRequest(objectRef, value))
@@ -1133,48 +1136,56 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return Boolean.TRUE.equals(result);
     }
+
     public List<TextParagraphReference> selectParagraphs() {
         TypedDocumentSnapshot<TextTypeObjectRef> snapshot = getTypedDocumentSnapshot(TextTypeObjectRef.class, TYPES_PARAGRAPH);
         List<TextTypeObjectRef> paragraphs = flattenTypedDocument(snapshot, TextTypeObjectRef.class);
-        if (paragraphs == null || paragraphs.isEmpty() || paragraphs.stream().anyMatch(ref -> ref.getText() == null)) {
+        if (paragraphs.isEmpty() || paragraphs.stream().anyMatch(ref -> ref.getText() == null)) {
             paragraphs = findParagraphs(null);
         }
         return toTextObject(paragraphs);
     }
+
     public List<TextLineReference> selectTextLines() {
         TypedDocumentSnapshot<TextTypeObjectRef> snapshot = getTypedDocumentSnapshot(TextTypeObjectRef.class, TYPES_TEXT_LINE);
         List<TextTypeObjectRef> textLines = flattenTypedDocument(snapshot, TextTypeObjectRef.class);
-        if (textLines == null || textLines.isEmpty() || textLines.stream().anyMatch(ref -> ref.getText() == null)) {
+        if (textLines.isEmpty() || textLines.stream().anyMatch(ref -> ref.getText() == null)) {
             textLines = findTextLines(null);
         }
         return toTextLineObject(textLines);
     }
+
     public List<PathReference> selectPaths() {
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
         return toPathObject(collectObjectsByType(snapshot, Set.of(ObjectType.PATH)));
     }
+
     public PageClient page(int pageIndex) {
         return new PageClient(this, pageIndex);
     }
+
     private List<TextParagraphReference> toTextObject(List<TextTypeObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> ensureTextType(ref, ObjectType.PARAGRAPH))
                 .filter(Objects::nonNull)
                 .map(ref -> new TextParagraphReference(ref, this))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     private List<TextLineReference> toTextLineObject(List<TextTypeObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> ensureTextType(ref, ObjectType.TEXT_LINE))
                 .filter(Objects::nonNull)
                 .map(ref -> new TextLineReference(this, ref))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     private List<PathReference> toPathObject(List<ObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> new PathReference(ref, this))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     public List<ImageReference> selectImages() {
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
         List<ObjectRef> images = collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
@@ -1183,16 +1194,19 @@ public class PDFDancer {
         }
         return toImageObject(images);
     }
+
     private List<ImageReference> toImageObject(List<ObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> new ImageReference(this, ref))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     private List<FormXObjectReference> toFormXObject(List<ObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> new FormXObjectReference(this, ref))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     public List<FormXObjectReference> selectForms() {
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
         List<ObjectRef> forms = collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
@@ -1204,26 +1218,27 @@ public class PDFDancer {
         }
         return toFormXObject(forms);
     }
+
     public List<FormFieldReference> selectFormFields() {
         List<FormFieldRef> formFields = collectFormFieldRefsFromDocument();
         return toFormFieldObject(formFields);
     }
+
     private List<FormFieldReference> toFormFieldObject(List<FormFieldRef> formFields) {
         return formFields.stream()
                 .map(ref -> new FormFieldReference(this, ref))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
+
     public List<FormFieldReference> selectFormFieldsByName(String elementName) {
         List<FormFieldRef> base = collectFormFieldRefsFromDocument();
-        if (base == null) {
-            base = findFormFields(null);
-        }
         return toFormFieldObject(
                 base.stream()
                         .filter(ref -> Objects.equals(ref.getName(), elementName))
-                        .toList()
+                        .collect(Collectors.toUnmodifiableList())
         );
     }
+
     public List<ObjectRef> selectElements() {
         List<ObjectRef> fallback = find(null, null);
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
@@ -1233,9 +1248,11 @@ public class PDFDancer {
         }
         return elements;
     }
+
     public PageRef addPage() {
         return addPage(null);
     }
+
     public PageRef addPage(AddPageRequest request) {
         String path = "/pdf/page/add";
         PageRef result = blockingClient.retrieve(
@@ -1248,9 +1265,11 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return result;
     }
+
     public PageBuilder page() {
         return new PageBuilder(this);
     }
+
     public boolean movePage(int fromPageIndex, int toPageIndex) {
         String path = "/pdf/page/move";
         Boolean result = blockingClient.retrieve(
@@ -1263,158 +1282,7 @@ public class PDFDancer {
         invalidateSnapshotCaches();
         return Boolean.TRUE.equals(result);
     }
-    /**
-     * Represents operations scoped to a single page of a PDF document.
-     * Provides type-safe selection methods for text, images, and paths.
-     */
-    public static class PageClient {
-        private final PDFDancer root;
-        private final int pageIndex;
-        PageClient(PDFDancer root, int pageIndex) {
-            this.root = root;
-            this.pageIndex = pageIndex;
-        }
-        /**
-         * Selects all paragraph objects on this page.
-         */
-        public List<TextParagraphReference> selectParagraphs() {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextObject(typed);
-        }
-        public int getPageIndex() {
-            return pageIndex;
-        }
-        public List<TextParagraphReference> selectParagraphsStartingWith(String text) {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextObject(
-                    typed.stream()
-                            .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
-                            .toList()
-            );
-        }
-        public List<TextParagraphReference> selectParagraphsAt(double x, double y) {
-            return selectParagraphsAt(x, y, DEFAULT_EPSILON);
-        }
-        public List<TextParagraphReference> selectParagraphsAt(double x, double y, double epsilon) {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextObject(
-                    typed.stream()
-                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                            .toList()
-            );
-        }
-        public List<TextParagraphReference> selectParagraphsMatching(String pattern) {
-            Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextObject(
-                    typed.stream()
-                            .filter(ref -> ref.getText() != null && compiled.matcher(ref.getText()).matches())
-                            .toList()
-            );
-        }
-        public List<PathReference> selectPathAt(double x, double y) {
-            Position position = new PositionBuilder().onPage(pageIndex).atCoordinates(x, y).build();
-            return root.toPathObject(root.find(ObjectType.PATH, position));
-        }
-        public List<TextLineReference> selectTextLinesStartingWith(String text) {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextLineObject(
-                    typed.stream()
-                            .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
-                            .toList()
-            );
-        }
-        public List<TextLineReference> selectTextLineAt(double x, double y) {
-            return selectTextLineAt(x, y, DEFAULT_EPSILON);
-        }
-        public List<TextLineReference> selectTextLines() {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextLineObject(typed);
-        }
-        public List<TextLineReference> selectTextLineAt(double x, double y, double epsilon) {
-            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
-            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-            return root.toTextLineObject(
-                    typed.stream()
-                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                            .toList()
-            );
-        }
-        public List<ImageReference> selectImages() {
-            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
-            List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
-            return root.toImageObject(images);
-        }
-        public List<ImageReference> selectImagesAt(double x, double y) {
-            return selectImagesAt(x, y, DEFAULT_EPSILON);
-        }
-        public List<ImageReference> selectImagesAt(double x, double y, double epsilon) {
-            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
-            List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
-            List<ObjectRef> filtered = images.stream()
-                    .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                    .toList();
-            return root.toImageObject(filtered);
-        }
-        public List<FormXObjectReference> selectForms() {
-            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
-            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
-            return root.toFormXObject(forms);
-        }
-        public List<PathReference> selectPaths() {
-            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
-            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.PATH));
-            return root.toPathObject(forms);
-        }
-        public List<FormXObjectReference> selectFormsAt(double x, double y) {
-            return selectFormsAt(x, y, DEFAULT_EPSILON);
-        }
-        public List<FormXObjectReference> selectFormsAt(double x, double y, double epsilon) {
-            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
-            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
-            List<ObjectRef> filtered = forms.stream()
-                    .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                    .toList();
-            return root.toFormXObject(filtered);
-        }
-        public List<FormFieldReference> selectFormFields() {
-            List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
-            if (formFields == null) {
-                Position position = new PositionBuilder().onPage(pageIndex).build();
-                formFields = root.findFormFields(position);
-            }
-            return root.toFormFieldObject(formFields);
-        }
-        public List<FormFieldReference> selectFormFieldsAt(double x, double y) {
-            return selectFormFieldsAt(x, y, DEFAULT_EPSILON);
-        }
-        public List<FormFieldReference> selectFormFieldsAt(double x, double y, double epsilon) {
-            List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
-            return root.toFormFieldObject(
-                    formFields.stream()
-                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                            .toList()
-            );
-        }
-        public List<TextParagraphReference> selectTextStartingWith(String text) {
-            return this.selectParagraphsStartingWith(text);
-        }
-        public BezierBuilder newBezier() {
-            return new BezierBuilder(root, pageIndex);
-        }
-        public PathBuilder newPath() {
-            return new PathBuilder(root, pageIndex);
-        }
-        public LineBuilder newLine() {
-            return new LineBuilder(root, pageIndex);
-        }
-    }
+
     /**
      * Gets the HTTP client used by this PDFDancer instance.
      * Useful for testing and creating new instances with the same client.
@@ -1423,5 +1291,376 @@ public class PDFDancer {
      */
     public PdfDancerHttpClient getHttpClient() {
         return httpClient;
+    }
+
+    private final class PageSnapshotKey {
+        private final int pageIndex;
+        private final String typesKey;
+
+        private PageSnapshotKey(int pageIndex, String typesKey) {
+            this.pageIndex = pageIndex;
+            this.typesKey = typesKey;
+        }
+
+        public int pageIndex() {
+            return pageIndex;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (PageSnapshotKey) obj;
+            return this.pageIndex == that.pageIndex &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pageIndex, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "PageSnapshotKey[" +
+                    "pageIndex=" + pageIndex + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
+    }
+
+    private final class DocumentSnapshotKey {
+        private final Class<? extends ObjectRef> elementClass;
+        private final String typesKey;
+
+        private DocumentSnapshotKey(Class<? extends ObjectRef> elementClass, String typesKey) {
+            this.elementClass = elementClass;
+            this.typesKey = typesKey;
+        }
+
+        public Class<? extends ObjectRef> elementClass() {
+            return elementClass;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (DocumentSnapshotKey) obj;
+            return Objects.equals(this.elementClass, that.elementClass) &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(elementClass, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "DocumentSnapshotKey[" +
+                    "elementClass=" + elementClass + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
+    }
+
+    private final class TypedPageSnapshotKey {
+        private final int pageIndex;
+        private final Class<? extends ObjectRef> elementClass;
+        private final String typesKey;
+
+        private TypedPageSnapshotKey(int pageIndex, Class<? extends ObjectRef> elementClass, String typesKey) {
+            this.pageIndex = pageIndex;
+            this.elementClass = elementClass;
+            this.typesKey = typesKey;
+        }
+
+        public int pageIndex() {
+            return pageIndex;
+        }
+
+        public Class<? extends ObjectRef> elementClass() {
+            return elementClass;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (TypedPageSnapshotKey) obj;
+            return this.pageIndex == that.pageIndex &&
+                    Objects.equals(this.elementClass, that.elementClass) &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pageIndex, elementClass, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "TypedPageSnapshotKey[" +
+                    "pageIndex=" + pageIndex + ", " +
+                    "elementClass=" + elementClass + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
+    }
+
+    private static final class TypedPageSnapshot<T extends ObjectRef> {
+        private PageRef pageRef;
+        private List<T> elements;
+
+        TypedPageSnapshot() {
+        }
+
+        TypedPageSnapshot(PageRef pageRef, List<T> elements) {
+            this.pageRef = pageRef;
+            this.elements = elements;
+        }
+
+        public PageRef getPageRef() {
+            return pageRef;
+        }
+
+        public void setPageRef(PageRef pageRef) {
+            this.pageRef = pageRef;
+        }
+
+        public List<T> getElements() {
+            return elements;
+        }
+
+        public void setElements(List<T> elements) {
+            this.elements = elements;
+        }
+    }
+
+    private static final class TypedDocumentSnapshot<T extends ObjectRef> {
+        private int pageCount;
+        private List<FontRecommendationDto> fonts;
+        private List<TypedPageSnapshot<T>> pages;
+
+        TypedDocumentSnapshot() {
+        }
+
+        TypedDocumentSnapshot(int pageCount, List<FontRecommendationDto> fonts, List<TypedPageSnapshot<T>> pages) {
+            this.pageCount = pageCount;
+            this.fonts = fonts;
+            this.pages = pages;
+        }
+
+        public int getPageCount() {
+            return pageCount;
+        }
+
+        public void setPageCount(int pageCount) {
+            this.pageCount = pageCount;
+        }
+
+        public List<FontRecommendationDto> getFonts() {
+            return fonts;
+        }
+
+        public void setFonts(List<FontRecommendationDto> fonts) {
+            this.fonts = fonts;
+        }
+
+        public List<TypedPageSnapshot<T>> getPages() {
+            return pages;
+        }
+
+        public void setPages(List<TypedPageSnapshot<T>> pages) {
+            this.pages = pages;
+        }
+    }
+
+    /**
+     * Represents operations scoped to a single page of a PDF document.
+     * Provides type-safe selection methods for text, images, and paths.
+     */
+    public static class PageClient {
+        private final PDFDancer root;
+        private final int pageIndex;
+
+        PageClient(PDFDancer root, int pageIndex) {
+            this.root = root;
+            this.pageIndex = pageIndex;
+        }
+
+        /**
+         * Selects all paragraph objects on this page.
+         */
+        public List<TextParagraphReference> selectParagraphs() {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextObject(typed);
+        }
+
+        public int getPageIndex() {
+            return pageIndex;
+        }
+
+        public List<TextParagraphReference> selectParagraphsStartingWith(String text) {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextObject(
+                    typed.stream()
+                            .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<TextParagraphReference> selectParagraphsAt(double x, double y) {
+            return selectParagraphsAt(x, y, DEFAULT_EPSILON);
+        }
+
+        public List<TextParagraphReference> selectParagraphsAt(double x, double y, double epsilon) {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextObject(
+                    typed.stream()
+                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<TextParagraphReference> selectParagraphsMatching(String pattern) {
+            Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_PARAGRAPH);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextObject(
+                    typed.stream()
+                            .filter(ref -> ref.getText() != null && compiled.matcher(ref.getText()).matches())
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<PathReference> selectPathAt(double x, double y) {
+            Position position = new PositionBuilder().onPage(pageIndex).atCoordinates(x, y).build();
+            return root.toPathObject(root.find(ObjectType.PATH, position));
+        }
+
+        public List<TextLineReference> selectTextLinesStartingWith(String text) {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextLineObject(
+                    typed.stream()
+                            .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<TextLineReference> selectTextLineAt(double x, double y) {
+            return selectTextLineAt(x, y, DEFAULT_EPSILON);
+        }
+
+        public List<TextLineReference> selectTextLines() {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextLineObject(typed);
+        }
+
+        public List<TextLineReference> selectTextLineAt(double x, double y, double epsilon) {
+            TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, TYPES_TEXT_LINE);
+            List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+            return root.toTextLineObject(
+                    typed.stream()
+                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<ImageReference> selectImages() {
+            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+            List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
+            return root.toImageObject(images);
+        }
+
+        public List<ImageReference> selectImagesAt(double x, double y) {
+            return selectImagesAt(x, y, DEFAULT_EPSILON);
+        }
+
+        public List<ImageReference> selectImagesAt(double x, double y, double epsilon) {
+            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+            List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
+            List<ObjectRef> filtered = images.stream()
+                    .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                    .collect(Collectors.toUnmodifiableList());
+            return root.toImageObject(filtered);
+        }
+
+        public List<FormXObjectReference> selectForms() {
+            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
+            return root.toFormXObject(forms);
+        }
+
+        public List<PathReference> selectPaths() {
+            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.PATH));
+            return root.toPathObject(forms);
+        }
+
+        public List<FormXObjectReference> selectFormsAt(double x, double y) {
+            return selectFormsAt(x, y, DEFAULT_EPSILON);
+        }
+
+        public List<FormXObjectReference> selectFormsAt(double x, double y, double epsilon) {
+            PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+            List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
+            List<ObjectRef> filtered = forms.stream()
+                    .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                    .collect(Collectors.toUnmodifiableList());
+            return root.toFormXObject(filtered);
+        }
+
+        public List<FormFieldReference> selectFormFields() {
+            List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
+            return root.toFormFieldObject(formFields);
+        }
+
+        public List<FormFieldReference> selectFormFieldsAt(double x, double y) {
+            return selectFormFieldsAt(x, y, DEFAULT_EPSILON);
+        }
+
+        public List<FormFieldReference> selectFormFieldsAt(double x, double y, double epsilon) {
+            List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
+            return root.toFormFieldObject(
+                    formFields.stream()
+                            .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                            .collect(Collectors.toUnmodifiableList())
+            );
+        }
+
+        public List<TextParagraphReference> selectTextStartingWith(String text) {
+            return this.selectParagraphsStartingWith(text);
+        }
+
+        public BezierBuilder newBezier() {
+            return new BezierBuilder(root, pageIndex);
+        }
+
+        public PathBuilder newPath() {
+            return new PathBuilder(root, pageIndex);
+        }
+
+        public LineBuilder newLine() {
+            return new LineBuilder(root, pageIndex);
+        }
     }
 }

@@ -1,4 +1,5 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 /**
  * Represents an interactive form field within a PDF document.
  * This class encapsulates form field properties including type, value, appearance,
@@ -6,31 +7,6 @@ package com.tfc.pdf.pdfdancer.api.common.model;
  * checkboxes, radio buttons, and dropdowns.
  */
 public class Form extends PDFObject {
-    /**
-     * Enumeration of supported PDF form field types.
-     */
-    public enum FormType {
-        /**
-         * Single-line or multi-line text input field
-         */
-        TEXT_FIELD,
-        /**
-         * Checkbox for binary selections
-         */
-        CHECKBOX,
-        /**
-         * Radio button for mutually exclusive selections
-         */
-        RADIO_BUTTON,
-        /**
-         * Dropdown list with selectable options
-         */
-        DROPDOWN,
-        /**
-         * Clickable button element
-         */
-        BUTTON
-    }
     /**
      * Field name identifier used in form processing.
      */
@@ -57,6 +33,7 @@ public class Form extends PDFObject {
     public Form() {
         super();
     }
+
     /**
      * Creates a form field with specified properties.
      *
@@ -72,36 +49,47 @@ public class Form extends PDFObject {
         this.type = type;
         this.size = size;
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public FormType getType() {
         return type;
     }
+
     public void setType(FormType type) {
         this.type = type;
     }
+
     public String getValue() {
         return value;
     }
+
     public void setValue(String value) {
         this.value = value;
     }
+
     public Size getSize() {
         return size;
     }
+
     public void setSize(Size size) {
         this.size = size;
     }
+
     public Font getFont() {
         return font;
     }
+
     public void setFont(Font font) {
         this.font = font;
     }
+
     /**
      * Returns the object type for this form field.
      *
@@ -110,5 +98,31 @@ public class Form extends PDFObject {
     @Override
     protected ObjectType getObjectType() {
         return ObjectType.FORM_X_OBJECT;
+    }
+
+    /**
+     * Enumeration of supported PDF form field types.
+     */
+    public enum FormType {
+        /**
+         * Single-line or multi-line text input field
+         */
+        TEXT_FIELD,
+        /**
+         * Checkbox for binary selections
+         */
+        CHECKBOX,
+        /**
+         * Radio button for mutually exclusive selections
+         */
+        RADIO_BUTTON,
+        /**
+         * Dropdown list with selectable options
+         */
+        DROPDOWN,
+        /**
+         * Clickable button element
+         */
+        BUTTON
     }
 }

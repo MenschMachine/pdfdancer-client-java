@@ -14,8 +14,8 @@ public final class MutableHttpRequest<T> {
 
     private final String method;
     private final String path;
-    private T body;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private T body;
     private MediaType contentType;
 
     MutableHttpRequest(String method, String path, T body) {

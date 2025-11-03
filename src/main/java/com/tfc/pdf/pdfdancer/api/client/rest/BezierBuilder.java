@@ -8,10 +8,10 @@ import com.tfc.pdf.pdfdancer.api.common.model.path.Path;
 
 /**
  * Fluent builder for adding a cubic Bezier curve to a PDF page.
- *
+ * <p>
  * Coordinate system: origin bottom-left; units in points (1/72").
  * The curve is added as a one-segment Path with STROKE painting by default.
- *
+ * <p>
  * Styling: color(Color), lineWidth(double), dash(...), dashWithPhase(...).
  */
 public class BezierBuilder {

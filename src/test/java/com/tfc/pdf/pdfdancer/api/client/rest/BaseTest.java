@@ -37,13 +37,6 @@ public abstract class BaseTest {
         httpClient = PdfDancerHttpClient.create(delegate, baseUri);
     }
 
-    @BeforeEach
-    void ensureServerAvailable() {
-        Assumptions.assumeTrue(isServerAvailable(),
-                () -> "PDFDancer API not available at " + baseUri
-                        + ". Set PDFDANCER_TESTS_ENABLED=true (and PDFDANCER_BASE_URI / PDFDANCER_TOKEN) to run integration tests.");
-    }
-
     private static synchronized boolean isServerAvailable() {
         if (!availabilityChecked) {
             availabilityChecked = true;
@@ -59,6 +52,13 @@ public abstract class BaseTest {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    @BeforeEach
+    void ensureServerAvailable() {
+        Assumptions.assumeTrue(isServerAvailable(),
+                () -> "PDFDancer API not available at " + baseUri
+                        + ". Set PDFDANCER_TESTS_ENABLED=true (and PDFDANCER_BASE_URI / PDFDANCER_TOKEN) to run integration tests.");
     }
 
     protected String getValidToken() {

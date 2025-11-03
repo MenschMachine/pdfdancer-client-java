@@ -1,8 +1,11 @@
 package com.tfc.pdf.pdfdancer.api.common.model;
+
 import com.tfc.pdf.pdfdancer.api.common.model.path.PathSegment;
 import com.tfc.pdf.pdfdancer.api.common.model.text.Paragraph;
 import com.tfc.pdf.pdfdancer.api.common.model.text.TextElement;
+
 import java.util.List;
+
 /**
  * Represents a single page within a PDF document, containing all content elements.
  * This class encapsulates a complete page structure including text, images, forms,
@@ -42,12 +45,14 @@ public class Page extends PDFObject {
      * Interactive form elements present on this page.
      */
     private List<Form> forms;
+
     /**
      * Default constructor for serialization frameworks.
      * Creates an uninitialized page that should be populated with content.
      */
     public Page() {
     }
+
     /**
      * Creates a page with essential identification and dimensional properties.
      * This constructor initializes the fundamental page characteristics,
@@ -62,48 +67,63 @@ public class Page extends PDFObject {
         this.pageIndex = pageIndex;
         this.size = size;
     }
+
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
+
     public int getPageIndex() {
         return pageIndex;
     }
+
     public void setPageIndex(int pageIndex) {
         this.pageIndex = pageIndex;
     }
+
     public PageSize getSize() {
         return size;
     }
+
     public void setSize(PageSize size) {
         this.size = size;
     }
+
     public List<Paragraph> getParagraphs() {
         return paragraphs;
     }
+
     public void setParagraphs(List<Paragraph> paragraphs) {
         this.paragraphs = paragraphs;
     }
+
     public List<Image> getImages() {
         return images;
     }
+
     public void setImages(List<Image> images) {
         this.images = images;
     }
+
     public List<PathSegment> getPaths() {
         return paths;
     }
+
     public void setPaths(List<PathSegment> paths) {
         this.paths = paths;
     }
+
     public List<Form> getForms() {
         return forms;
     }
+
     public void setForms(List<Form> forms) {
         this.forms = forms;
     }
+
     /**
      * Creates an object reference for this page.
      * This method generates a lightweight reference that can be used
@@ -115,14 +135,17 @@ public class Page extends PDFObject {
     public PageRef toObjectRef() {
         return new PageRef(this.getId(), Position.atPage(this.getPageIndex()), this.getObjectType(), this.getObjectType(), this.size, Orientation.PORTRAIT); // TODO
     }
+
     @Override
     protected ObjectType getObjectType() {
         return ObjectType.PAGE;
     }
+
     @Override
     public Position getPosition() {
         return Position.atPage(this.getPageIndex());
     }
+
     @Override
     public void setPosition(Position position) {
         throw new UnsupportedOperationException("Not supported yet.");

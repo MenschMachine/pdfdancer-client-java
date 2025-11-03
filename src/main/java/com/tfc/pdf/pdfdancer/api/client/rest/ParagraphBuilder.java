@@ -7,6 +7,7 @@ import com.tfc.pdf.pdfdancer.api.common.util.ParagraphUtil;
 import com.tfc.pdf.pdfdancer.api.common.util.TextMeasurementUtil;
 
 import java.io.File;
+import java.util.stream.Collectors;
 
 public class ParagraphBuilder {
 
@@ -107,7 +108,7 @@ public class ParagraphBuilder {
                 paragraph.setFont(this.font);
             }
             if (this.lineSpacing != null) {
-                paragraph.setLineSpacings(paragraph.getLines().stream().map(l -> this.lineSpacing).toList());
+                paragraph.setLineSpacings(paragraph.getLines().stream().map(l -> this.lineSpacing).collect(Collectors.toUnmodifiableList()));
             }
             // apply styles to original lines
             this.paragraph.getLines().forEach(line -> {

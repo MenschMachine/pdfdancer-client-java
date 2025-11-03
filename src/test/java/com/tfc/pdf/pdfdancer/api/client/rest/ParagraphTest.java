@@ -21,13 +21,13 @@ public class ParagraphTest extends BaseTest {
         paragraphs = client.page(0).selectParagraphs();
         assertEquals(2, paragraphs.size());
 
-        TextParagraphReference para1 = paragraphs.getFirst();
+        TextParagraphReference para1 = paragraphs.get(0);
         assertEquals("PARAGRAPH_000003", para1.getInternalId());
         assertNotNull(para1.getPosition());
         assertEquals(326, para1.getPosition().getX().intValue());
         assertEquals(706, para1.getPosition().getY().intValue());
 
-        TextParagraphReference para2 = paragraphs.getLast();
+        TextParagraphReference para2 = paragraphs.get(paragraphs.size() - 1);
         assertNotNull(para2.getPosition());
         assertEquals("PARAGRAPH_000004", para2.getInternalId());
         assertEquals(54, para2.getPosition().getX().intValue());
@@ -41,7 +41,7 @@ public class ParagraphTest extends BaseTest {
         List<TextParagraphReference> paragraphs = client.page(0).selectParagraphsStartingWith("The Complete");
         assertEquals(1, paragraphs.size());
 
-        TextParagraphReference para1 = paragraphs.getFirst();
+        TextParagraphReference para1 = paragraphs.get(0);
         assertNotNull(para1.getPosition());
         assertEquals("PARAGRAPH_000004", para1.getInternalId());
         assertEquals(54, para1.getPosition().getX().intValue());
@@ -52,14 +52,14 @@ public class ParagraphTest extends BaseTest {
 
         paragraphs = client.page(0).selectParagraphsMatching(".*Complete.*");
         assertEquals(1, paragraphs.size());
-        para1 = paragraphs.getFirst();
+        para1 = paragraphs.get(0);
         assertEquals("PARAGRAPH_000004", para1.getInternalId());
     }
 
     @Test
     public void deleteParagraph() {
         PDFDancer client = createClient();
-        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
         assertNotNull(text);
         assertTrue(text.delete());
         assertTrue(client.page(0).selectParagraphsStartingWith("The Complete").isEmpty());
@@ -68,7 +68,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void moveParagraph() {
         PDFDancer client = createClient();
-        TextParagraphReference text = client.page(0).selectTextStartingWith("The Complete").getFirst();
+        TextParagraphReference text = client.page(0).selectTextStartingWith("The Complete").get(0);
 
         text.moveTo(0.1, 300);
 
@@ -80,7 +80,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraph() {
         PDFDancer client = createClient();
-        TextParagraphReference ref = client.page(0).selectTextStartingWith("The Complete").getFirst();
+        TextParagraphReference ref = client.page(0).selectTextStartingWith("The Complete").get(0);
 
         // Apply complex modification (font, spacing, position, text)
         assertTrue(
@@ -102,7 +102,7 @@ public class ParagraphTest extends BaseTest {
         List<TextParagraphReference> relocated = client.page(0).selectParagraphsAt(0.1, 300);
         assertTrue(relocated.isEmpty());
 
-        TextParagraphReference text = client.page(0).selectTextStartingWith("This is regular Sans text showing alignment and styles").getFirst();
+        TextParagraphReference text = client.page(0).selectTextStartingWith("This is regular Sans text showing alignment and styles").get(0);
         // TODO this moves not only the line, but the whole paragraph
         // TODO write assertions to prove that
         // TODO also check color and stuff
@@ -126,7 +126,7 @@ public class ParagraphTest extends BaseTest {
         List<TextParagraphReference> relocated = client.page(0).selectParagraphsAt(0.1, 300);
         assertTrue(relocated.isEmpty());
 
-        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("This is regular Sans text showing alignment and styles").getFirst();
+        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("This is regular Sans text showing alignment and styles").get(0);
         text.moveTo(0.1, 300);
 
         relocated = client.page(0).selectParagraphsAt(0.1, 300);
@@ -144,7 +144,7 @@ public class ParagraphTest extends BaseTest {
     public void changeColorMultiFontParagraph() {
         PDFDancer client = createClient("Showcase.pdf");
 
-        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("This is regular Sans text showing alignment and styles").getFirst();
+        TextParagraphReference text = client.page(0).selectParagraphsStartingWith("This is regular Sans text showing alignment and styles").get(0);
         assertEquals(Color.BLACK, text.getColor());
 
         text.edit().color(Color.RED).apply();
@@ -160,7 +160,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphSimple() {
         PDFDancer client = createClient();
-        TextParagraphReference ref = client.page(0).selectTextStartingWith("The Complete").getFirst();
+        TextParagraphReference ref = client.page(0).selectTextStartingWith("The Complete").get(0);
         assertTrue(
                 ref.edit().replace("Awesomely\nObvious!").apply()
         );
@@ -212,7 +212,7 @@ public class ParagraphTest extends BaseTest {
         System.err.println(allFonts);
         List<Font> fonts = client.findFonts("Roboto", 14);
         assertFalse(fonts.isEmpty());
-        Font roboto = fonts.getFirst();
+        Font roboto = fonts.get(0);
         assertTrue(roboto.getName().startsWith("Roboto"));
 
         assertTrue(
@@ -233,7 +233,7 @@ public class ParagraphTest extends BaseTest {
         List<Font> fonts = client.findFonts("Asimovian", 14);
         assertFalse(fonts.isEmpty());
         assertEquals("Asimovian-Regular", fonts.get(0).getName());
-        Font asimovian = fonts.getFirst();
+        Font asimovian = fonts.get(0);
 
         assertTrue(
                 client.newParagraph()
@@ -266,7 +266,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphWithoutPosition() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
         double originalX = paragraph.getPosition().getX();
         double originalY = paragraph.getPosition().getY();
 
@@ -287,7 +287,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphWithoutPositionAndSpacing() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
         double originalX = paragraph.getPosition().getX();
         double originalY = paragraph.getPosition().getY();
 
@@ -308,7 +308,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphNoop() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
 
         assertTrue(paragraph.edit().apply());
 
@@ -319,7 +319,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphOnlyText() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
 
         assertTrue(
                 paragraph.edit()
@@ -337,7 +337,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphOnlyFont() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
 
         assertTrue(
                 paragraph.edit()
@@ -353,7 +353,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void modifyParagraphOnlyMove() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
 
         assertTrue(
                 paragraph.edit()
@@ -369,7 +369,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void paragraphColorReading() {
         PDFDancer client = createClient();
-        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").getFirst();
+        TextParagraphReference paragraph = client.page(0).selectParagraphsStartingWith("The Complete").get(0);
 
         Color color = paragraph.getColor();
         assertNotNull(color);
