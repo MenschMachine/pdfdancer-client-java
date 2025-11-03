@@ -2,7 +2,7 @@ plugins {
     java
 }
 
-group = "com.tfc.pdf"
+group = "com.pdfdancer.client"
 version = "0.1.0-SNAPSHOT"
 
 java {
