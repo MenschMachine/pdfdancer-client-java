@@ -207,9 +207,6 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void addParagraphWithCustomFont1_2() {
         PDFDancer client = createClient();
-        List<Font> allFonts = createClient().findFonts("", 14);
-        System.out.println(allFonts);
-        System.err.println(allFonts);
         List<Font> fonts = client.findFonts("Roboto", 14);
         assertFalse(fonts.isEmpty());
         Font roboto = fonts.get(0);

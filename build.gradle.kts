@@ -1,9 +1,15 @@
+import java.util.*
+
 plugins {
     java
 }
 
+val versionProps = Properties().apply {
+    file("version.properties").inputStream().use { load(it) }
+}
+
 group = "com.pdfdancer.client"
-version = "0.1.0-SNAPSHOT"
+version = versionProps.getProperty("version") ?: "UNKNOWN"
 
 java {
     toolchain {
@@ -33,4 +39,41 @@ tasks.test {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+fun bumpVersion(part: String) {
+    val propsFile = file("version.properties")
+    val props = Properties()
+    propsFile.inputStream().use { props.load(it) }
+
+    val version = props.getProperty("version")
+    val (major, minor, patch) = version.split(".").map { it.toInt() }
+
+    val newVersion = when (part) {
+        "major" -> "${major + 1}.0.0"
+        "minor" -> "$major.${minor + 1}.0"
+        "patch" -> "$major.$minor.${patch + 1}"
+        else -> version
+    }
+
+    props.setProperty("version", newVersion)
+    propsFile.outputStream().use { props.store(it, null) }
+
+    println("Bumped version: $newVersion")
+}
+
+tasks.register("bumpPatch") { doLast { bumpVersion("patch") } }
+tasks.register("bumpMinor") { doLast { bumpVersion("minor") } }
+tasks.register("bumpMajor") { doLast { bumpVersion("major") } }
+tasks.register("printVersion") {
+    doLast {
+        println(project.version.toString())
+    }
+}
+
+tasks.withType<Javadoc> {
+    (options as? StandardJavadocDocletOptions)?.apply {
+        addBooleanOption("Xdoclint:none", true)
+        quiet()
+    }
 }
