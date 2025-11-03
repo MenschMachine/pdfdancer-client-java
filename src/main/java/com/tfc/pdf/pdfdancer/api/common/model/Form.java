@@ -27,6 +27,7 @@ public class Form extends PDFObject {
      * Font properties for text-based form fields.
      */
     private Font font;
+
     /**
      * Default constructor for serialization frameworks.
      */

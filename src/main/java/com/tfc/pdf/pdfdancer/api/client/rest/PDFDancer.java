@@ -1293,134 +1293,6 @@ public class PDFDancer {
         return httpClient;
     }
 
-    private final class PageSnapshotKey {
-        private final int pageIndex;
-        private final String typesKey;
-
-        private PageSnapshotKey(int pageIndex, String typesKey) {
-            this.pageIndex = pageIndex;
-            this.typesKey = typesKey;
-        }
-
-        public int pageIndex() {
-            return pageIndex;
-        }
-
-        public String typesKey() {
-            return typesKey;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (PageSnapshotKey) obj;
-            return this.pageIndex == that.pageIndex &&
-                    Objects.equals(this.typesKey, that.typesKey);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(pageIndex, typesKey);
-        }
-
-        @Override
-        public String toString() {
-            return "PageSnapshotKey[" +
-                    "pageIndex=" + pageIndex + ", " +
-                    "typesKey=" + typesKey + ']';
-        }
-
-    }
-
-    private final class DocumentSnapshotKey {
-        private final Class<? extends ObjectRef> elementClass;
-        private final String typesKey;
-
-        private DocumentSnapshotKey(Class<? extends ObjectRef> elementClass, String typesKey) {
-            this.elementClass = elementClass;
-            this.typesKey = typesKey;
-        }
-
-        public Class<? extends ObjectRef> elementClass() {
-            return elementClass;
-        }
-
-        public String typesKey() {
-            return typesKey;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (DocumentSnapshotKey) obj;
-            return Objects.equals(this.elementClass, that.elementClass) &&
-                    Objects.equals(this.typesKey, that.typesKey);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(elementClass, typesKey);
-        }
-
-        @Override
-        public String toString() {
-            return "DocumentSnapshotKey[" +
-                    "elementClass=" + elementClass + ", " +
-                    "typesKey=" + typesKey + ']';
-        }
-
-    }
-
-    private final class TypedPageSnapshotKey {
-        private final int pageIndex;
-        private final Class<? extends ObjectRef> elementClass;
-        private final String typesKey;
-
-        private TypedPageSnapshotKey(int pageIndex, Class<? extends ObjectRef> elementClass, String typesKey) {
-            this.pageIndex = pageIndex;
-            this.elementClass = elementClass;
-            this.typesKey = typesKey;
-        }
-
-        public int pageIndex() {
-            return pageIndex;
-        }
-
-        public Class<? extends ObjectRef> elementClass() {
-            return elementClass;
-        }
-
-        public String typesKey() {
-            return typesKey;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (TypedPageSnapshotKey) obj;
-            return this.pageIndex == that.pageIndex &&
-                    Objects.equals(this.elementClass, that.elementClass) &&
-                    Objects.equals(this.typesKey, that.typesKey);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(pageIndex, elementClass, typesKey);
-        }
-
-        @Override
-        public String toString() {
-            return "TypedPageSnapshotKey[" +
-                    "pageIndex=" + pageIndex + ", " +
-                    "elementClass=" + elementClass + ", " +
-                    "typesKey=" + typesKey + ']';
-        }
-
-    }
-
     private static final class TypedPageSnapshot<T extends ObjectRef> {
         private PageRef pageRef;
         private List<T> elements;
@@ -1662,5 +1534,133 @@ public class PDFDancer {
         public LineBuilder newLine() {
             return new LineBuilder(root, pageIndex);
         }
+    }
+
+    private static final class PageSnapshotKey {
+        private final int pageIndex;
+        private final String typesKey;
+
+        private PageSnapshotKey(int pageIndex, String typesKey) {
+            this.pageIndex = pageIndex;
+            this.typesKey = typesKey;
+        }
+
+        public int pageIndex() {
+            return pageIndex;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (PageSnapshotKey) obj;
+            return this.pageIndex == that.pageIndex &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pageIndex, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "PageSnapshotKey[" +
+                    "pageIndex=" + pageIndex + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
+    }
+
+    private static final class DocumentSnapshotKey {
+        private final Class<? extends ObjectRef> elementClass;
+        private final String typesKey;
+
+        private DocumentSnapshotKey(Class<? extends ObjectRef> elementClass, String typesKey) {
+            this.elementClass = elementClass;
+            this.typesKey = typesKey;
+        }
+
+        public Class<? extends ObjectRef> elementClass() {
+            return elementClass;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (DocumentSnapshotKey) obj;
+            return Objects.equals(this.elementClass, that.elementClass) &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(elementClass, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "DocumentSnapshotKey[" +
+                    "elementClass=" + elementClass + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
+    }
+
+    private static final class TypedPageSnapshotKey {
+        private final int pageIndex;
+        private final Class<? extends ObjectRef> elementClass;
+        private final String typesKey;
+
+        private TypedPageSnapshotKey(int pageIndex, Class<? extends ObjectRef> elementClass, String typesKey) {
+            this.pageIndex = pageIndex;
+            this.elementClass = elementClass;
+            this.typesKey = typesKey;
+        }
+
+        public int pageIndex() {
+            return pageIndex;
+        }
+
+        public Class<? extends ObjectRef> elementClass() {
+            return elementClass;
+        }
+
+        public String typesKey() {
+            return typesKey;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (TypedPageSnapshotKey) obj;
+            return this.pageIndex == that.pageIndex &&
+                    Objects.equals(this.elementClass, that.elementClass) &&
+                    Objects.equals(this.typesKey, that.typesKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pageIndex, elementClass, typesKey);
+        }
+
+        @Override
+        public String toString() {
+            return "TypedPageSnapshotKey[" +
+                    "pageIndex=" + pageIndex + ", " +
+                    "elementClass=" + elementClass + ", " +
+                    "typesKey=" + typesKey + ']';
+        }
+
     }
 }
