@@ -117,15 +117,12 @@ publishing {
 
     repositories {
         maven {
-            name = "sonatype"
-            // ✅ Correct endpoints for OSSRH
-            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            name = "CentralPortal"
+            url = uri("https://central.sonatype.com/api/v1/publisher")
 
             credentials {
-                username = findProperty("sonatypeUsername") as String? ?: System.getenv("SONATYPE_USERNAME")
-                password = findProperty("sonatypePassword") as String? ?: System.getenv("SONATYPE_PASSWORD")
+                username = findProperty("centralPortalUsername") as String? ?: System.getenv("CENTRAL_PORTAL_USERNAME")
+                password = findProperty("centralPortalPassword") as String? ?: System.getenv("CENTRAL_PORTAL_PASSWORD")
             }
         }
     }
