@@ -10,13 +10,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
 
     strategy:
       matrix:
-        java: [ 11, 17, 21, 23 ]
+        java: ${{ github.ref == 'refs/heads/main' && fromJSON('[11, 17, 21, 23]') || fromJSON('[11]') }}
 
     steps:
       - name: Checkout code
