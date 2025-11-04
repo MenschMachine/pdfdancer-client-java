@@ -9,17 +9,17 @@ on:
 
 jobs:
   build:
+    # run the minimal matrix on non-main branches
+    if: github.ref != 'refs/heads/main'
+
     permissions:
       contents: read
+    runs-on: ubuntu-latest
 
-    # Default matrix (used for non-main branches)
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
         java: [ 11 ]
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -35,19 +35,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make gradlew executable
-        if: runner.os != 'Windows'
         run: chmod +x gradlew
 
       - name: Run build
-        if: runner.os != 'Windows'
         run: ./gradlew build
-        env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
-
-      - name: Run build (Windows)
-        if: runner.os == 'Windows'
-        run: gradlew.bat build
         env:
           PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
           PDFDANCER_TOKEN: 42
@@ -56,17 +47,20 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: build-reports-${{ github.run_number }}-${{ matrix.os }}-jdk${{ matrix.java }}
+          name: build-reports-${{ github.run_number }}-ubuntu-jdk11
           path: |
             build/reports/
             build/test-results/
           retention-days: 7
 
   build-full-matrix:
+    # run the full matrix only on main
     if: github.ref == 'refs/heads/main'
+
     permissions:
       contents: read
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -99,6 +93,7 @@ jobs:
 
       - name: Run build (Windows)
         if: runner.os == 'Windows'
+        shell: cmd
         run: gradlew.bat build
         env:
           PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
