@@ -1,3 +1,5 @@
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 plugins {
@@ -125,12 +127,13 @@ publishing {
 signing {
     sign(publishing.publications["mavenJava"])
 
-    val signingKey: String? = findProperty("signingKey") as String?
-    val signingPassword: String? = findProperty("signingPassword") as String?
+    val keyFilePath = findProperty("signing.keyFile") as String?
+    val password = findProperty("signing.password") as String?
 
-    if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
+    if (!keyFilePath.isNullOrBlank() && !password.isNullOrBlank()) {
+        val keyData = Files.readString(Paths.get(keyFilePath))
+        useInMemoryPgpKeys(keyData, password)
     } else {
-        useGpgCmd() // Fallback to system GPG if properties aren't set
+        throw GradleException("Missing signing.keyFile or signing.password property")
     }
 }
