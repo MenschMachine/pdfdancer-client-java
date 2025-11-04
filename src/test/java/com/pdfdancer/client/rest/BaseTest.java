@@ -1,9 +1,6 @@
 package com.pdfdancer.client.rest;
 
-import com.pdfdancer.client.http.HttpRequest;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,9 +19,6 @@ public abstract class BaseTest {
     protected static PdfDancerHttpClient httpClient;
     protected static URI baseUrl;
 
-    private static boolean availabilityChecked;
-    private static boolean serverAvailable;
-
     @BeforeAll
     static void initClient() {
         String baseUrlValue = System.getProperty("pdfdancer.baseUrl",
@@ -35,30 +29,6 @@ public abstract class BaseTest {
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
         httpClient = PdfDancerHttpClient.create(delegate, baseUrl);
-    }
-
-    private static synchronized boolean isServerAvailable() {
-        if (!availabilityChecked) {
-            availabilityChecked = true;
-            serverAvailable = probeServer();
-        }
-        return serverAvailable;
-    }
-
-    private static boolean probeServer() {
-        try {
-            httpClient.toBlocking().retrieve(HttpRequest.GET("/ping"), String.class);
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    @BeforeEach
-    void ensureServerAvailable() {
-        Assumptions.assumeTrue(isServerAvailable(),
-                () -> "PDFDancer API not available at " + baseUrl
-                        + ". Set PDFDANCER_TESTS_ENABLED=true (and PDFDANCER_BASE_URL / PDFDANCER_TOKEN) to run integration tests.");
     }
 
     protected String getValidToken() {
