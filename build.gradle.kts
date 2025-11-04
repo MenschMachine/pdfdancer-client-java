@@ -1,5 +1,6 @@
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.security.MessageDigest
 import java.util.*
 
 plugins {
@@ -87,7 +88,7 @@ publishing {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
             pom {
-                name.set("PDFDancer SDK")
+                name.set("PDFDancer Java Client")
                 description.set("Java SDK for PDFDancer API")
                 url.set("https://github.com/MenschMachine/pdfdancer-client-java")
 
@@ -118,7 +119,7 @@ publishing {
     repositories {
         maven {
             name = "CentralPortal"
-            url = uri("https://central.sonatype.com/api/v1/publisher")
+            url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
 
             credentials {
                 username = findProperty("centralPortalUsername") as String? ?: System.getenv("CENTRAL_PORTAL_USERNAME")
@@ -139,5 +140,111 @@ signing {
         useInMemoryPgpKeys(keyData, password)
     } else {
         throw GradleException("Missing signing.keyFile or signing.password property")
+    }
+}
+
+tasks.register("mavenCentralBundle") {
+    group = "publishing"
+    description = "Creates a bundle.zip suitable for uploading to Maven Central"
+
+    dependsOn("publishToMavenLocal")
+
+    val bundleFile = layout.buildDirectory.file("distributions/bundle.zip")
+    outputs.file(bundleFile)
+
+    doLast {
+        val publication = publishing.publications["mavenJava"] as MavenPublication
+        val artifactId = publication.artifactId
+        val version = project.version.toString()
+        val groupPath = project.group.toString().replace('.', '/')
+
+        val localRepoPath = file("${System.getProperty("user.home")}/.m2/repository/$groupPath/$artifactId/$version")
+
+        if (!localRepoPath.exists()) {
+            throw GradleException("Local Maven repository artifacts not found at: $localRepoPath")
+        }
+
+        // Generate MD5 and SHA1 checksums for all artifacts
+        val artifactFiles = fileTree(localRepoPath).matching {
+            include("*.jar", "*.pom", "*.module")
+        }.files
+
+        fun generateChecksum(file: File, algorithm: String): String {
+            val digest = MessageDigest.getInstance(algorithm)
+            val bytes = file.readBytes()
+            val hash = digest.digest(bytes)
+            return hash.joinToString("") { "%02x".format(it) }
+        }
+
+        artifactFiles.forEach { file ->
+            // Generate MD5
+            val md5 = generateChecksum(file, "MD5")
+            File(localRepoPath, "${file.name}.md5").writeText(md5)
+
+            // Generate SHA1
+            val sha1 = generateChecksum(file, "SHA-1")
+            File(localRepoPath, "${file.name}.sha1").writeText(sha1)
+        }
+
+        // Create the zip file with proper directory structure
+        ant.withGroovyBuilder {
+            "zip"("destfile" to bundleFile.get().asFile.absolutePath) {
+                "zipfileset"("dir" to localRepoPath.absolutePath, "prefix" to "$groupPath/$artifactId/$version") {
+                    "include"("name" to "*.jar")
+                    "include"("name" to "*.pom")
+                    "include"("name" to "*.module")
+                    "include"("name" to "*.asc")
+                    "include"("name" to "*.md5")
+                    "include"("name" to "*.sha1")
+                }
+            }
+        }
+
+        val allFiles = fileTree(localRepoPath).matching {
+            include("*.jar", "*.pom", "*.module", "*.asc", "*.md5", "*.sha1")
+        }.files.sortedBy { it.name }
+
+        println("\nMaven Central bundle created successfully!")
+        println("Location: ${bundleFile.get().asFile}")
+        println("\nBundle contains ${allFiles.size} files:")
+        allFiles.forEach { println("  ✓ ${it.name}") }
+        println("\nYou can now upload this bundle to Maven Central.")
+    }
+}
+
+tasks.register("printBundleInfo") {
+    group = "publishing"
+    description = "Prints information about the Maven Central bundle"
+
+    doLast {
+        val publication = publishing.publications["mavenJava"] as MavenPublication
+        val artifactId = publication.artifactId
+        val version = project.version.toString()
+
+        println("""
+            |
+            |Maven Central Bundle Information:
+            |=================================
+            |Group ID:    ${project.group}
+            |Artifact ID: $artifactId
+            |Version:     $version
+            |
+            |To create the bundle:
+            |  ./gradlew mavenCentralBundle
+            |
+            |The bundle will include:
+            |  - ${artifactId}-${version}.jar
+            |  - ${artifactId}-${version}.jar.asc
+            |  - ${artifactId}-${version}-sources.jar
+            |  - ${artifactId}-${version}-sources.jar.asc
+            |  - ${artifactId}-${version}-javadoc.jar
+            |  - ${artifactId}-${version}-javadoc.jar.asc
+            |  - ${artifactId}-${version}.pom
+            |  - ${artifactId}-${version}.pom.asc
+            |
+            |Output location:
+            |  build/distributions/bundle.zip
+            |
+        """.trimMargin())
     }
 }

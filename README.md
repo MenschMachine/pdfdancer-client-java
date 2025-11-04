@@ -189,6 +189,72 @@ Use `PDFDancer.getDocumentSnapshot()` / `getPageSnapshot()` to inspect the serve
 ./gradlew publish
 ```
 
+### Publishing to Maven Central
+
+This project uses the new Maven Central publishing process. There are two ways to publish:
+
+#### Option 1: Direct Publishing (Automated)
+
+Publish directly to Maven Central using Gradle:
+
+```bash
+# Set your credentials (or add to ~/.gradle/gradle.properties)
+export CENTRAL_PORTAL_USERNAME="your-username"
+export CENTRAL_PORTAL_PASSWORD="your-password"
+
+# Configure signing (or add to ~/.gradle/gradle.properties)
+export SIGNING_KEY_FILE="/path/to/your/private-key.asc"
+export SIGNING_PASSWORD="your-key-password"
+
+# Publish to Maven Central
+./gradlew publish
+```
+
+**gradle.properties example:**
+```properties
+centralPortalUsername=your-username
+centralPortalPassword=your-password
+signing.keyFile=/path/to/your/private-key.asc
+signing.password=your-key-password
+```
+
+#### Option 2: Manual Bundle Upload
+
+Create a bundle.zip and upload it manually to Maven Central:
+
+```bash
+# 1. Configure signing credentials
+export SIGNING_KEY_FILE="/path/to/your/private-key.asc"
+export SIGNING_PASSWORD="your-key-password"
+
+# 2. Create the bundle
+./gradlew mavenCentralBundle
+
+# 3. Upload the bundle
+# The bundle will be created at: build/distributions/bundle.zip
+```
+
+Then upload `build/distributions/bundle.zip` to [Maven Central Portal](https://central.sonatype.com/publishing):
+
+1. Log in to https://central.sonatype.com/
+2. Click "Publish" → "Upload Bundle"
+3. Select `build/distributions/bundle.zip`
+4. Click "Publish"
+
+The bundle contains all required artifacts:
+- JAR files (main, sources, javadoc)
+- POM file with complete metadata
+- Gradle module metadata
+- GPG signatures (.asc files)
+- MD5 and SHA1 checksums
+
+**Prerequisites for Maven Central:**
+- A verified namespace (e.g., `com.pdfdancer.client`)
+- A GPG key pair for signing artifacts
+- Maven Central account credentials
+
+For more information, see the [Maven Central Publishing Guide](https://central.sonatype.org/publish/publish-guide/).
+
 ### Integration / E2E Tests
 
 The tests in `src/test/java` exercise the live API. To run them locally:
