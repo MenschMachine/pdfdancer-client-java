@@ -1,7 +1,9 @@
 import java.util.*
 
 plugins {
-    java
+    `java-library`
+    `maven-publish`
+    signing
 }
 
 val versionProps = Properties().apply {
@@ -75,5 +77,60 @@ tasks.withType<Javadoc> {
     (options as? StandardJavadocDocletOptions)?.apply {
         addBooleanOption("Xdoclint:none", true)
         quiet()
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            pom {
+                name.set("PDFDancer SDK")
+                description.set("Java SDK for PDFDancer API")
+                url.set("https://github.com/MenschMachine/pdfdancer-client-java")
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("pdfdancer")
+                        name.set("PDFDancer.com")
+                        email.set("michael.lahr@thefamouscat.com")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/MenschMachine/pdfdancer-client-java")
+                    connection.set("scm:git:git://github.com/MenschMachine/pdfdancer-client-java.git")
+                    developerConnection.set("scm:git:ssh://github.com/MenschMachine/pdfdancer-client-java.git")
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "sonatype"
+            url = uri("https://central.sonatype.com/api/v1/publisher/deploy")
+            credentials {
+                username = findProperty("sonatypeUsername") as String? ?: System.getenv("SONATYPE_USERNAME")
+                password = findProperty("sonatypePassword") as String? ?: System.getenv("SONATYPE_PASSWORD")
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["mavenJava"])
+
+    val signingKey: String? = findProperty("signingKey") as String?
+    val signingPassword: String? = findProperty("signingPassword") as String?
+
+    if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    } else {
+        useGpgCmd() // Fallback to system GPG if properties aren't set
     }
 }
