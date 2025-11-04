@@ -36,7 +36,7 @@ import static com.pdfdancer.common.util.FileUtils.writeBytesToFile;
  */
 public class PDFDancer {
     public static final double DEFAULT_EPSILON = 0.01;
-    private static final URI DEFAULT_BASE_URI = URI.create("http://localhost:8080");
+    private static final URI DEFAULT_BASE_URI = URI.create("https://api.pdfdancer.com");
     public static final String TYPES_PARAGRAPH = "PARAGRAPH";
     public static final String TYPES_TEXT_LINE = "TEXT_LINE";
     /**
@@ -76,7 +76,7 @@ public class PDFDancer {
 
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      *
      * @param token   authentication token for API access
      * @param pdfFile PDF file to upload and process
@@ -89,7 +89,7 @@ public class PDFDancer {
 
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
      * - If PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
@@ -107,7 +107,7 @@ public class PDFDancer {
 
     /**
      * Creates a new PDFDancer client by uploading an existing PDF file.
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
      * - If PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
@@ -148,7 +148,7 @@ public class PDFDancer {
     /**
      * Creates a new PDFDancer client with a blank PDF.
      * Uses default page size (A4), orientation (PORTRAIT), and page count (1).
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
      * - If PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
@@ -185,7 +185,7 @@ public class PDFDancer {
 
     /**
      * Creates a new PDFDancer client with a blank PDF using custom parameters.
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      *
      * @param token            authentication token for API access
      * @param pageSize         page size (use PageSize.A4, PageSize.LETTER, PageSize.LEGAL, or PageSize.custom(width, height))
@@ -202,7 +202,7 @@ public class PDFDancer {
 
     /**
      * Creates a new PDFDancer client with a blank PDF using custom parameters.
-     * Uses default HTTP client configured for localhost:8080.
+     * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
      * - If PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
@@ -256,11 +256,11 @@ public class PDFDancer {
     }
 
     /**
-     * Creates a default HTTP client configured for localhost development.
-     * This method provides a preconfigured client for connecting to a local
-     * PDFDancer API server running on the standard development port.
+     * Creates a default HTTP client configured for the hosted PDFDancer API.
+     * This method provides a preconfigured client for connecting to https://api.pdfdancer.com
+     * when no custom {@link java.net.http.HttpClient} is supplied.
      *
-     * @return HTTP client configured for localhost:8080
+     * @return HTTP client configured for https://api.pdfdancer.com
      * @throws RuntimeException if URL creation fails
      */
     private static PdfDancerHttpClient getDefaultClient() {
