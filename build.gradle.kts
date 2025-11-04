@@ -90,12 +90,14 @@ publishing {
                 name.set("PDFDancer SDK")
                 description.set("Java SDK for PDFDancer API")
                 url.set("https://github.com/MenschMachine/pdfdancer-client-java")
+
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")
                         url.set("https://www.apache.org/licenses/LICENSE-2.0")
                     }
                 }
+
                 developers {
                     developer {
                         id.set("pdfdancer")
@@ -103,6 +105,7 @@ publishing {
                         email.set("michael.lahr@thefamouscat.com")
                     }
                 }
+
                 scm {
                     url.set("https://github.com/MenschMachine/pdfdancer-client-java")
                     connection.set("scm:git:git://github.com/MenschMachine/pdfdancer-client-java.git")
@@ -115,7 +118,11 @@ publishing {
     repositories {
         maven {
             name = "sonatype"
-            url = uri("https://central.sonatype.com/api/v1/publisher/deploy")
+            // ✅ Correct endpoints for OSSRH
+            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+
             credentials {
                 username = findProperty("sonatypeUsername") as String? ?: System.getenv("SONATYPE_USERNAME")
                 password = findProperty("sonatypePassword") as String? ?: System.getenv("SONATYPE_PASSWORD")
