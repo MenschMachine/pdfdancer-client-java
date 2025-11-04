@@ -9,14 +9,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
-        java: ${{ github.ref == 'refs/heads/main' && fromJSON('[11, 17, 21, 23]') || fromJSON('[11]') }}
+        include: >
+          ${{ 
+            github.ref == 'refs/heads/main' 
+            && fromJSON('[
+              {"os": "ubuntu-latest", "java": 11},
+              {"os": "ubuntu-latest", "java": 17},
+              {"os": "ubuntu-latest", "java": 21},
+              {"os": "ubuntu-latest", "java": 23},
+              {"os": "windows-latest", "java": 11},
+              {"os": "windows-latest", "java": 17},
+              {"os": "windows-latest", "java": 21},
+              {"os": "windows-latest", "java": 23}
+            ]') 
+            || fromJSON('[
+              {"os": "ubuntu-latest", "java": 11}
+            ]') 
+          }}
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
