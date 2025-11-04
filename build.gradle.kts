@@ -129,28 +129,42 @@ publishing {
     }
 }
 
-signing {
-    sign(publishing.publications["mavenJava"])
+// Signing configuration - only required for publishing to Maven Central
+val keyFilePath = findProperty("signing.keyFile") as String?
+val password = findProperty("signing.password") as String?
+val signingEnabled = !keyFilePath.isNullOrBlank() && !password.isNullOrBlank()
 
-    val keyFilePath = findProperty("signing.keyFile") as String?
-    val password = findProperty("signing.password") as String?
-
-    if (!keyFilePath.isNullOrBlank() && !password.isNullOrBlank()) {
+if (signingEnabled) {
+    signing {
         val keyData = Files.readString(Paths.get(keyFilePath))
         useInMemoryPgpKeys(keyData, password)
-    } else {
-        throw GradleException("Missing signing.keyFile or signing.password property")
+        sign(publishing.publications["mavenJava"])
     }
+} else {
+    // Signing is disabled - builds will succeed but publishing to Maven Central will fail
+    logger.warn("Signing is disabled. Set signing.keyFile and signing.password to enable artifact signing.")
 }
 
 tasks.register("mavenCentralBundle") {
     group = "publishing"
-    description = "Creates a bundle.zip suitable for uploading to Maven Central"
+    description = "Creates a bundle.zip suitable for uploading to Maven Central (requires signing credentials)"
 
     dependsOn("publishToMavenLocal")
 
     val bundleFile = layout.buildDirectory.file("distributions/bundle.zip")
     outputs.file(bundleFile)
+
+    doFirst {
+        // Check if signing is enabled
+        val keyFilePath = findProperty("signing.keyFile") as String?
+        val password = findProperty("signing.password") as String?
+        if (keyFilePath.isNullOrBlank() || password.isNullOrBlank()) {
+            throw GradleException(
+                "Maven Central bundle requires signing credentials.\n" +
+                "Please set signing.keyFile and signing.password properties."
+            )
+        }
+    }
 
     doLast {
         val publication = publishing.publications["mavenJava"] as MavenPublication
