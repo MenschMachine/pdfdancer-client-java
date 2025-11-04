@@ -1,110 +1,86 @@
-name: Build
+name: CI
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ main, staging, develop, development, dev ]
   pull_request:
-    branches: [ '**' ]
-  workflow_dispatch:
+    branches: [ main, staging, develop, development, dev ]
 
 jobs:
-  build:
-    # run the minimal matrix on non-main branches
+  test:
+    # Run minimal config on non-main branches
     if: github.ref != 'refs/heads/main'
-
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        java: [ 11 ]
+        node-version: [ 20.x ]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Run linter
+        run: npm run lint
 
-      - name: Run build
-        run: ./gradlew build
-        env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
+      - name: Build
+        run: npm run build
 
-      - name: Upload build reports
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: build-reports-${{ github.run_number }}-ubuntu-jdk11
-          path: |
-            build/reports/
-            build/test-results/
-          retention-days: 7
+      - name: Run tests
+        run: |
+          PDFDANCER_BASE_URL=https://api-staging.pdfdancer.com \
+          PDFDANCER_TOKEN=42 \
+          npm run test
 
-  build-full-matrix:
-    # run the full matrix only on main
+  test-full-matrix:
+    # Run full OS + Node version matrix only on main
     if: github.ref == 'refs/heads/main'
-
-    permissions:
-      contents: read
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        java: [ 11, 17, 21, 23 ]
+        node-version: [ 20.x, 22.x, 24.x ]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Make gradlew executable
+      - name: Run linter
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests (Unix)
         if: runner.os != 'Windows'
-        run: chmod +x gradlew
+        run: |
+          PDFDANCER_BASE_URL=https://api-staging.pdfdancer.com \
+          PDFDANCER_TOKEN=42 \
+          npm run test
 
-      - name: Run build
-        if: runner.os != 'Windows'
-        run: ./gradlew build
-        env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
-
-      - name: Run build (Windows)
+      - name: Run tests (Windows)
         if: runner.os == 'Windows'
         shell: cmd
-        run: gradlew.bat build
-        env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
-
-      - name: Upload build reports
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: build-reports-${{ github.run_number }}-${{ matrix.os }}-jdk${{ matrix.java }}
-          path: |
-            build/reports/
-            build/test-results/
-          retention-days: 7
+        run: |
+          set PDFDANCER_BASE_URL=https://api-staging.pdfdancer.com
+          set PDFDANCER_TOKEN=42
+          npm run test
