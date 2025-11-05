@@ -101,8 +101,7 @@ public class PDFDancer {
     public static PDFDancer createSession(File pdfFile) {
         PdfDancerHttpClient client = getDefaultClient();
         byte[] bytes = readFile(pdfFile);
-        String token = envTokenOrNull();
-        return token != null ? createSession(token, bytes, client) : createAnonSession(bytes, client);
+        return createSession(getTokenOrAnonymous(client), bytes, client);
     }
 
     /**
@@ -137,12 +136,12 @@ public class PDFDancer {
 
     @SuppressWarnings("unused")
     public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient) {
-        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createSession(token, bytesPDF, wrapHttpClient(httpClient));
     }
 
     @SuppressWarnings("unused")
     public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient, URI baseUrl) {
-        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, baseUrl));
+        return createSession(token, bytesPDF, wrapHttpClient(httpClient, baseUrl));
     }
 
     /**
@@ -158,11 +157,7 @@ public class PDFDancer {
     @SuppressWarnings("unused")
     public static PDFDancer createNew() {
         PdfDancerHttpClient client = getDefaultClient();
-        String token = envTokenOrNull();
-        if (token == null) {
-            token = obtainAnonymousToken(client);
-        }
-        return createNew(token, PageSize.A4, Orientation.PORTRAIT, 1, client);
+        return createNew(getTokenOrAnonymous(client), PageSize.A4, Orientation.PORTRAIT, 1, client);
     }
 
     static PDFDancer createAnonSession(byte[] testPdf, PdfDancerHttpClient client) {
@@ -175,12 +170,12 @@ public class PDFDancer {
 
     @SuppressWarnings("unused")
     static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient) {
-        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createAnonSession(testPdf, wrapHttpClient(httpClient));
     }
 
     @SuppressWarnings("unused")
     static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient, URI baseUrl) {
-        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, baseUrl));
+        return createAnonSession(testPdf, wrapHttpClient(httpClient, baseUrl));
     }
 
     /**
@@ -217,11 +212,7 @@ public class PDFDancer {
                                       Orientation orientation,
                                       int initialPageCount) {
         PdfDancerHttpClient client = getDefaultClient();
-        String token = envTokenOrNull();
-        if (token == null) {
-            token = obtainAnonymousToken(client);
-        }
-        return createNew(token, pageSize, orientation, initialPageCount, client);
+        return createNew(getTokenOrAnonymous(client), pageSize, orientation, initialPageCount, client);
     }
 
     /**
@@ -245,14 +236,14 @@ public class PDFDancer {
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
                                       int initialPageCount, HttpClient httpClient) {
-        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createNew(token, pageSize, orientation, initialPageCount, wrapHttpClient(httpClient));
     }
 
     @SuppressWarnings("unused")
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
                                       int initialPageCount, HttpClient httpClient, URI baseUrl) {
-        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, baseUrl));
+        return createNew(token, pageSize, orientation, initialPageCount, wrapHttpClient(httpClient, baseUrl));
     }
 
     /**
@@ -267,12 +258,39 @@ public class PDFDancer {
         return PdfDancerHttpClient.createDefault(DEFAULT_BASE_URI);
     }
 
-    private static String envTokenOrNull() {
-        return EnvironmentInfo.envTokenOrNull();
+    /**
+     * Wraps a java.net.http.HttpClient into a PdfDancerHttpClient with default base URI.
+     * This helper eliminates duplication across multiple wrapper methods.
+     *
+     * @param httpClient the HTTP client to wrap
+     * @return wrapped PdfDancerHttpClient
+     */
+    private static PdfDancerHttpClient wrapHttpClient(HttpClient httpClient) {
+        return PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI);
     }
 
-    private static String obtainAnonymousToken(PdfDancerHttpClient client) {
-        return SessionService.obtainAnonymousToken(client);
+    /**
+     * Wraps a java.net.http.HttpClient into a PdfDancerHttpClient with custom base URI.
+     * This helper eliminates duplication across multiple wrapper methods.
+     *
+     * @param httpClient the HTTP client to wrap
+     * @param baseUrl the base URL for the API
+     * @return wrapped PdfDancerHttpClient
+     */
+    private static PdfDancerHttpClient wrapHttpClient(HttpClient httpClient, URI baseUrl) {
+        return PdfDancerHttpClient.create(httpClient, baseUrl);
+    }
+
+    /**
+     * Gets the token from environment if available, otherwise obtains an anonymous token.
+     * This helper eliminates duplicate token acquisition logic.
+     *
+     * @param client HTTP client for API communication
+     * @return authentication token (from environment or newly obtained anonymous token)
+     */
+    private static String getTokenOrAnonymous(PdfDancerHttpClient client) {
+        String token = EnvironmentInfo.envTokenOrNull();
+        return token != null ? token : SessionService.obtainAnonymousToken(client);
     }
 
     /**
@@ -291,8 +309,7 @@ public class PDFDancer {
 
     /**
      * Creates a blank PDF session on the server.
-     * This method requests the server to create a new blank PDF with the specified
-     * parameters and returns a session ID for subsequent manipulation operations.
+     * Delegates to SessionService to avoid duplication.
      *
      * @param token            authentication token for the request
      * @param pageSize         page size (standard or custom)
@@ -304,13 +321,7 @@ public class PDFDancer {
     private static String createBlankPdfSession(String token, PageSize pageSize,
                                                 Orientation orientation,
                                                 int initialPageCount, PdfDancerHttpClient client) {
-        return client.toBlocking().retrieve(
-                HttpRequest.POST("/session/new",
-                                new CreateBlankPdfRequest(pageSize, orientation, initialPageCount))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token),
-                String.class
-        );
+        return SessionService.createBlankPdfSession(token, pageSize, orientation, initialPageCount, client);
     }
 
     /**
@@ -347,9 +358,7 @@ public class PDFDancer {
      * @return true if the page was successfully deleted, false otherwise
      */
     public Boolean deletePage(ObjectRef pageRef) {
-        Boolean result = modification.deletePage(pageRef);
-        invalidateSnapshotCaches();
-        return result;
+        return withCacheInvalidation(() -> modification.deletePage(pageRef));
     }
 
     /**
@@ -381,9 +390,7 @@ public class PDFDancer {
      * @return true if the object was successfully deleted, false otherwise
      */
     protected boolean delete(ObjectRef objectRef) {
-        Boolean result = modification.delete(objectRef);
-        invalidateSnapshotCaches();
-        return Boolean.TRUE.equals(result);
+        return Boolean.TRUE.equals(withCacheInvalidation(() -> modification.delete(objectRef)));
     }
 
     /**
@@ -451,9 +458,7 @@ public class PDFDancer {
      * @return true if the object was successfully moved, false otherwise
      */
     protected Boolean move(ObjectRef objectRef, Position position) {
-        Boolean result = modification.move(objectRef, position);
-        invalidateSnapshotCaches();
-        return result;
+        return withCacheInvalidation(() -> modification.move(objectRef, position));
     }
 
     /**
@@ -466,19 +471,29 @@ public class PDFDancer {
      * @return true if the image was successfully added, false otherwise
      */
     protected boolean addImage(Image image, Position position) {
-        boolean result = modification.addImage(image, position);
-        invalidateSnapshotCaches();
-        return result;
+        return withCacheInvalidation(() -> modification.addImage(image, position));
     }
 
     protected Boolean addObject(PDFObject object) {
-        Boolean result = modification.addObject(object);
-        invalidateSnapshotCaches();
-        return result;
+        return withCacheInvalidation(() -> modification.addObject(object));
     }
 
     private void invalidateSnapshotCaches() {
         snapshotCache.invalidate();
+    }
+
+    /**
+     * Executes an operation and invalidates snapshot caches afterwards.
+     * This helper reduces duplication for all modification operations.
+     *
+     * @param operation the operation to execute
+     * @param <T> the return type
+     * @return the result of the operation
+     */
+    private <T> T withCacheInvalidation(java.util.function.Supplier<T> operation) {
+        T result = operation.get();
+        invalidateSnapshotCaches();
+        return result;
     }
 
 
@@ -543,37 +558,36 @@ public class PDFDancer {
         );
     }
 
-    private List<TextTypeObjectRef> findParagraphs(Position position) {
+    /**
+     * Generic find method that eliminates duplication across findParagraphs, findTextLines, and findFormFields.
+     *
+     * @param type the object type to search for
+     * @param position positional constraints (null for all positions)
+     * @param returnClass the class of the return type
+     * @param <T> the type of ObjectRef to return
+     * @return list of matching objects
+     */
+    private <T extends ObjectRef> List<T> findByType(ObjectType type, Position position, Class<T> returnClass) {
         String path = "/pdf/find";
         return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(ObjectType.PARAGRAPH, position, null))
+                HttpRequest.POST(path, new FindRequest(type, position, null))
                         .contentType(MediaType.APPLICATION_JSON_TYPE)
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),
-                Argument.listOf(TextTypeObjectRef.class)
+                Argument.listOf(returnClass)
         );
+    }
+
+    private List<TextTypeObjectRef> findParagraphs(Position position) {
+        return findByType(ObjectType.PARAGRAPH, position, TextTypeObjectRef.class);
     }
 
     private List<TextTypeObjectRef> findTextLines(Position position) {
-        String path = "/pdf/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(ObjectType.TEXT_LINE, position, null))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(TextTypeObjectRef.class)
-        );
+        return findByType(ObjectType.TEXT_LINE, position, TextTypeObjectRef.class);
     }
 
     private List<FormFieldRef> findFormFields(Position position) {
-        String path = "/pdf/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(FORM_FIELD, position, null))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(FormFieldRef.class)
-        );
+        return findByType(FORM_FIELD, position, FormFieldRef.class);
     }
 
     @SuppressWarnings("unused")
@@ -602,21 +616,15 @@ public class PDFDancer {
     }
 
     protected boolean modifyParagraph(ObjectRef ref, Paragraph newParagraph) {
-        boolean success = modification.modifyParagraph(ref, newParagraph);
-        invalidateSnapshotCaches();
-        return success;
+        return withCacheInvalidation(() -> modification.modifyParagraph(ref, newParagraph));
     }
 
     protected boolean modifyTextLine(ObjectRef ref, String newTextLine) {
-        boolean success = modification.modifyTextLine(ref, newTextLine);
-        invalidateSnapshotCaches();
-        return success;
+        return withCacheInvalidation(() -> modification.modifyTextLine(ref, newTextLine));
     }
 
     protected boolean modifyParagraph(ObjectRef ref, String newText) {
-        boolean success = modification.modifyParagraph(ref, newText);
-        invalidateSnapshotCaches();
-        return success;
+        return withCacheInvalidation(() -> modification.modifyParagraph(ref, newText));
     }
 
     protected boolean addParagaph(Paragraph newParagraph) {
@@ -720,9 +728,7 @@ public class PDFDancer {
     }
 
     protected boolean changeFormField(FormFieldRef objectRef, String value) {
-        Boolean result = modification.changeFormField(objectRef, value);
-        invalidateSnapshotCaches();
-        return Boolean.TRUE.equals(result);
+        return Boolean.TRUE.equals(withCacheInvalidation(() -> modification.changeFormField(objectRef, value)));
     }
 
     public List<TextParagraphReference> selectParagraphs() {
@@ -842,9 +848,7 @@ public class PDFDancer {
     }
 
     public PageRef addPage(AddPageRequest request) {
-        PageRef result = modification.addPage(request);
-        invalidateSnapshotCaches();
-        return result;
+        return withCacheInvalidation(() -> modification.addPage(request));
     }
 
     public PageBuilder page() {
@@ -852,9 +856,7 @@ public class PDFDancer {
     }
 
     public boolean movePage(int fromPageIndex, int toPageIndex) {
-        Boolean result = modification.movePage(fromPageIndex, toPageIndex);
-        invalidateSnapshotCaches();
-        return Boolean.TRUE.equals(result);
+        return Boolean.TRUE.equals(withCacheInvalidation(() -> modification.movePage(fromPageIndex, toPageIndex)));
     }
 
     /**
