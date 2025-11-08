@@ -73,9 +73,9 @@ public class LineShowcaseTest extends BaseTest {
         assertEquals(expectedLines, pdf.selectPaths().size());
 
         // Spot-check a few positions (hit-test at line starts)
-        assertFalse(pdf.page(0).selectPathAt(left, height - 60).isEmpty()); // first solid
-        assertFalse(pdf.page(0).selectPathAt(left, height - 60 - (4 * step)).isEmpty()); // after 4 solids
-        assertFalse(pdf.page(0).selectPathAt(left + 50, 50).isEmpty()); // vertical line start
+        assertFalse(pdf.page(0).selectPathsAt(left, height - 60).isEmpty()); // first solid
+        assertFalse(pdf.page(0).selectPathsAt(left, height - 60 - (4 * step)).isEmpty()); // after 4 solids
+        assertFalse(pdf.page(0).selectPathsAt(left + 50, 50).isEmpty()); // vertical line start
 
         // Save for visual inspection
         pdf.save("/tmp/line-Showcase.pdf");

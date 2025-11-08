@@ -126,9 +126,9 @@ public class BezierShowcaseTest extends BaseTest {
         assertEquals(expectedCurves, pdf.selectPaths().size());
 
         // Spot-check a few positions (hit-test near curve start points)
-        assertFalse(pdf.page(0).selectPathAt(left, top - 80).isEmpty());
-        assertFalse(pdf.page(0).selectPathAt(left, top - 380).isEmpty());
-        assertFalse(pdf.page(0).selectPathAt(cx, cy + r).isEmpty());
+        assertFalse(pdf.page(0).selectPathsAt(left, top - 80).isEmpty());
+        assertFalse(pdf.page(0).selectPathsAt(left, top - 380).isEmpty());
+        assertFalse(pdf.page(0).selectPathsAt(cx, cy + r).isEmpty());
 
         // Save for visual inspection
         pdf.save("/tmp/bezier-Showcase.pdf");

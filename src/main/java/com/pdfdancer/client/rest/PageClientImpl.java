@@ -80,18 +80,17 @@ class PageClientImpl {
         );
     }
 
-    public List<PathReference> selectPathAt(double x, double y) {
+    public List<PathReference> selectPathsAt(double x, double y) {
         Position position = new PositionBuilder().onPage(pageIndex).atCoordinates(x, y).build();
         return root.toPathObject(root.find(ObjectType.PATH, position));
     }
 
     /**
      * Selects a single path at the specified coordinates.
-     * Note: This is the singular version of selectPathAt(x, y) which returns a list.
      * @return Optional containing the first path found at the position, or empty if none found
      */
-    public Optional<PathReference> selectSinglePathAt(double x, double y) {
-        List<PathReference> paths = selectPathAt(x, y);
+    public Optional<PathReference> selectPathAt(double x, double y) {
+        List<PathReference> paths = selectPathsAt(x, y);
         return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
     }
 
@@ -105,7 +104,7 @@ class PageClientImpl {
         );
     }
 
-    public List<TextLineReference> selectTextLineAt(double x, double y) { return selectTextLineAt(x, y, PDFDancer.DEFAULT_EPSILON); }
+    public List<TextLineReference> selectTextLinesAt(double x, double y) { return selectTextLinesAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<TextLineReference> selectTextLines() {
         TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
@@ -113,7 +112,7 @@ class PageClientImpl {
         return root.toTextLineObject(typed);
     }
 
-    public List<TextLineReference> selectTextLineAt(double x, double y, double epsilon) {
+    public List<TextLineReference> selectTextLinesAt(double x, double y, double epsilon) {
         TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextLineObject(
@@ -125,20 +124,18 @@ class PageClientImpl {
 
     /**
      * Selects a single text line at the specified coordinates with default epsilon.
-     * Note: This is the singular version of selectTextLineAt(x, y) which returns a list.
      * @return Optional containing the first text line found at the position, or empty if none found
      */
-    public Optional<TextLineReference> selectSingleTextLineAt(double x, double y) {
-        return selectSingleTextLineAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    public Optional<TextLineReference> selectTextLineAt(double x, double y) {
+        return selectTextLineAt(x, y, PDFDancer.DEFAULT_EPSILON);
     }
 
     /**
      * Selects a single text line at the specified coordinates with custom epsilon tolerance.
-     * Note: This is the singular version of selectTextLineAt(x, y, epsilon) which returns a list.
      * @return Optional containing the first text line found at the position, or empty if none found
      */
-    public Optional<TextLineReference> selectSingleTextLineAt(double x, double y, double epsilon) {
-        List<TextLineReference> textLines = selectTextLineAt(x, y, epsilon);
+    public Optional<TextLineReference> selectTextLineAt(double x, double y, double epsilon) {
+        List<TextLineReference> textLines = selectTextLinesAt(x, y, epsilon);
         return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
     }
 
