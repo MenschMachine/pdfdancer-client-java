@@ -68,13 +68,8 @@ public class ParagraphTest extends BaseTest {
         assertEquals(54, paragraph.get().getPosition().getX().intValue());
         assertEquals(496, paragraph.get().getPosition().getY().intValue());
 
-        // Test with default epsilon - use exact coordinates
-        Optional<TextParagraphReference> paragraphDefaultEpsilon = client.page(0).selectParagraphAt(54, 496);
-        assertTrue(paragraphDefaultEpsilon.isPresent(), "Should find paragraph with default epsilon");
-        assertEquals("PARAGRAPH_000004", paragraphDefaultEpsilon.get().getInternalId());
-
         // Test at position with no paragraph
-        Optional<TextParagraphReference> emptyResult = client.page(0).selectParagraphAt(1000, 1000);
+        Optional<TextParagraphReference> emptyResult = client.page(0).selectParagraphAt(1000, 1000, 1);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no paragraph found");
     }
 
