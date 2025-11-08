@@ -4,6 +4,7 @@ import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.response.PageSnapshot;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,6 +57,23 @@ public class PageApi {
                         .filter(ref -> root.containsPoint(ref, x, y, epsilon))
                         .collect(Collectors.toUnmodifiableList())
         );
+    }
+
+    /**
+     * Selects a single paragraph at the specified coordinates with default epsilon.
+     * @return Optional containing the first paragraph found at the position, or empty if none found
+     */
+    public Optional<TextParagraphReference> selectParagraphAt(double x, double y) {
+        return selectParagraphAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects a single paragraph at the specified coordinates with custom epsilon tolerance.
+     * @return Optional containing the first paragraph found at the position, or empty if none found
+     */
+    public Optional<TextParagraphReference> selectParagraphAt(double x, double y, double epsilon) {
+        List<TextParagraphReference> paragraphs = selectParagraphsAt(x, y, epsilon);
+        return paragraphs.isEmpty() ? Optional.empty() : Optional.of(paragraphs.get(0));
     }
 
     public List<TextParagraphReference> selectParagraphsMatching(String pattern) {
@@ -123,6 +141,23 @@ public class PageApi {
         return root.toImageObject(filtered);
     }
 
+    /**
+     * Selects a single image at the specified coordinates with default epsilon.
+     * @return Optional containing the first image found at the position, or empty if none found
+     */
+    public Optional<ImageReference> selectImageAt(double x, double y) {
+        return selectImageAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects a single image at the specified coordinates with custom epsilon tolerance.
+     * @return Optional containing the first image found at the position, or empty if none found
+     */
+    public Optional<ImageReference> selectImageAt(double x, double y, double epsilon) {
+        List<ImageReference> images = selectImagesAt(x, y, epsilon);
+        return images.isEmpty() ? Optional.empty() : Optional.of(images.get(0));
+    }
+
     public List<FormXObjectReference> selectForms() {
         PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
         List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
@@ -148,6 +183,23 @@ public class PageApi {
         return root.toFormXObject(filtered);
     }
 
+    /**
+     * Selects a single form XObject at the specified coordinates with default epsilon.
+     * @return Optional containing the first form found at the position, or empty if none found
+     */
+    public Optional<FormXObjectReference> selectFormAt(double x, double y) {
+        return selectFormAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects a single form XObject at the specified coordinates with custom epsilon tolerance.
+     * @return Optional containing the first form found at the position, or empty if none found
+     */
+    public Optional<FormXObjectReference> selectFormAt(double x, double y, double epsilon) {
+        List<FormXObjectReference> forms = selectFormsAt(x, y, epsilon);
+        return forms.isEmpty() ? Optional.empty() : Optional.of(forms.get(0));
+    }
+
     public List<FormFieldReference> selectFormFields() {
         List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
         return root.toFormFieldObject(formFields);
@@ -164,6 +216,23 @@ public class PageApi {
                         .filter(ref -> root.containsPoint(ref, x, y, epsilon))
                         .collect(Collectors.toUnmodifiableList())
         );
+    }
+
+    /**
+     * Selects a single form field at the specified coordinates with default epsilon.
+     * @return Optional containing the first form field found at the position, or empty if none found
+     */
+    public Optional<FormFieldReference> selectFormFieldAt(double x, double y) {
+        return selectFormFieldAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects a single form field at the specified coordinates with custom epsilon tolerance.
+     * @return Optional containing the first form field found at the position, or empty if none found
+     */
+    public Optional<FormFieldReference> selectFormFieldAt(double x, double y, double epsilon) {
+        List<FormFieldReference> formFields = selectFormFieldsAt(x, y, epsilon);
+        return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
     }
 
     public List<TextParagraphReference> selectTextStartingWith(String text) {
