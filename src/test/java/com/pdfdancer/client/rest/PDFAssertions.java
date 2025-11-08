@@ -175,7 +175,7 @@ public class PDFAssertions {
         assertEquals(y, ref.getPosition().getY(), epsilon,
                 String.format("%f != %f", y, ref.getPosition().getY()));
 
-        List<TextLineReference> byPosition = pdf.page(page).selectTextLineAt(x, y, epsilon);
+        List<TextLineReference> byPosition = pdf.page(page).selectTextLinesAt(x, y, epsilon);
         assertEquals(1, byPosition.size());
         assertEquals(lines.get(0).getInternalId(), byPosition.get(0).getInternalId());
 
@@ -245,7 +245,7 @@ public class PDFAssertions {
     }
 
     public PDFAssertions assertPathIsAt(String internalId, double x, double y, int page, double epsilon) {
-        List<PathReference> paths = pdf.page(page).selectPathAt(x, y);
+        List<PathReference> paths = pdf.page(page).selectPathsAt(x, y);
         assertEquals(1, paths.size());
 
         PathReference ref = paths.get(0);
@@ -260,7 +260,7 @@ public class PDFAssertions {
     }
 
     public PDFAssertions assertNoPathAt(double x, double y, int page) {
-        List<PathReference> paths = pdf.page(page).selectPathAt(x, y);
+        List<PathReference> paths = pdf.page(page).selectPathsAt(x, y);
         assertEquals(0, paths.size());
         return this;
     }

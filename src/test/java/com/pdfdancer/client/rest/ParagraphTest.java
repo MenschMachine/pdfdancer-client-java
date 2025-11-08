@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,6 +55,22 @@ public class ParagraphTest extends BaseTest {
         assertEquals(1, paragraphs.size());
         para1 = paragraphs.get(0);
         assertEquals("PARAGRAPH_000004", para1.getInternalId());
+    }
+
+    @Test
+    public void findSingularParagraphByPosition() {
+        PDFDancer client = createClient();
+
+        // Test finding a single paragraph at a known position with sufficient epsilon
+        Optional<TextParagraphReference> paragraph = client.page(0).selectParagraphAt(54, 496, 1);
+        assertTrue(paragraph.isPresent(), "Should find paragraph at known position");
+        assertEquals("PARAGRAPH_000004", paragraph.get().getInternalId());
+        assertEquals(54, paragraph.get().getPosition().getX().intValue());
+        assertEquals(496, paragraph.get().getPosition().getY().intValue());
+
+        // Test at position with no paragraph
+        Optional<TextParagraphReference> emptyResult = client.page(0).selectParagraphAt(1000, 1000, 1);
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no paragraph found");
     }
 
     @Test
