@@ -85,6 +85,16 @@ class PageClientImpl {
         return root.toPathObject(root.find(ObjectType.PATH, position));
     }
 
+    /**
+     * Selects a single path at the specified coordinates.
+     * Note: This is the singular version of selectPathAt(x, y) which returns a list.
+     * @return Optional containing the first path found at the position, or empty if none found
+     */
+    public Optional<PathReference> selectSinglePathAt(double x, double y) {
+        List<PathReference> paths = selectPathAt(x, y);
+        return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
+    }
+
     public List<TextLineReference> selectTextLinesStartingWith(String text) {
         TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
@@ -111,6 +121,25 @@ class PageClientImpl {
                         .filter(ref -> root.containsPoint(ref, x, y, epsilon))
                         .collect(Collectors.toUnmodifiableList())
         );
+    }
+
+    /**
+     * Selects a single text line at the specified coordinates with default epsilon.
+     * Note: This is the singular version of selectTextLineAt(x, y) which returns a list.
+     * @return Optional containing the first text line found at the position, or empty if none found
+     */
+    public Optional<TextLineReference> selectSingleTextLineAt(double x, double y) {
+        return selectSingleTextLineAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects a single text line at the specified coordinates with custom epsilon tolerance.
+     * Note: This is the singular version of selectTextLineAt(x, y, epsilon) which returns a list.
+     * @return Optional containing the first text line found at the position, or empty if none found
+     */
+    public Optional<TextLineReference> selectSingleTextLineAt(double x, double y, double epsilon) {
+        List<TextLineReference> textLines = selectTextLineAt(x, y, epsilon);
+        return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
     }
 
     public List<ImageReference> selectImages() {

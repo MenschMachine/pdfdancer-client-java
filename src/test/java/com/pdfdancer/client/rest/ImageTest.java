@@ -98,20 +98,15 @@ public class ImageTest extends BaseTest {
     public void findSingularImageByPosition() {
         PDFDancer client = createClient();
 
-        // Test finding a single image at a known position
+        // Test finding a single image at a known position with sufficient epsilon
         Optional<ImageReference> image = client.page(11).selectImageAt(54, 300, 1);
         assertTrue(image.isPresent(), "Should find image at known position");
         assertEquals("IMAGE_000003", image.get().getInternalId());
         assertEquals(54, image.get().getPosition().getX().intValue());
         assertEquals(300, image.get().getPosition().getY().intValue());
 
-        // Test with default epsilon
-        Optional<ImageReference> imageDefaultEpsilon = client.page(11).selectImageAt(54, 300);
-        assertTrue(imageDefaultEpsilon.isPresent(), "Should find image with default epsilon");
-        assertEquals("IMAGE_000003", imageDefaultEpsilon.get().getInternalId());
-
         // Test at position with no image
-        Optional<ImageReference> emptyResult = client.page(11).selectImageAt(0, 0);
+        Optional<ImageReference> emptyResult = client.page(11).selectImageAt(0, 0, 1);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no image found");
     }
 

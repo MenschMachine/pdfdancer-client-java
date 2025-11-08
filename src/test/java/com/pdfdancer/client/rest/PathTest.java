@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +44,21 @@ public class PathTest extends BaseTest {
         assertEquals("PATH_000001", paths.get(0).getInternalId());
     }
 
+    @Test
+    public void findSingularPathByPosition() {
+        PDFDancer pdf = createClient();
+
+        // Test finding a single path at a known position
+        Optional<PathReference> path = pdf.page(0).selectSinglePathAt(80, 720);
+        assertTrue(path.isPresent(), "Should find path at known position");
+        assertEquals("PATH_000001", path.get().getInternalId());
+        assertEquals(80, path.get().getPosition().getX().intValue());
+        assertEquals(720, path.get().getPosition().getY().intValue());
+
+        // Test at position with no path
+        Optional<PathReference> emptyResult = pdf.page(0).selectSinglePathAt(1000, 1000);
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no path found");
+    }
 
     @Test
     public void deletePath() {
