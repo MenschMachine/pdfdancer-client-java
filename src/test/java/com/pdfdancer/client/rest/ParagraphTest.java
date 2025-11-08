@@ -61,17 +61,17 @@ public class ParagraphTest extends BaseTest {
     public void findSingularParagraphByPosition() {
         PDFDancer client = createClient();
 
-        // Test finding a single paragraph at a known position
-        Optional<TextParagraphReference> paragraph = client.page(0).selectParagraphAt(54, 496);
+        // Test finding a single paragraph at a known position with sufficient epsilon
+        Optional<TextParagraphReference> paragraph = client.page(0).selectParagraphAt(54, 496, 1);
         assertTrue(paragraph.isPresent(), "Should find paragraph at known position");
         assertEquals("PARAGRAPH_000004", paragraph.get().getInternalId());
         assertEquals(54, paragraph.get().getPosition().getX().intValue());
         assertEquals(496, paragraph.get().getPosition().getY().intValue());
 
-        // Test with custom epsilon
-        Optional<TextParagraphReference> paragraphWithEpsilon = client.page(0).selectParagraphAt(54, 496, 0.1);
-        assertTrue(paragraphWithEpsilon.isPresent(), "Should find paragraph with custom epsilon");
-        assertEquals("PARAGRAPH_000004", paragraphWithEpsilon.get().getInternalId());
+        // Test with default epsilon - use exact coordinates
+        Optional<TextParagraphReference> paragraphDefaultEpsilon = client.page(0).selectParagraphAt(54, 496);
+        assertTrue(paragraphDefaultEpsilon.isPresent(), "Should find paragraph with default epsilon");
+        assertEquals("PARAGRAPH_000004", paragraphDefaultEpsilon.get().getInternalId());
 
         // Test at position with no paragraph
         Optional<TextParagraphReference> emptyResult = client.page(0).selectParagraphAt(1000, 1000);

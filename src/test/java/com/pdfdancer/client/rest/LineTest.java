@@ -3,6 +3,7 @@ package com.pdfdancer.client.rest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +43,22 @@ public class LineTest extends BaseTest {
         assertNotNull(line.getPosition());
         assertEquals(54, line.getPosition().getX().intValue());
         assertEquals(606, line.getPosition().getY().intValue());
+    }
+
+    @Test
+    public void findSingularTextLineByPosition() {
+        PDFDancer pdf = createClient();
+
+        // Test finding a single text line at a known position with sufficient epsilon
+        Optional<TextLineReference> line = pdf.page(0).selectSingleTextLineAt(54, 606, 1);
+        assertTrue(line.isPresent(), "Should find text line at known position");
+        assertEquals("TEXTLINE_000002", line.get().getInternalId());
+        assertEquals(54, line.get().getPosition().getX().intValue());
+        assertEquals(606, line.get().getPosition().getY().intValue());
+
+        // Test at position with no text line
+        Optional<TextLineReference> emptyResult = pdf.page(0).selectSingleTextLineAt(1000, 1000, 1);
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no text line found");
     }
 
     @Test

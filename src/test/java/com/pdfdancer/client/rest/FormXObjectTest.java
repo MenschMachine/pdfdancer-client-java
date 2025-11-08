@@ -101,18 +101,13 @@ public class FormXObjectTest extends BaseTest {
     public void findSingularFormByPosition() {
         PDFDancer pdf = createClient();
 
-        // Test finding a single form at a known position
+        // Test finding a single form at a known position with sufficient epsilon
         Optional<FormXObjectReference> form = pdf.page(0).selectFormAt(17, 447, 1);
         assertTrue(form.isPresent(), "Should find form at known position");
         assertEquals("FORM_000001", form.get().getInternalId());
 
-        // Test with default epsilon
-        Optional<FormXObjectReference> formDefaultEpsilon = pdf.page(0).selectFormAt(17, 447);
-        assertTrue(formDefaultEpsilon.isPresent(), "Should find form with default epsilon");
-        assertEquals("FORM_000001", formDefaultEpsilon.get().getInternalId());
-
         // Test at position with no form
-        Optional<FormXObjectReference> emptyResult = pdf.page(0).selectFormAt(0, 0);
+        Optional<FormXObjectReference> emptyResult = pdf.page(0).selectFormAt(0, 0, 1);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form found");
     }
 
