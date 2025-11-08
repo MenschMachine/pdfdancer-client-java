@@ -5,6 +5,7 @@ import com.pdfdancer.common.model.Position;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,6 +40,26 @@ public class AcroformTest extends BaseTest {
         assertEquals(1, byPosition.size());
         assertEquals(ObjectType.RADIO_BUTTON, byPosition.get(0).type());
         assertEquals("FORM_FIELD_000008", byPosition.get(0).getInternalId());
+    }
+
+    @Test
+    public void findSingularFormFieldByPosition() {
+        PDFDancer pdf = createClient();
+
+        // Test finding a single form field at a known position
+        Optional<FormFieldReference> formField = pdf.page(0).selectFormFieldAt(280, 455, 1);
+        assertTrue(formField.isPresent(), "Should find form field at known position");
+        assertEquals(ObjectType.RADIO_BUTTON, formField.get().type());
+        assertEquals("FORM_FIELD_000008", formField.get().getInternalId());
+
+        // Test with default epsilon
+        Optional<FormFieldReference> formFieldDefaultEpsilon = pdf.page(0).selectFormFieldAt(280, 455);
+        assertTrue(formFieldDefaultEpsilon.isPresent(), "Should find form field with default epsilon");
+        assertEquals("FORM_FIELD_000008", formFieldDefaultEpsilon.get().getInternalId());
+
+        // Test at position with no form field
+        Optional<FormFieldReference> emptyResult = pdf.page(0).selectFormFieldAt(0, 0);
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form field found");
     }
 
     @Test

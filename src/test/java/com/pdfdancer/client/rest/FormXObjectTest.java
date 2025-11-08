@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,6 +95,20 @@ public class FormXObjectTest extends BaseTest {
         List<FormXObjectReference> found = pdf.page(0).selectFormsAt(17, 447, 1);
         assertEquals(1, found.size());
         assertEquals("FORM_000001", found.get(0).getInternalId());
+    }
+
+    @Test
+    public void findSingularFormByPosition() {
+        PDFDancer pdf = createClient();
+
+        // Test finding a single form at a known position with sufficient epsilon
+        Optional<FormXObjectReference> form = pdf.page(0).selectFormAt(17, 447, 1);
+        assertTrue(form.isPresent(), "Should find form at known position");
+        assertEquals("FORM_000001", form.get().getInternalId());
+
+        // Test at position with no form
+        Optional<FormXObjectReference> emptyResult = pdf.page(0).selectFormAt(0, 0, 1);
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form found");
     }
 
     @Test

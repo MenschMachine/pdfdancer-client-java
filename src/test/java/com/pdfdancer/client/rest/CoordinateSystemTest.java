@@ -118,9 +118,9 @@ public class CoordinateSystemTest extends BaseTest {
 
         // Basic assertions: some paths exist and representative ticks and grid are present
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn some paths");
-        assertFalse(pdf.page(0).selectPathAt(50, 0).isEmpty(), "Missing X tick at x=50");
-        assertFalse(pdf.page(0).selectPathAt(0, 50).isEmpty(), "Missing Y tick at y=50");
-        assertFalse(pdf.page(0).selectPathAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
+        assertFalse(pdf.page(0).selectPathsAt(50, 0).isEmpty(), "Missing X tick at x=50");
+        assertFalse(pdf.page(0).selectPathsAt(0, 50).isEmpty(), "Missing Y tick at y=50");
+        assertFalse(pdf.page(0).selectPathsAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
         assertFalse(pdf.page(0).selectParagraphsStartingWith("50").isEmpty(), "Missing '50' label(s)");
 
         // Save for visual inspection
