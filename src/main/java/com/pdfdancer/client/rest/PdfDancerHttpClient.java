@@ -37,26 +37,39 @@ public final class PdfDancerHttpClient {
     private final HttpClient delegate;
     private final URI baseUrl;
     private final ObjectMapper objectMapper;
+    private final RetryConfig retryConfig;
 
-    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper) {
+    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper, RetryConfig retryConfig) {
         this.delegate = delegate;
         this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
+        this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.noRetry();
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper());
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), null);
+    }
+
+    public static PdfDancerHttpClient createDefault(URI baseUrl, RetryConfig retryConfig) {
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(DEFAULT_TIMEOUT)
+                .build();
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), retryConfig);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper());
+        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper(), null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper);
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, null);
+    }
+
+    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper, RetryConfig retryConfig) {
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig);
     }
 
     private static ObjectMapper createObjectMapper() {
@@ -74,37 +87,97 @@ public final class PdfDancerHttpClient {
 
     private <T> T send(MutableHttpRequest<?> request, Class<T> responseType, Argument<T> argument) {
         HttpRequest httpRequest = toJavaRequest(request);
-        HttpResponse<byte[]> response;
+
+        int maxAttempts = retryConfig.getMaxAttempts();
+        RuntimeException lastException = null;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                HttpResponse<byte[]> response = delegate.send(httpRequest, BodyHandlers.ofByteArray());
+
+                int status = response.statusCode();
+                if (status < 200 || status >= 300) {
+                    RuntimeException error = translateError(response);
+
+                    // Check if we should retry based on status code
+                    if (attempt < maxAttempts &&
+                        error instanceof PdfDancerClientException &&
+                        retryConfig.isRetryableStatusCode(status)) {
+                        lastException = error;
+                        sleep(calculateDelay(attempt));
+                        continue;
+                    }
+
+                    throw error;
+                }
+
+                // Success - parse and return response
+                byte[] body = response.body();
+                if (responseType != null) {
+                    return decode(body, responseType);
+                }
+
+                JavaType javaType = toJavaType(argument);
+                try {
+                    if (body == null || body.length == 0) {
+                        return null;
+                    }
+                    @SuppressWarnings("unchecked")
+                    T value = (T) readValueFixingTypes(body, javaType);
+                    return value;
+                } catch (IOException e) {
+                    String preview = new String(body, StandardCharsets.UTF_8);
+                    throw new PdfDancerClientException("Failed to parse response body: " + preview, e);
+                }
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new PdfDancerClientException("HTTP request interrupted", e);
+            } catch (IOException e) {
+                // Check if we should retry on connection error
+                if (attempt < maxAttempts && retryConfig.isRetryOnConnectionError()) {
+                    lastException = new PdfDancerClientException("HTTP request failed", e);
+                    sleep(calculateDelay(attempt));
+                    continue;
+                }
+                throw new PdfDancerClientException("HTTP request failed", e);
+            } catch (RuntimeException e) {
+                // Re-throw runtime exceptions that we already checked for retry
+                if (e == lastException) {
+                    throw e;
+                }
+                // For other runtime exceptions, don't retry
+                throw e;
+            }
+        }
+
+        // If we exhausted all retries, throw the last exception
+        if (lastException != null) {
+            throw lastException;
+        }
+
+        throw new PdfDancerClientException("HTTP request failed after " + maxAttempts + " attempts");
+    }
+
+    private Duration calculateDelay(int attempt) {
+        long delayMillis = (long) (retryConfig.getInitialDelay().toMillis() *
+                                   Math.pow(retryConfig.getBackoffMultiplier(), attempt - 1));
+        Duration delay = Duration.ofMillis(delayMillis);
+
+        // Cap at max delay
+        if (delay.compareTo(retryConfig.getMaxDelay()) > 0) {
+            delay = retryConfig.getMaxDelay();
+        }
+
+        return delay;
+    }
+
+    private void sleep(Duration duration) {
         try {
-            response = delegate.send(httpRequest, BodyHandlers.ofByteArray());
+            Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new PdfDancerClientException("HTTP request interrupted", e);
-        } catch (IOException e) {
-            throw new PdfDancerClientException("HTTP request failed", e);
-        }
-
-        int status = response.statusCode();
-        if (status < 200 || status >= 300) {
-            throw translateError(response);
-        }
-
-        byte[] body = response.body();
-        if (responseType != null) {
-            return decode(body, responseType);
-        }
-
-        JavaType javaType = toJavaType(argument);
-        try {
-            if (body == null || body.length == 0) {
-                return null;
-            }
-            @SuppressWarnings("unchecked")
-            T value = (T) readValueFixingTypes(body, javaType);
-            return value;
-        } catch (IOException e) {
-            String preview = new String(body, StandardCharsets.UTF_8);
-            throw new PdfDancerClientException("Failed to parse response body: " + preview, e);
+            throw new PdfDancerClientException("Retry sleep interrupted", e);
         }
     }
 
