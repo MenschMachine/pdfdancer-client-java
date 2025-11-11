@@ -29,6 +29,12 @@ import static java.net.http.HttpResponse.BodyHandlers;
 /**
  * Minimal HTTP client abstraction backed by {@link java.net.http.HttpClient} that mimics
  * the subset of Micronaut's client API used by the original PDFDancer client.
+ * <p>
+ * By default, clients created without an explicit {@link RetryConfig} will use
+ * {@link RetryConfig#defaultConfig()}, which includes retry logic for transient errors
+ * (429, 503, etc.) with exponential backoff. To disable retries, explicitly pass
+ * {@link RetryConfig#noRetry()} when creating the client.
+ * </p>
  */
 public final class PdfDancerHttpClient {
 
@@ -43,7 +49,7 @@ public final class PdfDancerHttpClient {
         this.delegate = delegate;
         this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
-        this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.noRetry();
+        this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.defaultConfig();
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl) {
