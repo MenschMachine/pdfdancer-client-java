@@ -29,6 +29,12 @@ import static java.net.http.HttpResponse.BodyHandlers;
 /**
  * Minimal HTTP client abstraction backed by {@link java.net.http.HttpClient} that mimics
  * the subset of Micronaut's client API used by the original PDFDancer client.
+ * <p>
+ * By default, clients created without an explicit {@link RetryConfig} will use
+ * {@link RetryConfig#defaultConfig()}, which includes retry logic for transient errors
+ * (429, 503, etc.) with exponential backoff. To disable retries, explicitly pass
+ * {@link RetryConfig#noRetry()} when creating the client.
+ * </p>
  */
 public final class PdfDancerHttpClient {
 
@@ -43,7 +49,7 @@ public final class PdfDancerHttpClient {
         this.delegate = delegate;
         this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
-        this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.noRetry();
+        this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.defaultConfig();
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl) {
@@ -104,7 +110,7 @@ public final class PdfDancerHttpClient {
                         error instanceof PdfDancerClientException &&
                         retryConfig.isRetryableStatusCode(status)) {
                         lastException = error;
-                        sleep(calculateDelay(attempt));
+                        sleep(calculateDelay(attempt, status, response));
                         continue;
                     }
 
@@ -137,7 +143,7 @@ public final class PdfDancerHttpClient {
                 // Check if we should retry on connection error
                 if (attempt < maxAttempts && retryConfig.isRetryOnConnectionError()) {
                     lastException = new PdfDancerClientException("HTTP request failed", e);
-                    sleep(calculateDelay(attempt));
+                    sleep(calculateDelay(attempt, 0, null));
                     continue;
                 }
                 throw new PdfDancerClientException("HTTP request failed", e);
@@ -159,7 +165,23 @@ public final class PdfDancerHttpClient {
         throw new PdfDancerClientException("HTTP request failed after " + maxAttempts + " attempts");
     }
 
-    private Duration calculateDelay(int attempt) {
+    private Duration calculateDelay(int attempt, int statusCode, HttpResponse<byte[]> response) {
+        // For 429 responses, check for Retry-After header
+        if (statusCode == 429 && response != null) {
+            Optional<String> retryAfter = response.headers().firstValue("Retry-After");
+            if (retryAfter.isPresent()) {
+                Duration retryDelay = parseRetryAfter(retryAfter.get());
+                if (retryDelay != null) {
+                    // Cap at max delay
+                    if (retryDelay.compareTo(retryConfig.getMaxDelay()) > 0) {
+                        return retryConfig.getMaxDelay();
+                    }
+                    return retryDelay;
+                }
+            }
+        }
+
+        // Use exponential backoff for other errors or if Retry-After is missing/invalid
         long delayMillis = (long) (retryConfig.getInitialDelay().toMillis() *
                                    Math.pow(retryConfig.getBackoffMultiplier(), attempt - 1));
         Duration delay = Duration.ofMillis(delayMillis);
@@ -170,6 +192,48 @@ public final class PdfDancerHttpClient {
         }
 
         return delay;
+    }
+
+    /**
+     * Parses the Retry-After header value.
+     * Supports both delay-seconds (integer) and HTTP-date formats.
+     *
+     * @param retryAfterValue the Retry-After header value
+     * @return the parsed delay Duration, or null if parsing fails
+     */
+    private Duration parseRetryAfter(String retryAfterValue) {
+        if (retryAfterValue == null || retryAfterValue.trim().isEmpty()) {
+            return null;
+        }
+
+        String value = retryAfterValue.trim();
+
+        // Try to parse as delay-seconds (integer)
+        try {
+            long seconds = Long.parseLong(value);
+            if (seconds >= 0) {
+                return Duration.ofSeconds(seconds);
+            }
+        } catch (NumberFormatException e) {
+            // Not a number, might be an HTTP-date - fall through
+        }
+
+        // Try to parse as HTTP-date
+        try {
+            java.time.ZonedDateTime futureTime = java.time.ZonedDateTime.parse(
+                value,
+                java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+            );
+            java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("GMT"));
+            long secondsUntil = java.time.Duration.between(now, futureTime).getSeconds();
+            if (secondsUntil >= 0) {
+                return Duration.ofSeconds(secondsUntil);
+            }
+        } catch (Exception e) {
+            // Failed to parse as HTTP-date
+        }
+
+        return null;
     }
 
     private void sleep(Duration duration) {

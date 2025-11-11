@@ -58,7 +58,7 @@ public final class RetryConfig {
      * Default settings:
      * <ul>
      *   <li>Max attempts: 3 (2 retries)</li>
-     *   <li>Initial delay: 100ms</li>
+     *   <li>Initial delay: 1 second</li>
      *   <li>Backoff multiplier: 2.0 (exponential backoff)</li>
      *   <li>Max delay: 5 seconds</li>
      *   <li>Retryable status codes: 408, 429, 500, 502, 503, 504</li>
@@ -72,7 +72,7 @@ public final class RetryConfig {
     public static RetryConfig defaultConfig() {
         return builder()
                 .maxAttempts(3)
-                .initialDelay(Duration.ofMillis(100))
+                .initialDelay(Duration.ofSeconds(1))
                 .backoffMultiplier(2.0)
                 .maxDelay(Duration.ofSeconds(5))
                 .retryOnStatus(408, 429, 500, 502, 503, 504)
