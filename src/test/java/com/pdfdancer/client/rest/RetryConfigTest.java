@@ -27,7 +27,7 @@ class RetryConfigTest {
         RetryConfig config = RetryConfig.defaultConfig();
 
         assertEquals(3, config.getMaxAttempts());
-        assertEquals(Duration.ofMillis(100), config.getInitialDelay());
+        assertEquals(Duration.ofSeconds(1), config.getInitialDelay());
         assertEquals(2.0, config.getBackoffMultiplier());
         assertEquals(Duration.ofSeconds(5), config.getMaxDelay());
         assertTrue(config.isRetryOnTimeout());
