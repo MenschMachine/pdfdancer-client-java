@@ -109,7 +109,7 @@ public class AcroformTest extends BaseTest {
         assertEquals(1, fields.size());
 
         FormFieldReference field = fields.get(0);
-        assertEquals("firstName", field.name());
+        assertEquals("firstName", field.getName());
         assertNull(field.value());
         assertEquals(ObjectType.TEXT_FIELD, field.type());
         assertEquals("FORM_FIELD_000001", field.getInternalId());
@@ -118,7 +118,7 @@ public class AcroformTest extends BaseTest {
 
         List<FormFieldReference> updated = pdf.selectFormFieldsByName("firstName");
         FormFieldReference updatedField = updated.get(0);
-        assertEquals("firstName", updatedField.name());
+        assertEquals("firstName", updatedField.getName());
         assertEquals("Donald Duck", updatedField.value());
     }
 }
