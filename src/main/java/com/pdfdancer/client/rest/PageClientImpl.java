@@ -266,6 +266,7 @@ class PageClientImpl {
         if (pageRef == null) {
             return false;
         }
-        return Boolean.TRUE.equals(root.deletePage(pageRef));
+        Boolean result = root.deletePage(pageRef);
+        return result != null && result;
     }
 }
