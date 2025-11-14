@@ -12,7 +12,7 @@ public class FormFieldReference extends BaseReference {
         return new FormFieldEdit(client, objectRef);
     }
 
-    public String name() {
+    public String getName() {
         return ref().getName();
     }
 
