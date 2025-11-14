@@ -1,12 +1,12 @@
 # PDFDancer Java SDK API Gaps Report
 
 **Report Date**: 2025-01-14
-**Java SDK Version**: 0.1.2
+**Java SDK Version**: 0.1.3
 **Documentation Version**: 3.1 (based on Python 0.2.22 / TypeScript 1.0.17)
 
 ## Executive Summary
 
-The PDFDancer Java SDK (v0.1.2) is missing several API methods that are documented and available in the Python (v0.2.22) and TypeScript (v1.0.17) SDKs. This report documents all missing functionality that prevents the Java examples from compiling.
+The PDFDancer Java SDK (v0.1.3) is missing several API methods that are documented and available in the Python (v0.2.22) and TypeScript (v1.0.17) SDKs. This report documents all missing functionality that prevents the Java examples from compiling.
 
 ---
 
@@ -179,7 +179,7 @@ double y = position.getY();
 
 ## Comparison with Other SDKs
 
-| Feature | Python 0.2.22 | TypeScript 1.0.17 | Java 0.1.2 | Status |
+| Feature | Python 0.2.22 | TypeScript 1.0.17 | Java 0.1.3 | Status |
 |---------|---------------|-------------------|------------|--------|
 | `pages()` | ✅ | ✅ | ❌ | Missing |
 | `newPage()` | ✅ | ✅ | ❌ | Missing |
@@ -261,7 +261,7 @@ The following example files cannot compile due to missing API methods:
    - `newParagraph()` builder
 
 4. **Documentation Alignment**:
-   - Update Java documentation to reflect actual SDK 0.1.2 API
+   - Update Java documentation to reflect actual SDK 0.1.3 API
    - OR release SDK 0.2.x with documented features
    - Add migration guide from legacy methods (`getPages()`) to new methods (`pages()`)
 
@@ -282,7 +282,7 @@ The following example files cannot compile due to missing API methods:
 
 | Documentation | Python SDK | TypeScript SDK | Java SDK | Compatible? |
 |--------------|------------|----------------|----------|-------------|
-| 3.1 (Nov 2025) | 0.2.22 ✅ | 1.0.17 ✅ | 0.1.2 ❌ | **No** |
+| 3.1 (Nov 2025) | 0.2.22 ✅ | 1.0.17 ✅ | 0.1.3 ❌ | **No** |
 
 The Java SDK is approximately **2-3 minor versions behind** the Python and TypeScript SDKs in terms of API completeness.
 
@@ -290,6 +290,6 @@ The Java SDK is approximately **2-3 minor versions behind** the Python and TypeS
 
 ## Conclusion
 
-The Java SDK (v0.1.2) requires significant updates to match the documented API and achieve feature parity with Python and TypeScript SDKs. Most critically, the `pages()` method and form field convenience methods are needed for basic example compilation.
+The Java SDK (v0.1.3) requires significant updates to match the documented API and achieve feature parity with Python and TypeScript SDKs. Most critically, the `pages()` method and form field convenience methods are needed for basic example compilation.
 
 **Estimated Gap**: Java SDK is missing approximately **10 documented API methods** that prevent 100% of example files from compiling correctly.
