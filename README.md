@@ -34,7 +34,7 @@ languages when you need it.
 
 ## Installation
 
-Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.1.1`).
+Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.1.2`).
 
 ### Maven
 
@@ -42,14 +42,14 @@ Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The 
 <dependency>
   <groupId>com.pdfdancer.client</groupId>
   <artifactId>pdfdancer-client-java</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("com.pdfdancer.client:pdfdancer-client-java:0.1.1")
+implementation("com.pdfdancer.client:pdfdancer-client-java:0.1.2")
 ```
 
 ### Requirements
