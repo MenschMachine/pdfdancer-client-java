@@ -1,11 +1,15 @@
+<p align="center">
+  <img src="src/main/resources/logo-orange-60h.webp" alt="PDFDancer logo" height="60">
+</p>
+
 # PDFDancer Java Client
 
-**Getting Started with PDFDancer**
+> Edit text in any real-world PDF. Even ones you didn't create.
 
-PDFDancer gives you pixel-perfect programmatic control over any PDF document from Java. Locate existing elements by
-coordinates or text, adjust them precisely, add brand-new content, and ship the modified PDF in memory or on disk. The
-same API surface is also available for TypeScript and Python so your teams can orchestrate identical PDF workflows across
-stacks.
+PDFDancer gives you pixel-perfect programmatic control over real-world PDF documents from Java. Locate existing elements
+by coordinates or text, adjust them precisely, add brand-new content, and ship the modified PDF in memory or on disk.
+The same API surface is also available for TypeScript and Python so you can work with the same editing model from other
+languages when you need it.
 
 > Need the raw API schema? The latest OpenAPI description lives in `docs/openapi.yml` (when included) and is published at
 > https://bucket.pdfdancer.com/api-doc/development-0.0.yml.
@@ -21,7 +25,7 @@ stacks.
 
 ## What Makes PDFDancer Different
 
-- **Edit any PDF**: Work with documents from customers, governments, or vendors—not just ones you generated.
+- **Edit text in real-world PDFs**: Work with documents from customers, governments, or vendors—not just ones you generated.
 - **Pixel-perfect positioning**: Move or add elements at exact coordinates and keep the original layout intact.
 - **Surgical text replacement**: Swap, rewrite, or restyle paragraphs without losing the rest of the page.
 - **Form manipulation**: Inspect, fill, and update AcroForm fields programmatically.
