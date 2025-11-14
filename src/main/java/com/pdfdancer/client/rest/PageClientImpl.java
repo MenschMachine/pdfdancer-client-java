@@ -253,4 +253,20 @@ class PageClientImpl {
     public PathBuilder newPath() { return new PathBuilder(root, pageIndex); }
 
     public LineBuilder newLine() { return new LineBuilder(root, pageIndex); }
+
+    /**
+     * Deletes the current page from the PDF document.
+     * This method removes the page at the current pageIndex from the document permanently,
+     * updating the page numbering for subsequent pages.
+     *
+     * @return true if the page was successfully deleted, false otherwise
+     */
+    public boolean delete() {
+        ObjectRef pageRef = root.getPage(pageIndex);
+        if (pageRef == null) {
+            return false;
+        }
+        Boolean result = root.deletePage(pageRef);
+        return result != null && result;
+    }
 }
