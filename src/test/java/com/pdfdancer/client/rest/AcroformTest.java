@@ -121,4 +121,16 @@ public class AcroformTest extends BaseTest {
         assertEquals("firstName", updatedField.getName());
         assertEquals("Donald Duck", updatedField.value());
     }
+
+    @Test
+    public void checkFormField() {
+
+        PDFDancer pdf = createClient();
+        List<FormFieldReference> fields = pdf.selectFormFields();
+        for (FormFieldReference field : fields) {
+            if (field.isCheckBox()) {
+                field.setValue("Off");
+            }
+        }
+    }
 }
