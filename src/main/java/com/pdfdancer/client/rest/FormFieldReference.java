@@ -2,6 +2,7 @@ package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.FormFieldRef;
 import com.pdfdancer.common.model.ObjectRef;
+import com.pdfdancer.common.model.ObjectType;
 
 public class FormFieldReference extends BaseReference {
     public FormFieldReference(PDFDancer client, FormFieldRef objectRef) {
@@ -34,8 +35,28 @@ public class FormFieldReference extends BaseReference {
         return value();
     }
 
-    public boolean setValue(String donaldDuck) {
-        return client.changeFormField(ref(), "Donald Duck");
+    public boolean setValue(String value) {
+        return client.changeFormField(ref(), value);
+    }
+
+    public boolean isCheckBox() {
+        return ObjectType.CHECKBOX.equals(objectRef.getType());
+    }
+
+    public boolean isRadioButton() {
+        return ObjectType.RADIO_BUTTON.equals(objectRef.getType());
+    }
+
+    public boolean isTextField() {
+        return ObjectType.TEXT_FIELD.equals(objectRef.getType());
+    }
+
+    public boolean isButton() {
+        return ObjectType.BUTTON.equals(objectRef.getType());
+    }
+
+    public boolean isDropdown() {
+        return ObjectType.DROPDOWN.equals(objectRef.getType());
     }
 
     public static class FormFieldEdit {
