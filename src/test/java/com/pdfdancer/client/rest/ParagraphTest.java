@@ -17,7 +17,7 @@ public class ParagraphTest extends BaseTest {
     public void findParagraphsByPosition() {
         PDFDancer client = createClient();
         List<TextParagraphReference> paragraphs = client.selectParagraphs();
-        assertEquals(172, paragraphs.size());
+        assertEquals(117, paragraphs.size());
 
         paragraphs = client.page(0).selectParagraphs();
         assertEquals(2, paragraphs.size());

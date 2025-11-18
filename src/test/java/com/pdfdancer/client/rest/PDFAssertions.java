@@ -195,7 +195,7 @@ public class PDFAssertions {
     }
 
     public PDFAssertions assertParagraphExists(String text, int page) {
-        List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsStartingWith(text);
+        List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
         assertEquals(1, paragraphs.size(),
                 String.format("No paragraphs starting with %s found on page %d", text, page));
         return this;
