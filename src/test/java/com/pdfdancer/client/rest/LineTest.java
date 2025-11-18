@@ -130,7 +130,7 @@ public class LineTest extends BaseTest {
         PDFDancer client = createClient();
         TextLineReference ref = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
 
-        assertTrue(ref.edit().replace(" replaced "));
+        assertTrue(ref.edit().replace(" replaced ").apply());
 
         client.save("/tmp/modifyLine.client");
 
@@ -143,11 +143,11 @@ public class LineTest extends BaseTest {
     }
 
     @Test
-    public void modifyLineWithFont() {
+    public void modifyLineSimple() {
         PDFDancer client = createClient();
         TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
 
-        assertTrue(line.edit().replace("modified"));
+        assertTrue(line.edit().replace("modified").apply());
 
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 0)
@@ -172,10 +172,141 @@ public class LineTest extends BaseTest {
         for (int i = 0; i < 10; i++) {
             TextLineReference line = client.page(0).selectTextLinesStartingWith(lineText).get(0);
             lineText = i + " The Complete C";
-            assertTrue(line.edit().replace(lineText));
+            assertTrue(line.edit().replace(lineText).apply());
         }
 
         new PDFAssertions(client).assertTextlineExists("9 The Complete C", 0);
+    }
+
+    @Test
+    public void modifyLineWithFluentBuilder() {
+        PDFDancer client = createClient();
+        List<TextLineReference> matches = client.page(0).selectTextLinesMatching(".*Complete.*");
+        assertEquals(1, matches.size());
+
+        assertTrue(
+                matches.get(0).edit()
+                        .replace("This line was replaced!\nUpdated with PDFDancer")
+                        .font("Helvetica", 12.0)
+                        .apply()
+        );
+
+        client.save("/tmp/modifyLineWithFluentBuilder.client");
+
+        // Verify the text was changed
+        assertTrue(client.page(0).selectTextLinesMatching(".*Complete.*").isEmpty());
+        assertFalse(client.page(0).selectTextLinesStartingWith("This line was replaced!").isEmpty());
+    }
+
+    @Test
+    public void modifyLineWithFont() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .replace("Modified Line")
+                        .font("Helvetica", 16.0)
+                        .apply()
+        );
+
+        client.save("/tmp/modifyLineWithFont.client");
+
+        new PDFAssertions(client)
+                .assertTextlineExists("Modified Line", 0)
+                .assertTextlineHasFont("Modified Line", "Helvetica", 16.0, 0);
+    }
+
+    @Test
+    public void modifyLineWithColor() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .color(new Color(255, 0, 0))
+                        .apply()
+        );
+
+        client.save("/tmp/modifyLineWithColor.client");
+
+        TextLineReference modifiedLine = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+        Color color = modifiedLine.getColor();
+        assertNotNull(color);
+        assertEquals(255, color.getRed());
+        assertEquals(0, color.getGreen());
+        assertEquals(0, color.getBlue());
+    }
+
+    @Test
+    public void modifyLineWithPosition() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .moveTo(100, 400)
+                        .apply()
+        );
+
+        client.save("/tmp/modifyLineWithPosition.client");
+
+        List<TextLineReference> movedLines = client.page(0).selectTextLinesAt(100, 400, 5);
+        assertFalse(movedLines.isEmpty());
+        assertEquals("The Complete", movedLines.get(0).getText().substring(0, 12));
+    }
+
+    @Test
+    public void modifyLineWithAllProperties() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .replace("Fully Modified Line")
+                        .font("Courier", 14.0)
+                        .color(new Color(0, 0, 255))
+                        .moveTo(150, 450)
+                        .apply()
+        );
+
+        client.save("/tmp/modifyLineWithAllProperties.client");
+
+        // Verify all changes
+        List<TextLineReference> modifiedLines = client.page(0).selectTextLinesAt(150, 450, 5);
+        assertFalse(modifiedLines.isEmpty());
+        TextLineReference modifiedLine = modifiedLines.get(0);
+
+        assertEquals("Fully Modified Line", modifiedLine.getText());
+        assertEquals("Courier", modifiedLine.getFontName());
+        assertEquals(14.0, modifiedLine.getFontSize(), 0.1);
+
+        Color color = modifiedLine.getColor();
+        assertNotNull(color);
+        assertEquals(0, color.getRed());
+        assertEquals(0, color.getGreen());
+        assertEquals(255, color.getBlue());
+    }
+
+    @Test
+    public void modifyLineTextOnly() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
+
+        String originalFont = line.getFontName();
+        Double originalSize = line.getFontSize();
+
+        assertTrue(
+                line.edit()
+                        .replace("Only Text Changed")
+                        .apply()
+        );
+
+        TextLineReference modifiedLine = client.page(0).selectTextLinesStartingWith("Only Text Changed").get(0);
+        assertEquals("Only Text Changed", modifiedLine.getText());
+        // Font should remain unchanged when only text is modified
+        assertEquals(originalFont, modifiedLine.getFontName());
+        assertEquals(originalSize, modifiedLine.getFontSize(), 0.1);
     }
 
 }
