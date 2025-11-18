@@ -148,6 +148,32 @@ public class PageApi {
         return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
     }
 
+    /**
+     * Selects all text lines on this page that match the given regex pattern.
+     * @param pattern Regular expression pattern to match against text line content
+     * @return List of text lines whose content matches the pattern
+     */
+    public List<TextLineReference> selectTextLinesMatching(String pattern) {
+        Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
+        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
+        return root.toTextLineObject(
+                typed.stream()
+                        .filter(ref -> ref.getText() != null && compiled.matcher(ref.getText()).matches())
+                        .collect(Collectors.toUnmodifiableList())
+        );
+    }
+
+    /**
+     * Selects a single text line on this page that matches the given regex pattern.
+     * @param pattern Regular expression pattern to match against text line content
+     * @return Optional containing the first text line whose content matches the pattern, or empty if none found
+     */
+    public Optional<TextLineReference> selectTextLineMatching(String pattern) {
+        List<TextLineReference> textLines = selectTextLinesMatching(pattern);
+        return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
+    }
+
     public List<ImageReference> selectImages() {
         PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
         List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));

@@ -46,6 +46,39 @@ public class LineTest extends BaseTest {
     }
 
     @Test
+    public void findTextLinesByMatching() {
+        PDFDancer pdf = createClient();
+
+        // Test matching all text lines with wildcard pattern
+        List<TextLineReference> lines = pdf.page(0).selectTextLinesMatching(".*");
+        assertEquals(4, lines.size());
+
+        // Test matching text lines with specific pattern
+        lines = pdf.page(0).selectTextLinesMatching(".*Complete.*");
+        assertEquals(1, lines.size());
+        TextLineReference line = lines.get(0);
+        assertEquals("TEXTLINE_000002", line.getInternalId());
+
+        // Test matching with case-sensitive regex
+        lines = pdf.page(0).selectTextLinesMatching("The Complete.*");
+        assertEquals(1, lines.size());
+    }
+
+    @Test
+    public void findSingularTextLineByMatching() {
+        PDFDancer pdf = createClient();
+
+        // Test finding a single text line by pattern
+        Optional<TextLineReference> line = pdf.page(0).selectTextLineMatching(".*Complete.*");
+        assertTrue(line.isPresent(), "Should find text line matching pattern");
+        assertEquals("TEXTLINE_000002", line.get().getInternalId());
+
+        // Test pattern with no matches
+        Optional<TextLineReference> emptyResult = pdf.page(0).selectTextLineMatching(".*NonExistentText.*");
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no text line matches");
+    }
+
+    @Test
     public void findSingularTextLineByPosition() {
         PDFDancer pdf = createClient();
 
