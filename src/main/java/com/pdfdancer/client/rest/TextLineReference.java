@@ -1,7 +1,9 @@
 package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
+import com.pdfdancer.common.model.Font;
 import com.pdfdancer.common.model.ObjectRef;
+import com.pdfdancer.common.model.Position;
 import com.pdfdancer.common.model.TextTypeObjectRef;
 
 public class TextLineReference extends BaseReference {
