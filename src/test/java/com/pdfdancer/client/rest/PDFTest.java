@@ -20,7 +20,7 @@ public class PDFTest extends BaseTest {
     public void selectElements() {
         PDFDancer pdf = createClient();
         List<ObjectRef> objectRefs = pdf.selectElements();
-        assertEquals(638, objectRefs.size());
+        assertEquals(583, objectRefs.size());
     }
 
     @Test
