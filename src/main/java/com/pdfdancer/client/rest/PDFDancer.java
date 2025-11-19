@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +138,17 @@ public class PDFDancer {
 
     @SuppressWarnings("unused")
     public static PDFDancer createSession(String token, byte[] bytesPDF, HttpClient httpClient) {
-        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createSession(token, bytesPDF, PdfDancerHttpClient.create(httpClient, getBaseUrl()));
+    }
+
+    private static URI getBaseUrl() {
+        String baseUrlValue = System.getProperty("pdfdancer.baseUrl",
+                System.getenv().getOrDefault("PDFDANCER_BASE_URL", String.valueOf(DEFAULT_BASE_URI)));
+        try {
+            return new URI(baseUrlValue);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -175,7 +186,7 @@ public class PDFDancer {
 
     @SuppressWarnings("unused")
     static PDFDancer createAnonSession(byte[] testPdf, HttpClient httpClient) {
-        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createAnonSession(testPdf, PdfDancerHttpClient.create(httpClient, getBaseUrl()));
     }
 
     @SuppressWarnings("unused")
@@ -245,7 +256,7 @@ public class PDFDancer {
     public static PDFDancer createNew(String token, PageSize pageSize,
                                       Orientation orientation,
                                       int initialPageCount, HttpClient httpClient) {
-        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, DEFAULT_BASE_URI));
+        return createNew(token, pageSize, orientation, initialPageCount, PdfDancerHttpClient.create(httpClient, getBaseUrl()));
     }
 
     @SuppressWarnings("unused")
@@ -264,7 +275,7 @@ public class PDFDancer {
      * @throws RuntimeException if URL creation fails
      */
     private static PdfDancerHttpClient getDefaultClient() {
-        return PdfDancerHttpClient.createDefault(DEFAULT_BASE_URI);
+        return PdfDancerHttpClient.createDefault(getBaseUrl());
     }
 
     private static String envTokenOrNull() {
