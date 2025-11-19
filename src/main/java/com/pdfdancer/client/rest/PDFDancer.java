@@ -613,6 +613,12 @@ public class PDFDancer {
         return success;
     }
 
+    protected boolean modifyTextLine(ObjectRef ref, com.pdfdancer.common.model.text.TextLine newTextLine) {
+        boolean success = modification.modifyTextLine(ref, newTextLine);
+        invalidateSnapshotCaches();
+        return success;
+    }
+
     protected boolean modifyParagraph(ObjectRef ref, String newText) {
         boolean success = modification.modifyParagraph(ref, newText);
         invalidateSnapshotCaches();

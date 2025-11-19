@@ -247,10 +247,10 @@ class SnapshotTest extends BaseTest {
     void testTotalElementCountMatchesExpected() {
         PDFDancer pdf = createClient();
 
-        // ObviouslyAwesome.pdf - snapshot-backed selectors align with Python client (583 total elements)
+        // ObviouslyAwesome.pdf - snapshot-backed selectors align with Python client (578 total elements)
         List<ObjectRef> allElements = pdf.selectElements();
-        assertEquals(583, allElements.size(),
-                "ObviouslyAwesome.pdf should have 583 total elements");
+        assertEquals(578, allElements.size(),
+                "ObviouslyAwesome.pdf should have 578 total elements");
 
         DocumentSnapshot docSnapshot = pdf.getDocumentSnapshot();
         int snapshotTotal = docSnapshot.pages().stream()

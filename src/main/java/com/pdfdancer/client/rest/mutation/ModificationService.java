@@ -99,6 +99,18 @@ public final class ModificationService {
         return result.success();
     }
 
+    public boolean modifyTextLine(ObjectRef ref, com.pdfdancer.common.model.text.TextLine newTextLine) {
+        String path = "/pdf/modify";
+        CommandResult result = blocking.retrieve(
+                HttpRequest.PUT(path, new ModifyRequest(ref, newTextLine))
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                CommandResult.class
+        );
+        return result.success();
+    }
+
     public boolean modifyParagraph(ObjectRef ref, String newText) {
         String path = "/pdf/text/paragraph";
         CommandResult result = blocking.retrieve(

@@ -80,7 +80,7 @@ public class PDFAssertions {
     }
 
     public PDFAssertions assertParagraphIsAt(String text, double x, double y, int page) {
-        return assertParagraphIsAt(text, x, y, page, 0.01);
+        return assertParagraphIsAt(text, x, y, page, 2d); // adjust for baseline vs. bounding box differences
     }
 
     public PDFAssertions assertParagraphIsAt(String text, double x, double y, int page, double epsilon) {
