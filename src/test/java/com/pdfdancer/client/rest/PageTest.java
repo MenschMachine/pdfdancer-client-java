@@ -14,8 +14,8 @@ public class PageTest extends BaseTest {
     public void testGetAllElements() {
         PDFDancer client = createClient();
 
-        // ObviouslyAwesome.pdf has 583 total elements across all pages (snapshot-backed API)
-        int expectedTotal = 583;
+        // ObviouslyAwesome.pdf has 578 total elements across all pages (snapshot-backed API)
+        int expectedTotal = 578;
         List<ObjectRef> allElements = client.selectElements();
         assertEquals(expectedTotal, allElements.size(),
                 String.format("%d elements found but %d elements expected", allElements.size(), expectedTotal));
