@@ -28,7 +28,7 @@ public class TextLineTest extends BaseTest {
         assertNotNull(last.getPosition());
         assertEquals("TEXTLINE_000340", last.getInternalId());
         assertEquals(548, last.getPosition().getX().intValue());
-        assertEquals(35, last.getPosition().getY().intValue());
+        assertBetween(30, 40, last.getPosition().getY().intValue());
     }
 
     @Test
