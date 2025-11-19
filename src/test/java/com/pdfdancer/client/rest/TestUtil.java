@@ -1,12 +1,18 @@
 package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
-import com.pdfdancer.client.rest.PDFDancer;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Utility methods for test classes.
  */
 public class TestUtil {
+
+    public static void assertBetween(int lower, int upper, int value) {
+        assertTrue(value >= lower && value <= upper,
+                String.format("Expected value between %d and %d but got %d", lower, upper, value));
+    }
 
     /**
      * Draws a coordinate grid on the specified page of a PDF document.
