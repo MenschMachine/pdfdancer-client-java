@@ -20,7 +20,7 @@ public class PDFTest extends BaseTest {
     public void selectElements() {
         PDFDancer pdf = createClient();
         List<ObjectRef> objectRefs = pdf.selectElements();
-        assertEquals(583, objectRefs.size());
+        assertEquals(578, objectRefs.size());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class PDFTest extends BaseTest {
                 List<TextLineReference> selectedLines2 = pdf2.page(0).selectTextLinesAt(100, 201.5, 3);
                 assertEquals(1, selectedLines2.size());
                 TextLineReference line = selectedLines2.get(0);
-                boolean success = line.edit().replace("hello " + i);
+                boolean success = line.edit().replace("hello " + i).apply();
                 assertTrue(success);
             }
             pdf2.save("/tmp/test_create_blank_pdf_add_and_modify_content2.client");

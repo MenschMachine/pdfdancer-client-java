@@ -5,6 +5,7 @@ import com.pdfdancer.common.model.Font;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Position;
 import com.pdfdancer.common.model.TextTypeObjectRef;
+import com.pdfdancer.common.model.text.TextLine;
 
 public class TextLineReference extends BaseReference {
     public TextLineReference(PDFDancer client, TextTypeObjectRef objectRef) {
@@ -124,7 +125,7 @@ public class TextLineReference extends BaseReference {
         /**
          * Applies all the modifications to the text line.
          * If only text is changed, uses the simple text line modification.
-         * If font, position, or color are changed, converts to a single-line paragraph for rich modification.
+         * If font, position, or color are changed, creates a TextLine object for rich modification.
          * @return true if the modification was successful
          */
         public boolean apply() {
@@ -135,39 +136,15 @@ public class TextLineReference extends BaseReference {
             }
 
             // Complex case: need to modify font, position, or color
-            // Convert to a single-line paragraph
-            ParagraphBuilder builder = new ParagraphBuilder(client);
+            // Build a TextLine object with all properties
+            String textToUse = newText != null ? newText : ref.getText();
+            Font fontToUse = newFont != null ? newFont : new Font(ref.getFontName(), ref.getFontSize());
+            Position positionToUse = newPosition != null ? newPosition : ref.getPosition();
+            Color colorToUse = newColor != null ? newColor : ref.getColor();
 
-            // Text
-            if (newText != null) {
-                builder.text(newText);
-            } else if (ref.getText() != null) {
-                builder.text(ref.getText());
-            }
+            TextLine textLine = TextLine.fromText(textToUse, positionToUse, colorToUse, fontToUse, ref.getStatus());
 
-            // Font
-            if (newFont != null) {
-                builder.font(newFont);
-            } else if (ref.getFontName() != null && ref.getFontSize() != null) {
-                builder.font(ref.getFontName(), ref.getFontSize());
-            }
-
-            // Position
-            if (newPosition != null) {
-                builder.at(newPosition);
-            } else if (ref.getPosition() != null) {
-                builder.at(ref.getPosition());
-            }
-
-            // Color
-            if (newColor != null) {
-                builder.color(newColor);
-            } else if (ref.getColor() != null) {
-                builder.color(ref.getColor());
-            }
-
-            // Modify as a paragraph (which is just a single line)
-            return client.modifyParagraph(ref, builder.finalizeParagraph());
+            return client.modifyTextLine(ref, textLine);
         }
 
     }

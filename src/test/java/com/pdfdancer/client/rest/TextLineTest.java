@@ -1,5 +1,6 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.Color;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LineTest extends BaseTest {
+public class TextLineTest extends BaseTest {
 
     @Test
     public void findLinesByPosition() {
@@ -105,7 +106,7 @@ public class LineTest extends BaseTest {
         assertTrue(ref.delete());
         assertTrue(client.page(0)
                 .selectTextLinesStartingWith("the complete").isEmpty());
-        client.save("/tmp/deleteLine.client");
+        client.save("/tmp/deleteLine.pdf");
     }
 
     @Test
@@ -122,7 +123,7 @@ public class LineTest extends BaseTest {
 
         ref = client.page(0).selectTextLinesAt(originalX + 100, originalY).get(0);
         assertNotNull(ref);
-        client.save("/tmp/moveLine.client");
+        client.save("/tmp/moveLine.pdf");
     }
 
     @Test
@@ -132,7 +133,7 @@ public class LineTest extends BaseTest {
 
         assertTrue(ref.edit().replace(" replaced ").apply());
 
-        client.save("/tmp/modifyLine.client");
+        client.save("/tmp/modifyLine.pdf");
 
         assertTrue(client.page(0).selectTextLinesStartingWith("The Complete").isEmpty());
 
@@ -186,12 +187,12 @@ public class LineTest extends BaseTest {
 
         assertTrue(
                 matches.get(0).edit()
-                        .replace("This line was replaced!\nUpdated with PDFDancer")
+                        .replace("This line was replaced!")
                         .font("Helvetica", 12.0)
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithFluentBuilder.client");
+        client.save("/tmp/modifyLineWithFluentBuilder.pdf");
 
         // Verify the text was changed
         assertTrue(client.page(0).selectTextLinesMatching(".*Complete.*").isEmpty());
@@ -210,7 +211,7 @@ public class LineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithFont.client");
+        client.save("/tmp/modifyLineWithFont.pdf");
 
         new PDFAssertions(client)
                 .assertTextlineExists("Modified Line", 0)
@@ -228,7 +229,7 @@ public class LineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithColor.client");
+        client.save("/tmp/modifyLineWithColor.pdf");
 
         TextLineReference modifiedLine = client.page(0).selectTextLinesStartingWith("The Complete").get(0);
         Color color = modifiedLine.getColor();
@@ -249,7 +250,7 @@ public class LineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithPosition.client");
+        client.save("/tmp/modifyLineWithPosition.pdf");
 
         List<TextLineReference> movedLines = client.page(0).selectTextLinesAt(100, 400, 5);
         assertFalse(movedLines.isEmpty());
@@ -270,7 +271,7 @@ public class LineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithAllProperties.client");
+        client.save("/tmp/modifyLineWithAllProperties.pdf");
 
         // Verify all changes
         List<TextLineReference> modifiedLines = client.page(0).selectTextLinesAt(150, 450, 5);
