@@ -134,7 +134,7 @@ public class ParagraphTest extends BaseTest {
                 .assertParagraphExists("This is regular Sans text showing alignment and styles", 0)
                 .assertParagraphIsAt("This is regular Sans text showing alignment and styles", 0.1, 300, 0, 3);
 
-        client.save("/tmp/moveMultiFontTextLine.client");
+        client.save("/tmp/moveMultiFontTextLine.pdf");
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ParagraphTest extends BaseTest {
                 .assertParagraphExists("This is regular Sans text showing alignment and styles", 0)
                 .assertParagraphIsAt("This is regular Sans text showing alignment and styles", 0.1, 300, 0, 3);
 
-        client.save("/tmp/moveMultiFontParagraph.client");
+        client.save("/tmp/moveMultiFontParagraph.pdf");
     }
 
 
@@ -168,7 +168,7 @@ public class ParagraphTest extends BaseTest {
         text.edit().color(Color.RED).apply();
 
         // TODO text rotation is lost
-        client.save("/tmp/changeColorMultiFontParagraph.client");
+        client.save("/tmp/changeColorMultiFontParagraph.pdf");
 
         new PDFAssertions(client)
                 .assertParagraphHasColor("This is regular Sans text showing alignment and styles", Color.RED, 0);
@@ -217,7 +217,7 @@ public class ParagraphTest extends BaseTest {
                         .at(0, 300.1, 500)
                         .add()
         );
-        client.save("/tmp/addParagraphWithCustomFont1_1.client");
+        client.save("/tmp/addParagraphWithCustomFont1_1.pdf");
         new PDFAssertions(client)
                 .assertParagraphExists("Awesomely", 0);
     }
@@ -313,7 +313,7 @@ public class ParagraphTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyParagraphWithoutPositionAndSpacing.client");
+        client.save("/tmp/modifyParagraphWithoutPositionAndSpacing.pdf");
         new PDFAssertions(client)
                 .assertTextlineHasFont("Awesomely", "Helvetica", 12, 0)
                 .assertTextlineHasFont("Obvious!", "Helvetica", 12, 0)
@@ -360,7 +360,7 @@ public class ParagraphTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyParagraphOnlyFont.client");
+        client.save("/tmp/modifyParagraphOnlyFont.pdf");
         new PDFAssertions(client)
                 .assertTextlineHasFont("The Complete", "Helvetica", 28, 0);
     }
@@ -376,7 +376,7 @@ public class ParagraphTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyParagraphOnlyMove.client");
+        client.save("/tmp/modifyParagraphOnlyMove.pdf");
         new PDFAssertions(client)
                 .assertParagraphIsAt("The Complete", 40, 12 // adjust for baseline vs bounding box difference
                         , 0, 3);

@@ -19,7 +19,7 @@ public class TestUtilTest extends BaseTest {
         assertFalse(pdf.page(0).selectParagraphsStartingWith("CENTER").isEmpty(), "Missing CENTER marker");
         assertFalse(pdf.page(0).selectParagraphsStartingWith("50").isEmpty(), "Missing numeric labels");
 
-        pdf.save("/tmp/test-util-coordinate-grid.client");
+        pdf.save("/tmp/test-util-coordinate-grid.pdf");
     }
 
     @Test
@@ -31,6 +31,6 @@ public class TestUtilTest extends BaseTest {
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn coordinate grid paths");
         assertFalse(pdf.page(0).selectParagraphsStartingWith("BOTTOM-RIGHT").isEmpty(), "Missing BOTTOM-RIGHT marker");
 
-        pdf.save("/tmp/test-util-coordinate-grid-page0.client");
+        pdf.save("/tmp/test-util-coordinate-grid-page0.pdf");
     }
 }

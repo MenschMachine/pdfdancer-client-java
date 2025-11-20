@@ -171,7 +171,7 @@ public class PageTest extends BaseTest {
         assertEquals(1, paragraphs.size());
 
         assertTrue(client.movePage(0, 11));
-        client.save("/tmp/movePage.client");
+        client.save("/tmp/movePage.pdf");
 
         List<PageRef> newPageList = client.getPages();
         assertEquals(12, newPageList.size());

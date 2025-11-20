@@ -124,7 +124,7 @@ public class CoordinateSystemTest extends BaseTest {
         assertFalse(pdf.page(0).selectParagraphsStartingWith("50").isEmpty(), "Missing '50' label(s)");
 
         // Save for visual inspection
-        pdf.save("/tmp/coordinate-system.client");
+        pdf.save("/tmp/coordinate-system.pdf");
     }
 }
 

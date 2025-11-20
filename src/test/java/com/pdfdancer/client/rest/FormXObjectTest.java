@@ -13,7 +13,7 @@ public class FormXObjectTest extends BaseTest {
 
     @Override
     protected String getPdfFile() {
-        return "Forms.pdf";
+        return "Forms-20-30.pdf";
     }
 
     @Test
@@ -21,7 +21,7 @@ public class FormXObjectTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         List<FormXObjectReference> forms = pdf.selectForms();
-        assertEquals(79, forms.size());
+        assertEquals(8, forms.size());
 
         boolean allFormsAtOrigin = forms.stream().allMatch(f -> {
             Position pos = f.getPosition();
@@ -30,8 +30,8 @@ public class FormXObjectTest extends BaseTest {
 
         assertFalse(allFormsAtOrigin, "All forms should not be at coordinates (0,0)");
 
-        List<FormXObjectReference> firstPage = pdf.page(0).selectForms();
-        assertEquals(1, firstPage.size());
+        List<FormXObjectReference> firstPage = pdf.page(4).selectForms();
+        assertEquals(2, firstPage.size());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class FormXObjectTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         List<FormXObjectReference> forms = pdf.selectForms();
-        int total = 79;
+        int total = 8;
         assertEquals(total, forms.size());
 
         int i = 1;
@@ -57,7 +57,7 @@ public class FormXObjectTest extends BaseTest {
         byte[] pdfBytes = pdf.getFileBytes();
         assertNotNull(pdfBytes);
         assertTrue(pdfBytes.length > 0);
-        pdf.save("/tmp/test.client");
+        pdf.save("/tmp/test.pdf");
     }
 
     @Test
@@ -69,7 +69,7 @@ public class FormXObjectTest extends BaseTest {
 
         Position pos = form.getPosition();
         assertEquals(98, pos.getX().intValue());
-        assertEquals(409, pos.getY().intValue());
+        assertEquals(464, pos.getY().intValue());
 
         // Move it
         form.moveTo(50.1, 100);
@@ -92,7 +92,7 @@ public class FormXObjectTest extends BaseTest {
         List<FormXObjectReference> none = pdf.page(0).selectFormsAt(0, 0);
         assertEquals(0, none.size());
 
-        List<FormXObjectReference> found = pdf.page(0).selectFormsAt(17, 447, 1);
+        List<FormXObjectReference> found = pdf.page(4).selectFormsAt(76, 623, 1);
         assertEquals(1, found.size());
         assertEquals("FORM_000001", found.get(0).getInternalId());
     }
@@ -102,7 +102,7 @@ public class FormXObjectTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Test finding a single form at a known position with sufficient epsilon
-        Optional<FormXObjectReference> form = pdf.page(0).selectFormAt(17, 447, 1);
+        Optional<FormXObjectReference> form = pdf.page(4).selectFormAt(76, 623, 1);
         assertTrue(form.isPresent(), "Should find form at known position");
         assertEquals("FORM_000001", form.get().getInternalId());
 

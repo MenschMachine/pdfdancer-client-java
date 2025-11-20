@@ -39,7 +39,7 @@ public class ImageTest extends BaseTest {
         assertNotNull(bytes);
         assertTrue(bytes.length > 0);
 
-        client.save("/tmp/deleteImage.client");
+        client.save("/tmp/deleteImage.pdf");
     }
 
     @Test

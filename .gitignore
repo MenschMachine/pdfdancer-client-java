@@ -11,3 +11,4 @@ out/
 # OS files
 .DS_Store
 .aider*
+/.run
