@@ -33,7 +33,7 @@ public class FileVersioner {
         int nextVersion = (maxVersion == -1) ? 0 : maxVersion + 1;
 
         String nextName = getVersionedName(baselineFile.getName(), nextVersion);
-        return ensureExtension(directory.resolve(nextName), ".client");
+        return ensureExtension(directory.resolve(nextName), ".pdf");
     }
 
     public static Path getNextXmlVersion(Path directory, File baselineFile) throws IOException {

@@ -96,13 +96,13 @@ public class PDFTest extends BaseTest {
         List<TextLineReference> selectedLines = pdf.page(0).selectTextLinesAt(100, 201.5, 3d); // needs high tolerance, because y of line != y of paragraph
         assertEquals(1, selectedLines.size());
         assertNotNull(selectedLines.get(0).getInternalId());
-        pdf.save("/tmp/test_create_blank_pdf_add_and_modify_content.client");
+        pdf.save("/tmp/test_create_blank_pdf_add_and_modify_content.pdf");
 
         try {
             PDFDancer pdf2 = PDFDancer.createSession(
                     getValidToken(),
                     java.nio.file.Files.readAllBytes(
-                            java.nio.file.Paths.get("/tmp/test_create_blank_pdf_add_and_modify_content.client")
+                            java.nio.file.Paths.get("/tmp/test_create_blank_pdf_add_and_modify_content.pdf")
                     ),
                     httpClient
             );
@@ -113,7 +113,7 @@ public class PDFTest extends BaseTest {
                 boolean success = line.edit().replace("hello " + i).apply();
                 assertTrue(success);
             }
-            pdf2.save("/tmp/test_create_blank_pdf_add_and_modify_content2.client");
+            pdf2.save("/tmp/test_create_blank_pdf_add_and_modify_content2.pdf");
         } catch (Exception e) {
             fail("Should not throw exception: " + e.getMessage());
         }

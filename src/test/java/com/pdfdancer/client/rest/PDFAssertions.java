@@ -33,7 +33,7 @@ public class PDFAssertions {
 
         // Save and reload to get fresh state (matches Python behavior)
         try {
-            File tempFile = File.createTempFile("client-assertions-", ".client");
+            File tempFile = File.createTempFile("client-assertions-", ".pdf");
             pdfDancer.save(tempFile.getAbsolutePath());
             System.out.println("Saved client file to " + tempFile.getAbsolutePath());
 
