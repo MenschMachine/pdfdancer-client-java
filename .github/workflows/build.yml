@@ -32,6 +32,25 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
 
+      - name: Set Gradle version based on Java version
+        id: gradle-version
+        shell: bash
+        run: |
+          if [ "${{ matrix.java }}" = "11" ]; then
+            echo "version=8.5" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.java }}" = "25" ]; then
+            echo "version=9.2.1" >> $GITHUB_OUTPUT
+          else
+            echo "version=8.10.2" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download and set up Gradle
+        shell: bash
+        run: |
+          GRADLE_VERSION="${{ steps.gradle-version.outputs.version }}"
+          cd gradle/wrapper
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" > gradle-wrapper.properties
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -78,6 +97,25 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
+
+      - name: Set Gradle version based on Java version
+        id: gradle-version
+        shell: bash
+        run: |
+          if [ "${{ matrix.java }}" = "11" ]; then
+            echo "version=8.5" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.java }}" = "25" ]; then
+            echo "version=9.2.1" >> $GITHUB_OUTPUT
+          else
+            echo "version=8.10.2" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download and set up Gradle
+        shell: bash
+        run: |
+          GRADLE_VERSION="${{ steps.gradle-version.outputs.version }}"
+          cd gradle/wrapper
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" > gradle-wrapper.properties
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
