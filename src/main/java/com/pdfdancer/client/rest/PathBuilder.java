@@ -18,7 +18,7 @@ import java.util.List;
 public class PathBuilder {
 
     private final PDFDancer client;
-    private final int pageIndex;
+    private final int pageNumber;
 
     private final List<PathSegment> segments = new ArrayList<>();
     private Point current; // cursor
@@ -33,9 +33,9 @@ public class PathBuilder {
     private Double dashPhase;
     private Boolean evenOddFill; // null -> default (nonzero)
 
-    PathBuilder(PDFDancer client, int pageIndex) {
+    PathBuilder(PDFDancer client, int pageNumber) {
         this.client = client;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
     }
 
     public PathBuilder moveTo(double x, double y) {
@@ -50,7 +50,7 @@ public class PathBuilder {
         Line line = new Line(current, next);
         applyStyle(line);
         // position anchored at the segment's starting point
-        line.setPosition(Position.atPageCoordinates(pageIndex, current.x(), current.y()));
+        line.setPosition(Position.atPageCoordinates(pageNumber, current.x(), current.y()));
         segments.add(line);
         this.current = next;
         return this;
@@ -63,7 +63,7 @@ public class PathBuilder {
         Point end = new Point(x, y);
         Bezier b = new Bezier(current, c1, c2, end);
         applyStyle(b);
-        b.setPosition(Position.atPageCoordinates(pageIndex, current.x(), current.y()));
+        b.setPosition(Position.atPageCoordinates(pageNumber, current.x(), current.y()));
         segments.add(b);
         this.current = end;
         return this;

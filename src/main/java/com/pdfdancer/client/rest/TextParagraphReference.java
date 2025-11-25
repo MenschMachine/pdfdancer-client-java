@@ -93,7 +93,7 @@ public class TextParagraphReference extends BaseReference {
         }
 
         public TextEdit moveTo(double x, double y) {
-            this.newPosition = Position.atPageCoordinates(ref.getPosition().getPageIndex(), x, y);
+            this.newPosition = Position.atPageCoordinates(ref.getPosition().getPageNumber(), x, y);
             return this;
         }
 

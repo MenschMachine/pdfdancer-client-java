@@ -30,7 +30,7 @@ public class FormXObjectTest extends BaseTest {
 
         assertFalse(allFormsAtOrigin, "All forms should not be at coordinates (0,0)");
 
-        List<FormXObjectReference> firstPage = pdf.page(4).selectForms();
+        List<FormXObjectReference> firstPage = pdf.page(5).selectForms();
         assertEquals(2, firstPage.size());
     }
 
@@ -74,7 +74,7 @@ public class FormXObjectTest extends BaseTest {
         // Move it
         form.moveTo(50.1, 100);
 
-        int page = pos.getPageIndex();
+        int page = pos.getPageNumber();
         List<FormXObjectReference> found = pdf.page(page)
                 .selectFormsAt(50.1, 100);
         assertEquals(1, found.size());
@@ -89,10 +89,10 @@ public class FormXObjectTest extends BaseTest {
     public void findFormByPosition() {
         PDFDancer pdf = createClient();
 
-        List<FormXObjectReference> none = pdf.page(0).selectFormsAt(0, 0);
+        List<FormXObjectReference> none = pdf.page(1).selectFormsAt(0, 0);
         assertEquals(0, none.size());
 
-        List<FormXObjectReference> found = pdf.page(4).selectFormsAt(76, 623, 1);
+        List<FormXObjectReference> found = pdf.page(5).selectFormsAt(76, 623, 1);
         assertEquals(1, found.size());
         assertEquals("FORM_000001", found.get(0).getInternalId());
     }
@@ -102,12 +102,12 @@ public class FormXObjectTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Test finding a single form at a known position with sufficient epsilon
-        Optional<FormXObjectReference> form = pdf.page(4).selectFormAt(76, 623, 1);
+        Optional<FormXObjectReference> form = pdf.page(5).selectFormAt(76, 623, 1);
         assertTrue(form.isPresent(), "Should find form at known position");
         assertEquals("FORM_000001", form.get().getInternalId());
 
         // Test at position with no form
-        Optional<FormXObjectReference> emptyResult = pdf.page(0).selectFormAt(0, 0, 1);
+        Optional<FormXObjectReference> emptyResult = pdf.page(1).selectFormAt(0, 0, 1);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form found");
     }
 

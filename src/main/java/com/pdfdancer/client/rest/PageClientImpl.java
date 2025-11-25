@@ -15,23 +15,23 @@ import java.util.stream.Collectors;
  */
 class PageClientImpl {
     protected final PDFDancer root;
-    protected final int pageIndex;
+    protected final int pageNumber;
 
-    PageClientImpl(PDFDancer root, int pageIndex) {
+    PageClientImpl(PDFDancer root, int pageNumber) {
         this.root = root;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
     }
 
     public List<TextParagraphReference> selectParagraphs() {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextObject(typed);
     }
 
-    public int getPageIndex() { return pageIndex; }
+    public int getPageNumber() { return pageNumber; }
 
     public List<TextParagraphReference> selectParagraphsStartingWith(String text) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextObject(
                 typed.stream()
@@ -43,7 +43,7 @@ class PageClientImpl {
     public List<TextParagraphReference> selectParagraphsAt(double x, double y) { return selectParagraphsAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<TextParagraphReference> selectParagraphsAt(double x, double y, double epsilon) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextObject(
                 typed.stream()
@@ -71,7 +71,7 @@ class PageClientImpl {
 
     public List<TextParagraphReference> selectParagraphsMatching(String pattern) {
         Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextObject(
                 typed.stream()
@@ -81,7 +81,7 @@ class PageClientImpl {
     }
 
     public List<PathReference> selectPathsAt(double x, double y) {
-        Position position = new PositionBuilder().onPage(pageIndex).atCoordinates(x, y).build();
+        Position position = new PositionBuilder().onPage(pageNumber).atCoordinates(x, y).build();
         return root.toPathObject(root.find(ObjectType.PATH, position));
     }
 
@@ -95,7 +95,7 @@ class PageClientImpl {
     }
 
     public List<TextLineReference> selectTextLinesStartingWith(String text) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextLineObject(
                 typed.stream()
@@ -107,13 +107,13 @@ class PageClientImpl {
     public List<TextLineReference> selectTextLinesAt(double x, double y) { return selectTextLinesAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<TextLineReference> selectTextLines() {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextLineObject(typed);
     }
 
     public List<TextLineReference> selectTextLinesAt(double x, double y, double epsilon) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextLineObject(
                 typed.stream()
@@ -146,7 +146,7 @@ class PageClientImpl {
      */
     public List<TextLineReference> selectTextLinesMatching(String pattern) {
         Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageIndex, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
+        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
         List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
         return root.toTextLineObject(
                 typed.stream()
@@ -166,7 +166,7 @@ class PageClientImpl {
     }
 
     public List<ImageReference> selectImages() {
-        PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
         List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
         return root.toImageObject(images);
     }
@@ -174,7 +174,7 @@ class PageClientImpl {
     public List<ImageReference> selectImagesAt(double x, double y) { return selectImagesAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<ImageReference> selectImagesAt(double x, double y, double epsilon) {
-        PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
         List<ObjectRef> images = root.collectObjectsByType(snapshot, Set.of(ObjectType.IMAGE));
         List<ObjectRef> filtered = images.stream()
                 .filter(ref -> root.containsPoint(ref, x, y, epsilon))
@@ -200,13 +200,13 @@ class PageClientImpl {
     }
 
     public List<FormXObjectReference> selectForms() {
-        PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
         List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
         return root.toFormXObject(forms);
     }
 
     public List<PathReference> selectPaths() {
-        PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
         List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.PATH));
         return root.toPathObject(forms);
     }
@@ -214,7 +214,7 @@ class PageClientImpl {
     public List<FormXObjectReference> selectFormsAt(double x, double y) { return selectFormsAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<FormXObjectReference> selectFormsAt(double x, double y, double epsilon) {
-        PageSnapshot snapshot = root.getPageSnapshotCached(pageIndex, null);
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
         List<ObjectRef> forms = root.collectObjectsByType(snapshot, Set.of(ObjectType.FORM_X_OBJECT));
         List<ObjectRef> filtered = forms.stream()
                 .filter(ref -> root.containsPoint(ref, x, y, epsilon))
@@ -240,14 +240,14 @@ class PageClientImpl {
     }
 
     public List<FormFieldReference> selectFormFields() {
-        List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
+        List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageNumber);
         return root.toFormFieldObject(formFields);
     }
 
     public List<FormFieldReference> selectFormFieldsAt(double x, double y) { return selectFormFieldsAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<FormFieldReference> selectFormFieldsAt(double x, double y, double epsilon) {
-        List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageIndex);
+        List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageNumber);
         return root.toFormFieldObject(
                 formFields.stream()
                         .filter(ref -> root.containsPoint(ref, x, y, epsilon))
@@ -274,21 +274,21 @@ class PageClientImpl {
 
     public List<TextParagraphReference> selectTextStartingWith(String text) { return this.selectParagraphsStartingWith(text); }
 
-    public BezierBuilder newBezier() { return new BezierBuilder(root, pageIndex); }
+    public BezierBuilder newBezier() { return new BezierBuilder(root, pageNumber); }
 
-    public PathBuilder newPath() { return new PathBuilder(root, pageIndex); }
+    public PathBuilder newPath() { return new PathBuilder(root, pageNumber); }
 
-    public LineBuilder newLine() { return new LineBuilder(root, pageIndex); }
+    public LineBuilder newLine() { return new LineBuilder(root, pageNumber); }
 
     /**
      * Deletes the current page from the PDF document.
-     * This method removes the page at the current pageIndex from the document permanently,
+     * This method removes the page at the current pageNumber from the document permanently,
      * updating the page numbering for subsequent pages.
      *
      * @return true if the page was successfully deleted, false otherwise
      */
     public boolean delete() {
-        ObjectRef pageRef = root.getPage(pageIndex);
+        ObjectRef pageRef = root.getPage(pageNumber);
         if (pageRef == null) {
             return false;
         }

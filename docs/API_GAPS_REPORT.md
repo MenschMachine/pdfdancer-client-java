@@ -63,7 +63,7 @@ pdf.page(2).delete();
 - **Status**: ❌ Missing
 - **Current Workaround**: None found
 - **Documentation Reference**: Examples only
-- **Expected Signature**: `void duplicatePage(int pageIndex)`
+- **Expected Signature**: `void duplicatePage(int pageNumber)`
 
 **Example**:
 ```java
