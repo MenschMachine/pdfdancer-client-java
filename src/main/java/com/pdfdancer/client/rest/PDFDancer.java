@@ -420,11 +420,15 @@ public class PDFDancer {
      * This method returns an object reference for the specified page,
      * enabling targeted page operations.
      *
-     * @param pageIndex the page number to retrieve (1-based indexing)
+     * @param pageNumber the page number to retrieve (1-based indexing, page 1 is first page)
      * @return object reference for the specified page, or null if not found
+     * @throws IllegalArgumentException if pageNumber is less than 1
      */
-    public ObjectRef getPage(int pageIndex) {
-        String path = "/pdf/page/find?pageIndex=" + pageIndex;
+    public ObjectRef getPage(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
+        String path = "/pdf/page/find?pageNumber=" + pageNumber;
         List<ObjectRef> result = blockingClient.retrieve(
                 HttpRequest.POST(path, null)
                         .contentType(MediaType.APPLICATION_JSON_TYPE)
@@ -497,8 +501,8 @@ public class PDFDancer {
         return snapshotCache.getDocumentSnapshotCached(types);
     }
 
-    PageSnapshot getPageSnapshotCached(int pageIndex, String types) {
-        return snapshotCache.getPageSnapshotCached(pageIndex, types);
+    PageSnapshot getPageSnapshotCached(int pageNumber, String types) {
+        return snapshotCache.getPageSnapshotCached(pageNumber, types);
     }
 
 
@@ -506,10 +510,10 @@ public class PDFDancer {
         return snapshotCache.getTypedDocumentSnapshot(elementClass, types);
     }
 
-    public <T extends ObjectRef> TypedPageSnapshot<T> getTypedPageSnapshot(int pageIndex,
+    public <T extends ObjectRef> TypedPageSnapshot<T> getTypedPageSnapshot(int pageNumber,
                                                                            Class<T> elementClass,
                                                                            String types) {
-        return snapshotCache.getTypedPageSnapshot(pageIndex, elementClass, types);
+        return snapshotCache.getTypedPageSnapshot(pageNumber, elementClass, types);
     }
 
     <T extends ObjectRef> List<T> getTypedElements(TypedPageSnapshot<T> page, Class<T> elementClass) {
@@ -524,8 +528,8 @@ public class PDFDancer {
         return selection.collectFormFieldRefsFromDocument(this);
     }
 
-    List<FormFieldRef> collectFormFieldRefsFromPage(int pageIndex) {
-        return selection.collectFormFieldRefsFromPage(this, pageIndex);
+    List<FormFieldRef> collectFormFieldRefsFromPage(int pageNumber) {
+        return selection.collectFormFieldRefsFromPage(this, pageNumber);
     }
 
     private TextTypeObjectRef ensureTextType(TextTypeObjectRef ref, ObjectType desiredType) {
@@ -640,10 +644,10 @@ public class PDFDancer {
         if (newParagraph.getPosition() == null) {
             throw new IllegalArgumentException("Paragraph getPosition is null");
         }
-        if (newParagraph.getPosition().getPageIndex() == null) {
+        if (newParagraph.getPosition().getPageNumber() == null) {
             throw new IllegalArgumentException("Paragraph getPosition page number is null");
         }
-        if (newParagraph.getPosition().getPageIndex() < 0) {
+        if (newParagraph.getPosition().getPageNumber() < 0) {
             throw new IllegalArgumentException("Paragraph getPosition page number is less than 0");
         }
         return addObject(newParagraph);
@@ -717,23 +721,31 @@ public class PDFDancer {
      * Retrieves a snapshot of a single PDF page.
      * This method returns the page metadata and all elements in a single response.
      *
-     * @param pageIndex zero-based index of the page to retrieve
+     * @param pageNumber the page number to retrieve (1-based indexing, page 1 is first page)
      * @return page snapshot containing page reference and all elements
+     * @throws IllegalArgumentException if pageNumber is less than 1
      */
-    public PageSnapshot getPageSnapshot(int pageIndex) {
-        return getPageSnapshotCached(pageIndex, null);
+    public PageSnapshot getPageSnapshot(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
+        return getPageSnapshotCached(pageNumber, null);
     }
 
     /**
      * Retrieves a snapshot of a single PDF page with type filtering.
      * Only elements matching the specified types will be included in the snapshot.
      *
-     * @param pageIndex zero-based index of the page to retrieve
-     * @param types     comma-separated list of object types to include (e.g., "PARAGRAPH,IMAGE")
+     * @param pageNumber the page number to retrieve (1-based indexing, page 1 is first page)
+     * @param types      comma-separated list of object types to include (e.g., "PARAGRAPH,IMAGE")
      * @return page snapshot containing page reference and filtered elements
+     * @throws IllegalArgumentException if pageNumber is less than 1
      */
-    public PageSnapshot getPageSnapshot(int pageIndex, String types) {
-        return getPageSnapshotCached(pageIndex, types);
+    public PageSnapshot getPageSnapshot(int pageNumber, String types) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
+        return getPageSnapshotCached(pageNumber, types);
     }
 
     protected boolean changeFormField(FormFieldRef objectRef, String value) {
@@ -765,8 +777,18 @@ public class PDFDancer {
         return toPathObject(collectObjectsByType(snapshot, Set.of(ObjectType.PATH)));
     }
 
-    public PageClient page(int pageIndex) {
-        return new PageClient(this, pageIndex);
+    /**
+     * Creates a client for working with a specific page.
+     *
+     * @param pageNumber the page number (1-based indexing, page 1 is first page)
+     * @return a PageClient for the specified page
+     * @throws IllegalArgumentException if pageNumber is less than 1
+     */
+    public PageClient page(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
+        return new PageClient(this, pageNumber);
     }
 
     List<TextParagraphReference> toTextObject(List<TextTypeObjectRef> objectRefs) {
@@ -864,12 +886,39 @@ public class PDFDancer {
         return result;
     }
 
-    public PageBuilder page() {
+    /**
+     * Creates a new page builder for fluent page creation.
+     *
+     * @return a new PageBuilder instance
+     */
+    public PageBuilder newPage() {
         return new PageBuilder(this);
     }
 
-    public boolean movePage(int fromPageIndex, int toPageIndex) {
-        Boolean result = modification.movePage(fromPageIndex, toPageIndex);
+    /**
+     * @deprecated Use {@link #newPage()} instead. This method will be removed in a future release.
+     */
+    @Deprecated
+    public PageBuilder page() {
+        return newPage();
+    }
+
+    /**
+     * Moves a page from one position to another within the PDF document.
+     *
+     * @param fromPage the source page number (1-based indexing, page 1 is first page)
+     * @param toPage   the target page number (1-based indexing)
+     * @return true if the page was successfully moved
+     * @throws IllegalArgumentException if fromPage or toPage is less than 1
+     */
+    public boolean movePage(int fromPage, int toPage) {
+        if (fromPage < 1) {
+            throw new IllegalArgumentException("fromPage must be >= 1 (1-based indexing)");
+        }
+        if (toPage < 1) {
+            throw new IllegalArgumentException("toPage must be >= 1 (1-based indexing)");
+        }
+        Boolean result = modification.movePage(fromPage, toPage);
         invalidateSnapshotCaches();
         return Boolean.TRUE.equals(result);
     }
@@ -890,8 +939,8 @@ public class PDFDancer {
      * Provides type-safe selection methods for text, images, and paths.
      */
     public static class PageClient extends PageClientImpl {
-        PageClient(PDFDancer root, int pageIndex) {
-            super(root, pageIndex);
+        PageClient(PDFDancer root, int pageNumber) {
+            super(root, pageNumber);
         }
     }
 

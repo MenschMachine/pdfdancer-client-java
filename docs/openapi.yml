@@ -1245,7 +1245,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: pageIndex
+      - name: pageNumber
         in: query
         explode: false
         schema:
@@ -1365,7 +1365,7 @@ paths:
             application/json:
               schema:
                 type: boolean
-  /pdf/page/{pageIndex}/snapshot:
+  /pdf/page/{pageNumber}/snapshot:
     get:
       operationId: getPageSnapshot
       parameters:
@@ -1374,7 +1374,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: pageIndex
+      - name: pageNumber
         in: path
         required: true
         schema:
@@ -2010,11 +2010,11 @@ components:
     AddPageRequest:
       required:
       - orientation
-      - pageIndex
+      - pageNumber
       - pageSize
       type: object
       properties:
-        pageIndex:
+        pageNumber:
           type: integer
           format: int32
         orientation:
@@ -3263,14 +3263,14 @@ components:
       - $ref: "#/components/schemas/TextLine"
     PageMoveRequest:
       required:
-      - fromPageIndex
-      - toPageIndex
+      - fromPageNumber
+      - toPageNumber
       type: object
       properties:
-        fromPageIndex:
+        fromPageNumber:
           type: integer
           format: int32
-        toPageIndex:
+        toPageNumber:
           type: integer
           format: int32
     PageRef:
@@ -3421,7 +3421,7 @@ components:
         "y":
           type: number
           format: double
-        pageIndex:
+        pageNumber:
           type: integer
           format: int32
         shape:

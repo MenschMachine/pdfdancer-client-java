@@ -12,7 +12,7 @@ public class PathEvenOddFillTest extends BaseTest {
         PDFDancer pdf = newPdf();
 
         // Draw a simple bow-tie (self-intersecting) polygon; even-odd fill should differ visually from nonzero
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .fillColor(new Color(200, 50, 50, 180))
                 .color(new Color(20, 20, 20))
                 .lineWidth(1.5)

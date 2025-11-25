@@ -38,8 +38,8 @@ public class PathTest extends BaseTest {
     public void findPathsByPosition() {
         PDFDancer pdf = createClient();
 
-        // Page 0, hit-test at (80, 720)
-        List<PathReference> paths = pdf.page(0).selectPathsAt(80, 720);
+        // Page 1, hit-test at (80, 720)
+        List<PathReference> paths = pdf.page(1).selectPathsAt(80, 720);
         assertEquals(1, paths.size());
         assertEquals("PATH_000001", paths.get(0).getInternalId());
     }
@@ -49,26 +49,26 @@ public class PathTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Test finding a single path at a known position
-        Optional<PathReference> path = pdf.page(0).selectPathAt(80, 720);
+        Optional<PathReference> path = pdf.page(1).selectPathAt(80, 720);
         assertTrue(path.isPresent(), "Should find path at known position");
         assertEquals("PATH_000001", path.get().getInternalId());
         assertEquals(80, path.get().getPosition().getX().intValue());
         assertEquals(720, path.get().getPosition().getY().intValue());
 
         // Test at position with no path
-        Optional<PathReference> emptyResult = pdf.page(0).selectPathAt(1000, 1000);
+        Optional<PathReference> emptyResult = pdf.page(1).selectPathAt(1000, 1000);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no path found");
     }
 
     @Test
     public void deletePath() {
         PDFDancer client = createClient();
-        List<PathReference> paths = client.page(0).selectPathsAt(80, 720);
+        List<PathReference> paths = client.page(1).selectPathsAt(80, 720);
         assertEquals(1, paths.size());
         assertEquals("PATH_000001", paths.get(0).getInternalId());
 
         paths.get(0).delete();
-        paths = client.page(0).selectPathsAt(80, 720);
+        paths = client.page(1).selectPathsAt(80, 720);
         assertEquals(0, paths.size());
         paths = client.selectPaths();
         assertEquals(8, paths.size());
@@ -78,7 +78,7 @@ public class PathTest extends BaseTest {
     public void movePath() {
 
         PDFDancer client = createClient();
-        List<PathReference> paths = client.page(0).selectPathsAt(80, 720);
+        List<PathReference> paths = client.page(1).selectPathsAt(80, 720);
         PathReference objectRef = paths.get(0);
         Position position = objectRef.getPosition();
 
@@ -87,9 +87,9 @@ public class PathTest extends BaseTest {
 
         assertTrue(objectRef.moveTo(50.1, 100));
 
-        paths = client.page(0).selectPathsAt(80, 720);
+        paths = client.page(1).selectPathsAt(80, 720);
         assertTrue(paths.isEmpty());
-        paths = client.page(0).selectPathsAt(50.1, 100);
+        paths = client.page(1).selectPathsAt(50.1, 100);
 
         objectRef = paths.get(0);
         position = objectRef.getPosition();
@@ -101,7 +101,7 @@ public class PathTest extends BaseTest {
     @Test
     public void addPath() throws IOException {
         PDFDancer pdf = TestPDFDancer.newPdf(getValidToken(), httpClient);
-        pdf.page(0)
+        pdf.page(1)
                 .newLine()
                 .from(100, 201.5)
                 .to(50.5, 300)
@@ -109,7 +109,7 @@ public class PathTest extends BaseTest {
                 .lineWidth(2.5d)
                 .add();
 
-        List<PathReference> paths = pdf.page(0).selectPathsAt(100, 201.5);
+        List<PathReference> paths = pdf.page(1).selectPathsAt(100, 201.5);
         assertEquals(1, paths.size());
         assertEquals("PATH_000001", paths.get(0).getInternalId());
         pdf.save("/tmp/addPath.pdf");

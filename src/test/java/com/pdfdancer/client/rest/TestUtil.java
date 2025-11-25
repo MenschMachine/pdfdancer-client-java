@@ -23,22 +23,22 @@ public class TestUtil {
      * - Corner and center text markers
      *
      * @param pdf       the PDFDancer instance to draw on
-     * @param pageIndex the page index (0-based) to draw the grid on
+     * @param pageNumber the page number (1-based) to draw the grid on
      */
-    public static void drawCoordinateGrid(PDFDancer pdf, int pageIndex) {
-        double width = pdf.getPages().get(pageIndex).getPageSize().getWidth();
-        double height = pdf.getPages().get(pageIndex).getPageSize().getHeight();
+    public static void drawCoordinateGrid(PDFDancer pdf, int pageNumber) {
+        double width = pdf.getPages().get(pageNumber - 1).getPageSize().getWidth();
+        double height = pdf.getPages().get(pageNumber - 1).getPageSize().getHeight();
 
         // Axes (origin at 0,0)
-        pdf.page(pageIndex).newLine().from(0, 0).to(width, 0).color(Color.BLACK).lineWidth(2.0).add(); // X-axis
-        pdf.page(pageIndex).newLine().from(0, 0).to(0, height).color(Color.BLACK).lineWidth(2.0).add(); // Y-axis
+        pdf.page(pageNumber).newLine().from(0, 0).to(width, 0).color(Color.BLACK).lineWidth(2.0).add(); // X-axis
+        pdf.page(pageNumber).newLine().from(0, 0).to(0, height).color(Color.BLACK).lineWidth(2.0).add(); // Y-axis
 
         double majorStep = 50.0;  // major tick spacing
         double tickLen = 10.0;    // tick mark length
 
         // X-axis major ticks and labels
         for (double x = 0.0; x <= width; x += majorStep) {
-            pdf.page(pageIndex).newLine()
+            pdf.page(pageNumber).newLine()
                     .from(x, 0)
                     .to(x, tickLen)
                     .color(Color.BLACK)
@@ -49,13 +49,13 @@ public class TestUtil {
                     .text(String.valueOf((int) x))
                     .font("Courier", 6)
                     .color(Color.BLACK)
-                    .at(pageIndex, x + 2, tickLen + 6)
+                    .at(pageNumber, x + 2, tickLen + 6)
                     .add();
         }
 
         // Y-axis major ticks and labels
         for (double y = 0.0; y <= height; y += majorStep) {
-            pdf.page(pageIndex).newLine()
+            pdf.page(pageNumber).newLine()
                     .from(0, y)
                     .to(tickLen, y)
                     .color(Color.BLACK)
@@ -66,7 +66,7 @@ public class TestUtil {
                     .text(String.valueOf((int) y))
                     .font("Courier", 6)
                     .color(Color.BLACK)
-                    .at(pageIndex, tickLen + 6, y + 2)
+                    .at(pageNumber, tickLen + 6, y + 2)
                     .add();
         }
 
@@ -76,7 +76,7 @@ public class TestUtil {
 
         // Vertical grid lines
         for (double gx = gridStep; gx <= width; gx += gridStep) {
-            pdf.page(pageIndex).newLine()
+            pdf.page(pageNumber).newLine()
                     .from(gx, 0)
                     .to(gx, height)
                     .color(gridColor)
@@ -86,7 +86,7 @@ public class TestUtil {
 
         // Horizontal grid lines
         for (double gy = gridStep; gy <= height; gy += gridStep) {
-            pdf.page(pageIndex).newLine()
+            pdf.page(pageNumber).newLine()
                     .from(0, gy)
                     .to(width, gy)
                     .color(gridColor)
@@ -96,23 +96,23 @@ public class TestUtil {
 
         // Corner and center text markers
         pdf.newParagraph().text("TOP-LEFT").font("Courier", 9).color(new Color(200, 0, 0))
-                .at(pageIndex, 4, height - 12).add();
+                .at(pageNumber, 4, height - 12).add();
         pdf.newParagraph().text("TOP-RIGHT").font("Courier", 9).color(new Color(0, 120, 200))
-                .at(pageIndex, Math.max(0, width - 100), height - 12).add();
+                .at(pageNumber, Math.max(0, width - 100), height - 12).add();
         pdf.newParagraph().text("BOTTOM-LEFT").font("Courier", 9).color(new Color(0, 160, 0))
-                .at(pageIndex, 4, 4).add();
+                .at(pageNumber, 4, 4).add();
         pdf.newParagraph().text("BOTTOM-RIGHT").font("Courier", 9).color(new Color(120, 0, 160))
-                .at(pageIndex, Math.max(0, width - 110), 4).add();
+                .at(pageNumber, Math.max(0, width - 110), 4).add();
         pdf.newParagraph().text("CENTER").font("Courier", 10).color(Color.BLACK)
-                .at(pageIndex, width / 2, height / 2).add();
+                .at(pageNumber, width / 2, height / 2).add();
     }
 
     /**
-     * Draws a coordinate grid on page 0 of the PDF document.
+     * Draws a coordinate grid on page 1 of the PDF document.
      *
      * @param pdf the PDFDancer instance to draw on
      */
     public static void drawCoordinateGrid(PDFDancer pdf) {
-        drawCoordinateGrid(pdf, 0);
+        drawCoordinateGrid(pdf, 1);
     }
 }
