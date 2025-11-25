@@ -8,24 +8,24 @@ import com.pdfdancer.common.model.PageSize;
 import java.util.Objects;
 
 public final class AddPageRequest {
-    @JsonProperty("pageIndex")
-    private final Integer pageIndex;
+    @JsonProperty("pageNumber")
+    private final Integer pageNumber;
     @JsonProperty("orientation")
     private final Orientation orientation;
     @JsonProperty("pageSize")
     private final PageSize pageSize;
 
     @JsonCreator
-    public AddPageRequest(@JsonProperty("pageIndex") Integer pageIndex,
+    public AddPageRequest(@JsonProperty("pageNumber") Integer pageNumber,
                           @JsonProperty("orientation") Orientation orientation,
                           @JsonProperty("pageSize") PageSize pageSize) {
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
         this.orientation = orientation;
         this.pageSize = pageSize;
     }
 
-    public Integer pageIndex() {
-        return pageIndex;
+    public Integer pageNumber() {
+        return pageNumber;
     }
 
     public Orientation orientation() {
@@ -41,20 +41,20 @@ public final class AddPageRequest {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (AddPageRequest) obj;
-        return Objects.equals(this.pageIndex, that.pageIndex) &&
+        return Objects.equals(this.pageNumber, that.pageNumber) &&
                 Objects.equals(this.orientation, that.orientation) &&
                 Objects.equals(this.pageSize, that.pageSize);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pageIndex, orientation, pageSize);
+        return Objects.hash(pageNumber, orientation, pageSize);
     }
 
     @Override
     public String toString() {
         return "AddPageRequest[" +
-                "pageIndex=" + pageIndex + ", " +
+                "pageNumber=" + pageNumber + ", " +
                 "orientation=" + orientation + ", " +
                 "pageSize=" + pageSize + ']';
     }

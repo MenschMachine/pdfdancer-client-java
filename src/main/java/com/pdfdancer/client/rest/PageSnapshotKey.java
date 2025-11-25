@@ -3,16 +3,16 @@ package com.pdfdancer.client.rest;
 import java.util.Objects;
 
 final class PageSnapshotKey {
-    private final int pageIndex;
+    private final int pageNumber;
     private final String typesKey;
 
-    PageSnapshotKey(int pageIndex, String typesKey) {
-        this.pageIndex = pageIndex;
+    PageSnapshotKey(int pageNumber, String typesKey) {
+        this.pageNumber = pageNumber;
         this.typesKey = typesKey;
     }
 
-    public int pageIndex() {
-        return pageIndex;
+    public int pageNumber() {
+        return pageNumber;
     }
 
     public String typesKey() {
@@ -24,19 +24,19 @@ final class PageSnapshotKey {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (PageSnapshotKey) obj;
-        return this.pageIndex == that.pageIndex &&
+        return this.pageNumber == that.pageNumber &&
                 Objects.equals(this.typesKey, that.typesKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pageIndex, typesKey);
+        return Objects.hash(pageNumber, typesKey);
     }
 
     @Override
     public String toString() {
         return "PageSnapshotKey[" +
-                "pageIndex=" + pageIndex + ", " +
+                "pageNumber=" + pageNumber + ", " +
                 "typesKey=" + typesKey + ']';
     }
 }

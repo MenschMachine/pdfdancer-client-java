@@ -22,8 +22,8 @@ public class ImageBuilder {
         return this;
     }
 
-    public ImageBuilder at(int pageIndex, double x, double y) {
-        this.position = new PositionBuilder().onPage(pageIndex).atCoordinates(x, y).build();
+    public ImageBuilder at(int pageNumber, double x, double y) {
+        this.position = new PositionBuilder().onPage(pageNumber).atCoordinates(x, y).build();
         return this;
     }
 

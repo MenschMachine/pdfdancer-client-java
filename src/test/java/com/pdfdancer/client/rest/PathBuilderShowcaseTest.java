@@ -12,7 +12,7 @@ public class PathBuilderShowcaseTest extends BaseTest {
     public void showcasePathBuilderWithFillAndMultiSegment() {
         PDFDancer pdf = newPdf();
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         double width = snapshot.pageRef().getPageSize().getWidth();
         double height = snapshot.pageRef().getPageSize().getHeight();
 
@@ -22,7 +22,7 @@ public class PathBuilderShowcaseTest extends BaseTest {
         double k = 0.5522847498 * r; // circle kappa
 
         // Multi-segment Bezier circle in ONE path, with fill + stroke
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .color(Color.BLACK)
                 .fillColor(new Color(220, 20, 60, 160))
                 .lineWidth(2.0)
@@ -38,7 +38,7 @@ public class PathBuilderShowcaseTest extends BaseTest {
         double right = width - 40;
         double y1 = height - 120;
         double y2 = height - 200;
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .color(new Color(30, 144, 255))
                 .lineWidth(2.5)
                 .moveTo(left, y1)

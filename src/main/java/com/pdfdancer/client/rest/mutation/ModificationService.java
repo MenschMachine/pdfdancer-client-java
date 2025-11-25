@@ -143,10 +143,10 @@ public final class ModificationService {
         );
     }
 
-    public Boolean movePage(int fromPageIndex, int toPageIndex) {
+    public Boolean movePage(int fromPage, int toPage) {
         String path = "/pdf/page/move";
         return blocking.retrieve(
-                HttpRequest.PUT(path, java.util.Map.of("fromPageIndex", fromPageIndex, "toPageIndex", toPageIndex))
+                HttpRequest.PUT(path, java.util.Map.of("fromPage", fromPage, "toPage", toPage))
                         .contentType(MediaType.APPLICATION_JSON_TYPE)
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),

@@ -7,9 +7,9 @@ import com.pdfdancer.common.response.PageSnapshot;
 interface SnapshotFetcher {
     DocumentSnapshot fetchDocumentSnapshot(String types);
 
-    PageSnapshot fetchPageSnapshot(int pageIndex, String types);
+    PageSnapshot fetchPageSnapshot(int pageNumber, String types);
 
     <T extends ObjectRef> TypedDocumentSnapshot<T> fetchTypedDocumentSnapshot(Class<T> elementClass, String types);
 
-    <T extends ObjectRef> TypedPageSnapshot<T> fetchTypedPageSnapshot(int pageIndex, Class<T> elementClass, String types);
+    <T extends ObjectRef> TypedPageSnapshot<T> fetchTypedPageSnapshot(int pageNumber, Class<T> elementClass, String types);
 }

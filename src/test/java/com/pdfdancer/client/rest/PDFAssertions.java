@@ -216,12 +216,12 @@ public class PDFAssertions {
         return this;
     }
 
-    public PDFAssertions assertPageDimension(double width, double height, int pageIndex) {
-        return assertPageDimension(width, height, null, pageIndex);
+    public PDFAssertions assertPageDimension(double width, double height, int pageNumber) {
+        return assertPageDimension(width, height, null, pageNumber);
     }
 
-    public PDFAssertions assertPageDimension(double width, double height, Orientation orientation, int pageIndex) {
-        PageRef page = pdf.getPages().get(pageIndex);
+    public PDFAssertions assertPageDimension(double width, double height, Orientation orientation, int pageNumber) {
+        PageRef page = pdf.getPages().get(pageNumber - 1);
         assertEquals(width, page.getPageSize().getWidth(), 0.001,
                 String.format("%f != %f", width, page.getPageSize().getWidth()));
         assertEquals(height, page.getPageSize().getHeight(), 0.001,
@@ -269,7 +269,7 @@ public class PDFAssertions {
         List<PathReference> paths = pdf.selectPaths();
         // Filter to specific page
         long pagePathCount = paths.stream()
-                .filter(p -> p.getPosition().getPageIndex() == page)
+                .filter(p -> p.getPosition().getPageNumber() == page)
                 .count();
         assertEquals(pathCount, pagePathCount,
                 String.format("Expected %d paths, but got %d", pathCount, pagePathCount));
@@ -322,29 +322,29 @@ public class PDFAssertions {
     public PDFAssertions assertTotalNumberOfElements(int nrOfElements) {
         int total = 0;
         for (PageRef pageRef : pdf.getPages()) {
-            int pageIndex = pageRef.getPosition().getPageIndex();
-            total += getNumberOfElements(pageIndex);
+            int pageNumber = pageRef.getPosition().getPageNumber();
+            total += getNumberOfElements(pageNumber);
         }
         assertEquals(nrOfElements, total,
                 String.format("Total number of elements differ, actual %d != expected %d", total, nrOfElements));
         return this;
     }
 
-    public PDFAssertions assertTotalNumberOfElements(int nrOfElements, int pageIndex) {
-        int total = getNumberOfElements(pageIndex);
+    public PDFAssertions assertTotalNumberOfElements(int nrOfElements, int pageNumber) {
+        int total = getNumberOfElements(pageNumber);
         assertEquals(nrOfElements, total,
                 String.format("Total number of elements differ, actual %d != expected %d", total, nrOfElements));
         return this;
     }
 
-    private int getNumberOfElements(int pageIndex) {
+    private int getNumberOfElements(int pageNumber) {
         int total = 0;
-        total += pdf.page(pageIndex).selectParagraphs().size();
-        total += pdf.page(pageIndex).selectFormFields().size();
-        total += pdf.page(pageIndex).selectForms().size();
-        total += pdf.page(pageIndex).selectImages().size();
-        total += pdf.page(pageIndex).selectPaths().size();
-        total += pdf.page(pageIndex).selectTextLines().size();
+        total += pdf.page(pageNumber).selectParagraphs().size();
+        total += pdf.page(pageNumber).selectFormFields().size();
+        total += pdf.page(pageNumber).selectForms().size();
+        total += pdf.page(pageNumber).selectImages().size();
+        total += pdf.page(pageNumber).selectPaths().size();
+        total += pdf.page(pageNumber).selectTextLines().size();
         return total;
     }
 
@@ -352,17 +352,17 @@ public class PDFAssertions {
     // Form Assertions
     // ===========================
 
-    public PDFAssertions assertNumberOfFormxobjects(int nrOfFormxobjects, int pageIndex) {
-        assertEquals(nrOfFormxobjects, pdf.page(pageIndex).selectForms().size(),
+    public PDFAssertions assertNumberOfFormxobjects(int nrOfFormxobjects, int pageNumber) {
+        assertEquals(nrOfFormxobjects, pdf.page(pageNumber).selectForms().size(),
                 String.format("Expected nr of formxobjects %d but got %d",
-                        nrOfFormxobjects, pdf.page(pageIndex).selectForms().size()));
+                        nrOfFormxobjects, pdf.page(pageNumber).selectForms().size()));
         return this;
     }
 
-    public PDFAssertions assertNumberOfFormFields(int nrOfFormFields, int pageIndex) {
-        assertEquals(nrOfFormFields, pdf.page(pageIndex).selectFormFields().size(),
+    public PDFAssertions assertNumberOfFormFields(int nrOfFormFields, int pageNumber) {
+        assertEquals(nrOfFormFields, pdf.page(pageNumber).selectFormFields().size(),
                 String.format("Expected nr of form fields %d but got %d",
-                        nrOfFormFields, pdf.page(pageIndex).selectFormFields().size()));
+                        nrOfFormFields, pdf.page(pageNumber).selectFormFields().size()));
         return this;
     }
 
@@ -385,22 +385,22 @@ public class PDFAssertions {
         return this;
     }
 
-    public PDFAssertions assertFormFieldExists(String fieldName, int pageIndex) {
+    public PDFAssertions assertFormFieldExists(String fieldName, int pageNumber) {
         List<FormFieldReference> formFields = pdf.selectFormFieldsByName(fieldName);
         // Filter to page
         long pageFormFields = formFields.stream()
-                .filter(f -> f.getPosition().getPageIndex() == pageIndex)
+                .filter(f -> f.getPosition().getPageNumber() == pageNumber)
                 .count();
         assertEquals(1, pageFormFields,
                 String.format("Expected 1 form field but got %d", pageFormFields));
         return this;
     }
 
-    public PDFAssertions assertFormFieldHasValue(String fieldName, String fieldValue, int pageIndex) {
+    public PDFAssertions assertFormFieldHasValue(String fieldName, String fieldValue, int pageNumber) {
         List<FormFieldReference> formFields = pdf.selectFormFieldsByName(fieldName);
         // Filter to page
         List<FormFieldReference> pageFormFields = formFields.stream()
-                .filter(f -> f.getPosition().getPageIndex() == pageIndex)
+                .filter(f -> f.getPosition().getPageNumber() == pageNumber)
                 .collect(Collectors.toUnmodifiableList());
         assertEquals(1, pageFormFields.size(),
                 String.format("Expected 1 form field but got %d", pageFormFields.size()));
@@ -409,8 +409,8 @@ public class PDFAssertions {
         return this;
     }
 
-    public void assertParagraphHasColor(String text, Color color, int pageIndex) {
-        TextParagraphReference paragraph = pdf.page(pageIndex).selectParagraphsStartingWith(text).get(0);
+    public void assertParagraphHasColor(String text, Color color, int pageNumber) {
+        TextParagraphReference paragraph = pdf.page(pageNumber).selectParagraphsStartingWith(text).get(0);
         assertEquals(color, paragraph.getColor(),
                 String.format("%s != %s", color, paragraph.getColor()));
     }

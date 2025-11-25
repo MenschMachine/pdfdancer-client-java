@@ -3,8 +3,8 @@ package com.pdfdancer.common.model;
 public class PositionBuilder {
     private final Position position = new Position();
 
-    public PositionBuilder onPage(int pageIndex) {
-        position.setPageIndex(pageIndex);
+    public PositionBuilder onPage(int pageNumber) {
+        position.setPageNumber(pageNumber);
         return this;
     }
 

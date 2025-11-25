@@ -17,7 +17,7 @@ import com.pdfdancer.common.model.path.Path;
 public class BezierBuilder {
 
     private final PDFDancer client;
-    private final int pageIndex;
+    private final int pageNumber;
 
     private Point p0; // start
     private Point c1; // control 1
@@ -31,9 +31,9 @@ public class BezierBuilder {
     private Double dashPhase;
     private Boolean evenOddFill; // null -> default (nonzero)
 
-    BezierBuilder(PDFDancer client, int pageIndex) {
+    BezierBuilder(PDFDancer client, int pageNumber) {
         this.client = client;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
     }
 
     public BezierBuilder from(double x, double y) {
@@ -100,7 +100,7 @@ public class BezierBuilder {
         if (strokeWidth != null) curve.setStrokeWidth(strokeWidth);
         if (dashArray != null && dashArray.length > 0) curve.setDashArray(dashArray);
         if (dashPhase != null) curve.setDashPhase(dashPhase);
-        curve.setPosition(Position.atPageCoordinates(pageIndex, p0.x(), p0.y()));
+        curve.setPosition(Position.atPageCoordinates(pageNumber, p0.x(), p0.y()));
 
         Path path = new Path();
         if (evenOddFill != null) {

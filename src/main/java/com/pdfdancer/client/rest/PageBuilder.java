@@ -8,7 +8,7 @@ import com.pdfdancer.common.request.AddPageRequest;
 public class PageBuilder {
 
     private final PDFDancer client;
-    private Integer pageIndex;
+    private Integer pageNumber;
     private Orientation orientation;
     private PageSize pageSize;
 
@@ -16,9 +16,28 @@ public class PageBuilder {
         this.client = client;
     }
 
-    public PageBuilder atIndex(int pageIndex) {
-        this.pageIndex = pageIndex;
+    /**
+     * Sets the page number where the new page should be inserted (1-based).
+     * Page 1 is the first page.
+     *
+     * @param pageNumber the 1-based page number (must be >= 1)
+     * @return this builder
+     * @throws IllegalArgumentException if pageNumber is less than 1
+     */
+    public PageBuilder atPage(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
+        this.pageNumber = pageNumber;
         return this;
+    }
+
+    /**
+     * @deprecated Use {@link #atPage(int)} instead. This method will be removed in a future release.
+     */
+    @Deprecated
+    public PageBuilder atIndex(int pageNumber) {
+        return atPage(pageNumber + 1);
     }
 
     public PageBuilder orientation(Orientation orientation) {
@@ -76,6 +95,6 @@ public class PageBuilder {
     }
 
     protected AddPageRequest buildRequest() {
-        return new AddPageRequest(pageIndex, orientation, pageSize);
+        return new AddPageRequest(pageNumber, orientation, pageSize);
     }
 }

@@ -39,43 +39,50 @@ import static java.net.http.HttpResponse.BodyHandlers;
 public final class PdfDancerHttpClient {
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
+    private static final String DEFAULT_API_VERSION = "1";
 
     private final HttpClient delegate;
     private final URI baseUrl;
     private final ObjectMapper objectMapper;
     private final RetryConfig retryConfig;
+    private final String apiVersion;
 
-    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper, RetryConfig retryConfig) {
+    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper, RetryConfig retryConfig, String apiVersion) {
         this.delegate = delegate;
         this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
         this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.defaultConfig();
+        this.apiVersion = apiVersion != null ? apiVersion : DEFAULT_API_VERSION;
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), null);
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), null, null);
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl, RetryConfig retryConfig) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), retryConfig);
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), retryConfig, null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper(), null);
+        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper(), null, null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, null);
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, null, null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper, RetryConfig retryConfig) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig);
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig, null);
+    }
+
+    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper, RetryConfig retryConfig, String apiVersion) {
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig, apiVersion);
     }
 
     private static ObjectMapper createObjectMapper() {
@@ -249,6 +256,9 @@ public final class PdfDancerHttpClient {
         URI target = baseUrl.resolve(request.path());
         HttpRequest.Builder builder = HttpRequest.newBuilder(target)
                 .timeout(DEFAULT_TIMEOUT);
+
+        // Add API version header
+        builder.header("X-API-VERSION", apiVersion);
 
         request.headers().forEach(builder::header);
 

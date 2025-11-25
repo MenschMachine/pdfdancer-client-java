@@ -108,7 +108,7 @@ public class TextLineReference extends BaseReference {
          * @return this TextLineEdit for method chaining
          */
         public TextLineEdit moveTo(double x, double y) {
-            this.newPosition = Position.atPageCoordinates(ref.getPosition().getPageIndex(), x, y);
+            this.newPosition = Position.atPageCoordinates(ref.getPosition().getPageNumber(), x, y);
             return this;
         }
 

@@ -40,10 +40,10 @@ public class PageTest extends BaseTest {
 
         PDFDancer client = createClient();
 
-        ObjectRef page = client.getPage(2);
+        ObjectRef page = client.getPage(3);
 
         assertNotNull(page);
-        assertEquals(2, page.getPosition().getPageIndex());
+        assertEquals(2, page.getPosition().getPageNumber());
         assertNotNull(page.getInternalId());
     }
 
@@ -52,7 +52,7 @@ public class PageTest extends BaseTest {
     public void testDeletePage() {
 
         PDFDancer client = createClient();
-        ObjectRef pageThree = client.getPage(3);
+        ObjectRef pageThree = client.getPage(4);
 
         Boolean response = client.deletePage(pageThree);
 
@@ -66,7 +66,7 @@ public class PageTest extends BaseTest {
         PDFDancer client = createClient();
         assertEquals(12, client.getPages().size());
         PageRef pageRef = client.addPage();
-        assertEquals(12, pageRef.getPosition().getPageIndex());
+        assertEquals(13, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -78,7 +78,7 @@ public class PageTest extends BaseTest {
 
         PageRef pageRef = client.page().add();
 
-        assertEquals(12, pageRef.getPosition().getPageIndex());
+        assertEquals(13, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -93,7 +93,7 @@ public class PageTest extends BaseTest {
                 .portrait()
                 .add();
 
-        assertEquals(12, pageRef.getPosition().getPageIndex());
+        assertEquals(13, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -108,7 +108,7 @@ public class PageTest extends BaseTest {
                 .landscape()
                 .add();
 
-        assertEquals(12, pageRef.getPosition().getPageIndex());
+        assertEquals(13, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -119,17 +119,17 @@ public class PageTest extends BaseTest {
         assertEquals(12, client.getPages().size());
 
         PageRef pageRef = client.page()
-                .atIndex(5)
+                .atIndex(6)
                 .a5()
                 .landscape()
                 .add();
 
-        assertEquals(5, pageRef.getPosition().getPageIndex());
+        assertEquals(6, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
         new PDFAssertions(client)
-                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.PORTRAIT, 5)
-                .assertTotalNumberOfElements(0, 5);
+                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.PORTRAIT, 6)
+                .assertTotalNumberOfElements(0, 6);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class PageTest extends BaseTest {
                 .landscape()
                 .add();
 
-        assertEquals(12, pageRef.getPosition().getPageIndex());
+        assertEquals(13, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -153,12 +153,12 @@ public class PageTest extends BaseTest {
         assertEquals(12, client.getPages().size());
 
         PageRef pageRef = client.page()
-                .atIndex(3)
+                .atIndex(4)
                 .pageSize(PageSize.A3)
                 .orientation(Orientation.LANDSCAPE)
                 .add();
 
-        assertEquals(3, pageRef.getPosition().getPageIndex());
+        assertEquals(4, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
     }
@@ -167,16 +167,16 @@ public class PageTest extends BaseTest {
     public void movePage() throws IOException {
         PDFDancer client = createClient();
 
-        List<TextParagraphReference> paragraphs = client.page(0).selectParagraphsStartingWith("The Complete");
+        List<TextParagraphReference> paragraphs = client.page(1).selectParagraphsStartingWith("The Complete");
         assertEquals(1, paragraphs.size());
 
-        assertTrue(client.movePage(0, 11));
+        assertTrue(client.movePage(1, 12));
         client.save("/tmp/movePage.pdf");
 
         List<PageRef> newPageList = client.getPages();
         assertEquals(12, newPageList.size());
 
-        paragraphs = client.page(11).selectParagraphsStartingWith("The Complete");
+        paragraphs = client.page(12).selectParagraphsStartingWith("The Complete");
         assertEquals(1, paragraphs.size());
     }
 

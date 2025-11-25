@@ -19,7 +19,7 @@ public class ImageTest extends BaseTest {
         List<ImageReference> images = client.selectImages(); // all images
         assertEquals(3, images.size());
 
-        List<ImageReference> firstPageImages = client.page(0).selectImages();
+        List<ImageReference> firstPageImages = client.page(1).selectImages();
         assertEquals(2, firstPageImages.size());
     }
 
@@ -57,7 +57,7 @@ public class ImageTest extends BaseTest {
 
         PDFAssertions assertions = new PDFAssertions(client);
         for (int i = 0; i < client.getPages().size(); i++) {
-            assertions.assertNumberOfImages(0, i);
+            assertions.assertNumberOfImages(0, i+1);
         }
     }
 
@@ -87,9 +87,9 @@ public class ImageTest extends BaseTest {
     @Test
     public void findImageByPosition() {
         PDFDancer client = createClient();
-        List<ImageReference> images = client.page(11).selectImagesAt(0, 0);
+        List<ImageReference> images = client.page(12).selectImagesAt(0, 0);
         assertEquals(0, images.size());
-        images = client.page(11).selectImagesAt(54, 300, 1);
+        images = client.page(12).selectImagesAt(54, 300, 1);
         assertEquals(1, images.size());
         assertEquals("IMAGE_000003", images.get(0).getInternalId());
     }
@@ -99,14 +99,14 @@ public class ImageTest extends BaseTest {
         PDFDancer client = createClient();
 
         // Test finding a single image at a known position with sufficient epsilon
-        Optional<ImageReference> image = client.page(11).selectImageAt(54, 300, 1);
+        Optional<ImageReference> image = client.page(12).selectImageAt(54, 300, 1);
         assertTrue(image.isPresent(), "Should find image at known position");
         assertEquals("IMAGE_000003", image.get().getInternalId());
         assertEquals(54, image.get().getPosition().getX().intValue());
         assertEquals(300, image.get().getPosition().getY().intValue());
 
         // Test at position with no image
-        Optional<ImageReference> emptyResult = client.page(11).selectImageAt(0, 0, 1);
+        Optional<ImageReference> emptyResult = client.page(12).selectImageAt(0, 0, 1);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no image found");
     }
 
@@ -122,18 +122,18 @@ public class ImageTest extends BaseTest {
         assertTrue(
                 client.newImage()
                         .fromFile(file)
-                        .at(6, 50.1, 98)
+                        .at(7, 50.1, 98)
                         .add()
         );
 
         List<ImageReference> after = client.selectImages();
         assertEquals(4, after.size());
 
-        List<ImageReference> page6 = client.page(6).selectImages();
-        assertEquals(1, page6.size());
+        List<ImageReference> page7 = client.page(7).selectImages();
+        assertEquals(1, page7.size());
 
-        ImageReference img = page6.get(0);
-        assertEquals(6, img.getPosition().getPageIndex());
+        ImageReference img = page7.get(0);
+        assertEquals(7, img.getPosition().getPageNumber());
         assertEquals("IMAGE_000004", img.getInternalId());
         assertEquals(50.1, img.getPosition().getX(), 0.01);
         assertEquals(98, img.getPosition().getY(), 0.01);

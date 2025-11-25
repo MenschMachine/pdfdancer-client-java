@@ -12,10 +12,10 @@ import java.util.Objects;
  * in the document's page sequence.
  */
 public final class PageMoveRequest {
-    @JsonProperty("fromPageIndex")
-    private final int fromPageIndex;
-    @JsonProperty("toPageIndex")
-    private final int toPageIndex;
+    @JsonProperty("fromPageNumber")
+    private final int fromPageNumber;
+    @JsonProperty("toPageNumber")
+    private final int toPageNumber;
 
     /**
      *
@@ -26,24 +26,24 @@ public final class PageMoveRequest {
              * The page number to move (1-based indexing).
              * This page will be extracted from its current getPosition.
              */
-            @JsonProperty("fromPageIndex") int fromPageIndex,
+            @JsonProperty("fromPageNumber") int fromPageNumber,
             /**
              * The target getPosition for the page (1-based indexing).
              * The specified page will be inserted at this getPosition,
              * with other pages shifting accordingly.
              */
-            @JsonProperty("toPageIndex") int toPageIndex
+            @JsonProperty("toPageNumber") int toPageNumber
     ) {
-        this.fromPageIndex = fromPageIndex;
-        this.toPageIndex = toPageIndex;
+        this.fromPageNumber = fromPageNumber;
+        this.toPageNumber = toPageNumber;
     }
 
-    public int fromPageIndex() {
-        return fromPageIndex;
+    public int fromPageNumber() {
+        return fromPageNumber;
     }
 
-    public int toPageIndex() {
-        return toPageIndex;
+    public int toPageNumber() {
+        return toPageNumber;
     }
 
     @Override
@@ -51,20 +51,20 @@ public final class PageMoveRequest {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (PageMoveRequest) obj;
-        return this.fromPageIndex == that.fromPageIndex &&
-                this.toPageIndex == that.toPageIndex;
+        return this.fromPageNumber == that.fromPageNumber &&
+                this.toPageNumber == that.toPageNumber;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fromPageIndex, toPageIndex);
+        return Objects.hash(fromPageNumber, toPageNumber);
     }
 
     @Override
     public String toString() {
         return "PageMoveRequest[" +
-                "fromPageIndex=" + fromPageIndex + ", " +
-                "toPageIndex=" + toPageIndex + ']';
+                "fromPageNumber=" + fromPageNumber + ", " +
+                "toPageNumber=" + toPageNumber + ']';
     }
 
 }

@@ -15,7 +15,7 @@ public class Position {
      * Page number where this getPosition is located (0-based indexing).
      * null indicates the getPosition applies across all pages.
      */
-    private Integer pageIndex;
+    private Integer pageNumber;
     /**
      * Geometric shape type defining how the getPosition area is interpreted.
      */
@@ -43,12 +43,12 @@ public class Position {
      * This constructor allows full specification of getPosition parameters for
      * complex positioning requirements.
      *
-     * @param pageIndex    the page number where the getPosition is located
+     * @param pageNumber    the page number where the getPosition is located
      * @param boundingRect the spatial bounds of the getPosition area
      * @param mode         how object matching should be performed
      */
-    public Position(Integer pageIndex, BoundingRect boundingRect, PositionMode mode) {
-        this.pageIndex = pageIndex;
+    public Position(Integer pageNumber, BoundingRect boundingRect, PositionMode mode) {
+        this.pageNumber = pageNumber;
         this.boundingRect = boundingRect;
         this.mode = mode;
     }
@@ -72,11 +72,11 @@ public class Position {
      * This factory method creates a getPosition that encompasses the entire specified page,
      * useful for page-level operations or when precise coordinates are not needed.
      *
-     * @param pageIndex the page number (0-based) to reference
+     * @param pageNumber the page number (0-based) to reference
      * @return a Position object representing the entire specified page
      */
-    public static Position atPage(int pageIndex) {
-        return new Position(pageIndex, null, PositionMode.CONTAINS);
+    public static Position atPage(int pageNumber) {
+        return new Position(pageNumber, null, PositionMode.CONTAINS);
     }
 
     /**
@@ -84,13 +84,13 @@ public class Position {
      * This factory method creates a precise point location within the specified page,
      * enabling accurate positioning for object placement and searching operations.
      *
-     * @param pageIndex the page number (0-based) containing the coordinates
+     * @param pageNumber the page number (0-based) containing the coordinates
      * @param x         the horizontal coordinate within the page
      * @param y         the vertical coordinate within the page
      * @return a Position object representing the specified point location
      */
-    public static Position atPageCoordinates(int pageIndex, double x, double y) {
-        Position position = Position.atPage(pageIndex);
+    public static Position atPageCoordinates(int pageNumber, double x, double y) {
+        Position position = Position.atPage(pageNumber);
         position.atPosition(new Point(x, y));
         return position;
     }
@@ -161,7 +161,7 @@ public class Position {
     }
 
     public Position copy() {
-        Position p = new Position(pageIndex, boundingRect, mode);
+        Position p = new Position(pageNumber, boundingRect, mode);
         p.textStartsWith = textStartsWith;
         p.shape = shape;
         p.textPattern = textPattern;
@@ -193,7 +193,7 @@ public class Position {
     @Override
     public String toString() {
         return "Position{" +
-                "pageIndex=" + pageIndex +
+                "pageNumber=" + pageNumber +
                 ", shape=" + shape +
                 ", mode=" + mode +
                 ", boundingRect=" + boundingRect +
@@ -205,17 +205,17 @@ public class Position {
      *
      * @return the page number (0-based), or null if getPosition applies to all pages
      */
-    public Integer getPageIndex() {
-        return pageIndex;
+    public Integer getPageNumber() {
+        return pageNumber;
     }
 
     /**
      * Sets the page number for this getPosition.
      *
-     * @param pageIndex the page number (0-based), or null for all pages
+     * @param pageNumber the page number (0-based), or null for all pages
      */
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
+    public void setPageNumber(Integer pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
     /**

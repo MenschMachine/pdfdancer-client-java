@@ -12,12 +12,12 @@ public class PathConvenienceMethodsTest extends BaseTest {
     public void convenienceCircleRectAndClosePath() {
         PDFDancer pdf = newPdf();
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         double width = snapshot.pageRef().getPageSize().getWidth();
         double height = snapshot.pageRef().getPageSize().getHeight();
 
         // Rectangle at bottom-left
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .color(Color.BLACK)
                 .fillColor(new Color(50, 205, 50, 140))
                 .lineWidth(1.5)
@@ -26,7 +26,7 @@ public class PathConvenienceMethodsTest extends BaseTest {
 
         // Circle in the center
         double r = Math.min(width, height) * 0.12;
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .color(new Color(25, 25, 112))
                 .fillColor(new Color(220, 20, 60, 160))
                 .lineWidth(2.0)
@@ -36,7 +36,7 @@ public class PathConvenienceMethodsTest extends BaseTest {
         // Triangle via lines, then closePath (stroke only)
         double tx = width - 160;
         double ty = height - 200;
-        pdf.page(0).newPath()
+        pdf.page(1).newPath()
                 .color(new Color(30, 144, 255))
                 .lineWidth(2.0)
                 .moveTo(tx, ty)
