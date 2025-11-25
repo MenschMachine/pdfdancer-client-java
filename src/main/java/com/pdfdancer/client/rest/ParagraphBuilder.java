@@ -84,8 +84,8 @@ public class ParagraphBuilder {
         return this;
     }
 
-    public ParagraphBuilder at(int pageIndex, double x, double y) {
-        paragraph.setPosition(Position.atPageCoordinates(pageIndex, x, y));
+    public ParagraphBuilder at(int pageNumber, double x, double y) {
+        paragraph.setPosition(Position.atPageCoordinates(pageNumber, x, y));
         return this;
     }
 

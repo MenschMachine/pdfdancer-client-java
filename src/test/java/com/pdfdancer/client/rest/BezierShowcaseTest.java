@@ -15,7 +15,7 @@ public class BezierShowcaseTest extends BaseTest {
     public void showcaseBezierCurves() throws IOException {
         PDFDancer pdf = newPdf();
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         double width = snapshot.pageRef().getPageSize().getWidth();
         double height = snapshot.pageRef().getPageSize().getHeight();
 
@@ -26,7 +26,7 @@ public class BezierShowcaseTest extends BaseTest {
         double bottom = margin;
 
         // 1) Simple S-curve across the page
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(left, top - 80)
                 .control1(left + (right - left) * 0.25, top - 20)
                 .control2(left + (right - left) * 0.75, top - 140)
@@ -36,7 +36,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .add();
 
         // 2) Gentle arc
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(left, top - 140)
                 .control1(left + (right - left) * 0.33, top - 140)
                 .control2(left + (right - left) * 0.66, top - 220)
@@ -46,7 +46,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .add();
 
         // 3) Tight curve with thicker stroke
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(left + 20, top - 260)
                 .control1(left + 60, top - 260)
                 .control2(left + 140, top - 320)
@@ -56,7 +56,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .add();
 
         // 4) Dashed curve
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(left, top - 380)
                 .control1(left + (right - left) * 0.25, top - 320)
                 .control2(left + (right - left) * 0.75, top - 440)
@@ -67,7 +67,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .add();
 
         // 5) Dashed curve with phase offset
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(left, top - 440)
                 .control1(left + (right - left) * 0.25, top - 380)
                 .control2(left + (right - left) * 0.75, top - 500)
@@ -83,7 +83,7 @@ public class BezierShowcaseTest extends BaseTest {
         double r = Math.min(width, height) * 0.18;
         double k = 0.5522847498 * r;
         // Top-right quarter
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(cx, cy + r)
                 .control1(cx + k, cy + r)
                 .control2(cx + r, cy + k)
@@ -92,7 +92,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .lineWidth(1.75)
                 .add();
         // Right-bottom quarter (dashed)
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(cx + r, cy)
                 .control1(cx + r, cy - k)
                 .control2(cx + k, cy - r)
@@ -102,7 +102,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .dash(3, 2)
                 .add();
         // Bottom-left quarter
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(cx, cy - r)
                 .control1(cx - k, cy - r)
                 .control2(cx - r, cy - k)
@@ -111,7 +111,7 @@ public class BezierShowcaseTest extends BaseTest {
                 .lineWidth(1.75)
                 .add();
         // Left-top quarter (dashed with phase)
-        pdf.page(0).newBezier()
+        pdf.page(1).newBezier()
                 .from(cx - r, cy)
                 .control1(cx - r, cy + k)
                 .control2(cx - k, cy + r)
@@ -126,9 +126,9 @@ public class BezierShowcaseTest extends BaseTest {
         assertEquals(expectedCurves, pdf.selectPaths().size());
 
         // Spot-check a few positions (hit-test near curve start points)
-        assertFalse(pdf.page(0).selectPathsAt(left, top - 80).isEmpty());
-        assertFalse(pdf.page(0).selectPathsAt(left, top - 380).isEmpty());
-        assertFalse(pdf.page(0).selectPathsAt(cx, cy + r).isEmpty());
+        assertFalse(pdf.page(1).selectPathsAt(left, top - 80).isEmpty());
+        assertFalse(pdf.page(1).selectPathsAt(left, top - 380).isEmpty());
+        assertFalse(pdf.page(1).selectPathsAt(cx, cy + r).isEmpty());
 
         // Save for visual inspection
         pdf.save("/tmp/bezier-Showcase.pdf");

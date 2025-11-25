@@ -29,7 +29,7 @@ import com.pdfdancer.common.model.path.Path;
 public class LineBuilder {
 
     private final PDFDancer client;
-    private final int pageIndex;
+    private final int pageNumber;
     private Point from;
     private Point to;
     private Color strokeColor;
@@ -41,11 +41,11 @@ public class LineBuilder {
      * Creates a builder bound to a specific page.
      *
      * @param client    PDFDancer client used to submit the object
-     * @param pageIndex zero-based index of the page to draw the line on
+     * @param pageNumber number of the page to draw the line on (1-based)
      */
-    public LineBuilder(PDFDancer client, int pageIndex) {
+    public LineBuilder(PDFDancer client, int pageNumber) {
         this.client = client;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
     }
 
     /**
@@ -174,8 +174,8 @@ public class LineBuilder {
         if (dashPhase != null) {
             line.setDashPhase(dashPhase);
         }
-        // Set position on the line segment (page index is what matters)
-        line.setPosition(Position.atPageCoordinates(pageIndex, from.x(), from.y()));
+        // Set position on the line segment (page number is what matters)
+        line.setPosition(Position.atPageCoordinates(pageNumber, from.x(), from.y()));
 
         // Build the Path
         Path path = new Path();

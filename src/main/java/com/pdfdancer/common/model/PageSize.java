@@ -2,6 +2,8 @@ package com.pdfdancer.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.Objects;
+
 /**
  * Represents PDF page dimensions, supporting both standard sizes and custom dimensions.
  * Dimensions are specified in points (1/72 inch).
@@ -172,5 +174,17 @@ public class PageSize {
     @JsonIgnore
     public boolean isCustom() {
         return name == null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PageSize)) return false;
+        PageSize pageSize = (PageSize) o;
+        return Double.compare(width, pageSize.width) == 0 && Double.compare(height, pageSize.height) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height);
     }
 }

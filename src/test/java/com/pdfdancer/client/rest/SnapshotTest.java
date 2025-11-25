@@ -25,10 +25,10 @@ class SnapshotTest extends BaseTest {
     @Test
     void testPageSnapshotMatchesSelectParagraphs() {
         PDFDancer pdf = createClient();
-        PDFDancer.PageClient page = pdf.page(0);
+        PDFDancer.PageClient page = pdf.page(1);
 
         // Get data via snapshot
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         List<ObjectRef> snapshotParagraphs = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.PARAGRAPH)
                 .collect(Collectors.toUnmodifiableList());
@@ -52,9 +52,9 @@ class SnapshotTest extends BaseTest {
     @Test
     void testPageSnapshotMatchesSelectImages() {
         PDFDancer pdf = createClient();
-        PDFDancer.PageClient page = pdf.page(0);
+        PDFDancer.PageClient page = pdf.page(1);
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         List<ObjectRef> snapshotImages = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.IMAGE)
                 .collect(Collectors.toUnmodifiableList());
@@ -78,9 +78,9 @@ class SnapshotTest extends BaseTest {
     @Test
     void testPageSnapshotMatchesSelectForms() {
         PDFDancer pdf = createClient();
-        PDFDancer.PageClient page = pdf.page(0);
+        PDFDancer.PageClient page = pdf.page(1);
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         List<ObjectRef> snapshotForms = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.FORM_X_OBJECT)
                 .collect(Collectors.toUnmodifiableList());
@@ -104,9 +104,9 @@ class SnapshotTest extends BaseTest {
     @Test
     void testPageSnapshotMatchesSelectFormFields() {
         PDFDancer pdf = createClient();
-        PDFDancer.PageClient page = pdf.page(0);
+        PDFDancer.PageClient page = pdf.page(1);
 
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
         List<ObjectRef> snapshotFormFields = snapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.FORM_FIELD ||
                         e.getType() == ObjectType.TEXT_FIELD ||
@@ -133,7 +133,7 @@ class SnapshotTest extends BaseTest {
     @Test
     void testPageSnapshotContainsAllElementTypes() {
         PDFDancer pdf = createClient();
-        PageSnapshot snapshot = pdf.getPageSnapshot(0);
+        PageSnapshot snapshot = pdf.getPageSnapshot(1);
 
         // Count elements by type
         long paragraphCount = snapshot.elements().stream().filter(e -> e.getType() == ObjectType.PARAGRAPH).count();
@@ -162,9 +162,9 @@ class SnapshotTest extends BaseTest {
 
         DocumentSnapshot docSnapshot = pdf.getDocumentSnapshot();
 
-        // Verify each page matches individual page snapshot
-        for (int i = 0; i < docSnapshot.pageCount(); i++) {
-            PageSnapshot docPageSnap = docSnapshot.pages().get(i);
+        // Verify each page matches individual page snapshot (1-based page numbers)
+        for (int i = 1; i <= docSnapshot.pageCount(); i++) {
+            PageSnapshot docPageSnap = docSnapshot.pages().get(i - 1);
             PageSnapshot individualPageSnap = pdf.getPageSnapshot(i);
 
             assertEquals(individualPageSnap.elements().size(), docPageSnap.elements().size(),
@@ -194,10 +194,10 @@ class SnapshotTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Get snapshot with PARAGRAPH filter
-        PageSnapshot paragraphSnapshot = pdf.getPageSnapshot(0, "PARAGRAPH");
+        PageSnapshot paragraphSnapshot = pdf.getPageSnapshot(1, "PARAGRAPH");
 
         // Get paragraphs via select method
-        List<TextParagraphReference> selectedParagraphs = pdf.page(0).selectParagraphs();
+        List<TextParagraphReference> selectedParagraphs = pdf.page(1).selectParagraphs();
 
         assertEquals(selectedParagraphs.size(), paragraphSnapshot.elements().size(),
                 "Filtered snapshot should match selectParagraphs() count");
@@ -221,7 +221,7 @@ class SnapshotTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Get snapshot with multiple type filter
-        PageSnapshot multiSnapshot = pdf.getPageSnapshot(0, "PARAGRAPH,TEXT_LINE");
+        PageSnapshot multiSnapshot = pdf.getPageSnapshot(1, "PARAGRAPH,TEXT_LINE");
 
         // Verify only specified types are present
         assertTrue(multiSnapshot.elements().stream()
@@ -230,7 +230,7 @@ class SnapshotTest extends BaseTest {
                 "Multi-type filter should only contain specified types");
 
         // Count should be sum of those types from unfiltered snapshot
-        PageSnapshot fullSnapshot = pdf.getPageSnapshot(0);
+        PageSnapshot fullSnapshot = pdf.getPageSnapshot(1);
         long expectedCount = fullSnapshot.elements().stream()
                 .filter(e -> e.getType() == ObjectType.PARAGRAPH || e.getType() == ObjectType.TEXT_LINE)
                 .count();
@@ -271,12 +271,12 @@ class SnapshotTest extends BaseTest {
 
         assertTrue(docSnapshot.pageCount() > 1, "Need multiple pages for this test");
 
-        // Test that each page's snapshot is independent
-        for (int i = 0; i < Math.min(3, docSnapshot.pageCount()); i++) {
+        // Test that each page's snapshot is independent (1-based page numbers)
+        for (int i = 1; i <= Math.min(3, docSnapshot.pageCount()); i++) {
             PageSnapshot pageSnap = pdf.getPageSnapshot(i);
             assertNotNull(pageSnap, "Page " + i + " snapshot should not be null");
-            assertEquals(i, pageSnap.pageRef().getPosition().getPageIndex(),
-                    "Page snapshot should have correct page index");
+            assertEquals(i, pageSnap.pageRef().getPosition().getPageNumber(),
+                    "Page snapshot should have correct page number");
         }
     }
 

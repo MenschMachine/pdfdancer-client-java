@@ -32,11 +32,11 @@ public class AcroformTest extends BaseTest {
         });
         assertFalse(allAtOrigin, "All forms should not be at coordinates (0,0)");
 
-        List<FormFieldReference> firstPage = pdf.page(0).selectFormFields();
+        List<FormFieldReference> firstPage = pdf.page(1).selectFormFields();
         assertEquals(10, firstPage.size());
 
         List<FormFieldReference> byPosition =
-                pdf.page(0).selectFormFieldsAt(280, 455, 1);
+                pdf.page(1).selectFormFieldsAt(280, 455, 1);
         assertEquals(1, byPosition.size());
         assertEquals(ObjectType.RADIO_BUTTON, byPosition.get(0).type());
         assertEquals("FORM_FIELD_000008", byPosition.get(0).getInternalId());
@@ -47,18 +47,18 @@ public class AcroformTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Test finding a single form field at a known position
-        Optional<FormFieldReference> formField = pdf.page(0).selectFormFieldAt(280, 455, 1);
+        Optional<FormFieldReference> formField = pdf.page(1).selectFormFieldAt(280, 455, 1);
         assertTrue(formField.isPresent(), "Should find form field at known position");
         assertEquals(ObjectType.RADIO_BUTTON, formField.get().type());
         assertEquals("FORM_FIELD_000008", formField.get().getInternalId());
 
         // Test with default epsilon
-        Optional<FormFieldReference> formFieldDefaultEpsilon = pdf.page(0).selectFormFieldAt(280, 455);
+        Optional<FormFieldReference> formFieldDefaultEpsilon = pdf.page(1).selectFormFieldAt(280, 455);
         assertTrue(formFieldDefaultEpsilon.isPresent(), "Should find form field with default epsilon");
         assertEquals("FORM_FIELD_000008", formFieldDefaultEpsilon.get().getInternalId());
 
         // Test at position with no form field
-        Optional<FormFieldReference> emptyResult = pdf.page(0).selectFormFieldAt(0, 0);
+        Optional<FormFieldReference> emptyResult = pdf.page(1).selectFormFieldAt(0, 0);
         assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form field found");
     }
 
@@ -83,7 +83,7 @@ public class AcroformTest extends BaseTest {
     public void moveFormField() {
         // TODO double check coordinates
         PDFDancer pdf = createClient();
-        List<FormFieldReference> fields = pdf.page(0)
+        List<FormFieldReference> fields = pdf.page(1)
                 .selectFormFieldsAt(380, 455, 10);
         assertEquals(1, fields.size());
 
@@ -93,10 +93,10 @@ public class AcroformTest extends BaseTest {
 
         field.moveTo(30, 40);
 
-        List<FormFieldReference> oldSpot = pdf.page(0).selectFormFieldsAt(380, 455);
+        List<FormFieldReference> oldSpot = pdf.page(1).selectFormFieldsAt(380, 455);
         assertEquals(0, oldSpot.size());
 
-        List<FormFieldReference> newSpot = pdf.page(0).selectFormFieldsAt(30, 40);
+        List<FormFieldReference> newSpot = pdf.page(1).selectFormFieldsAt(30, 40);
         assertEquals(1, newSpot.size());
         assertEquals(field.getInternalId(), newSpot.get(0).getInternalId());
     }

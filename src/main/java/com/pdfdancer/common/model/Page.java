@@ -18,9 +18,9 @@ public class Page extends PDFObject {
      */
     private String id;
     /**
-     * Sequential page number within the document (0-based indexing).
+     * Sequential page number within the document (1-based).
      */
-    private int pageIndex;
+    private int pageNumber;
     /**
      * Physical dimensions of the page including width and height.
      */
@@ -59,12 +59,12 @@ public class Page extends PDFObject {
      * with content elements to be added separately.
      *
      * @param id        unique identifier for the page
-     * @param pageIndex sequential number of this page in the document
+     * @param pageNumber sequential number of this page in the document
      * @param size      physical dimensions of the page
      */
-    public Page(String id, int pageIndex, PageSize size) {
+    public Page(String id, int pageNumber, PageSize size) {
         this.id = id;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
         this.size = size;
     }
 
@@ -76,12 +76,12 @@ public class Page extends PDFObject {
         this.id = id;
     }
 
-    public int getPageIndex() {
-        return pageIndex;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
-    public void setPageIndex(int pageIndex) {
-        this.pageIndex = pageIndex;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
     public PageSize getSize() {
@@ -133,7 +133,7 @@ public class Page extends PDFObject {
      * @return an ObjectRef representing this page
      */
     public PageRef toObjectRef() {
-        return new PageRef(this.getId(), Position.atPage(this.getPageIndex()), this.getObjectType(), this.getObjectType(), this.size, Orientation.PORTRAIT); // TODO
+        return new PageRef(this.getId(), Position.atPage(this.getPageNumber()), this.getObjectType(), this.getObjectType(), this.size, Orientation.PORTRAIT); // TODO
     }
 
     @Override
@@ -143,7 +143,7 @@ public class Page extends PDFObject {
 
     @Override
     public Position getPosition() {
-        return Position.atPage(this.getPageIndex());
+        return Position.atPage(this.getPageNumber());
     }
 
     @Override

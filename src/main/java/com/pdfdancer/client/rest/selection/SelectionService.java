@@ -123,10 +123,10 @@ public class SelectionService {
         return results;
     }
 
-    public List<FormFieldRef> collectFormFieldRefsFromPage(PDFDancer root, int pageIndex) {
+    public List<FormFieldRef> collectFormFieldRefsFromPage(PDFDancer root, int pageNumber) {
         List<FormFieldRef> results = new ArrayList<>();
         for (Form.FormType filter : Form.FormType.values()) {
-            TypedPageSnapshot<FormFieldRef> snapshot = root.getTypedPageSnapshot(pageIndex, FormFieldRef.class, filter.name());
+            TypedPageSnapshot<FormFieldRef> snapshot = root.getTypedPageSnapshot(pageNumber, FormFieldRef.class, filter.name());
             List<FormFieldRef> elements = getTypedElements(snapshot, FormFieldRef.class);
             elements.stream()
                     .map(ref -> adjustFormFieldType(ref, filter))
