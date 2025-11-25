@@ -18,7 +18,7 @@ public class Page extends PDFObject {
      */
     private String id;
     /**
-     * Sequential page number within the document (0-based indexing).
+     * Sequential page number within the document (1-based).
      */
     private int pageNumber;
     /**

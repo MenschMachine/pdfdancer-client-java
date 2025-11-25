@@ -43,7 +43,7 @@ public class PageTest extends BaseTest {
         ObjectRef page = client.getPage(3);
 
         assertNotNull(page);
-        assertEquals(2, page.getPosition().getPageNumber());
+        assertEquals(3, page.getPosition().getPageNumber());
         assertNotNull(page.getInternalId());
     }
 
@@ -124,12 +124,35 @@ public class PageTest extends BaseTest {
                 .landscape()
                 .add();
 
-        assertEquals(6, pageRef.getPosition().getPageNumber());
+        assertEquals(7, pageRef.getPosition().getPageNumber());
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
         new PDFAssertions(client)
-                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.PORTRAIT, 6)
-                .assertTotalNumberOfElements(0, 6);
+                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.LANDSCAPE, 7)
+                .assertTotalNumberOfElements(0, 7);
+    }
+
+    @Test
+    public void addPageWithBuilderAtNumber() throws IOException {
+        PDFDancer client = createClient();
+        assertEquals(12, client.getPages().size());
+
+        PageRef pageRef = client.page()
+                .atPage(7)
+                .a5()
+                .landscape()
+                .add();
+
+        assertEquals(7, pageRef.getPosition().getPageNumber());
+        assertEquals(PageSize.A5, pageRef.getPageSize());
+        assertEquals(Orientation.LANDSCAPE, pageRef.getOrientation());
+
+        List<PageRef> newPageList = client.getPages();
+        assertEquals(13, newPageList.size());
+
+        new PDFAssertions(client)
+                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.LANDSCAPE, 7)
+                .assertTotalNumberOfElements(0, 7);
     }
 
     @Test
@@ -153,7 +176,7 @@ public class PageTest extends BaseTest {
         assertEquals(12, client.getPages().size());
 
         PageRef pageRef = client.page()
-                .atIndex(4)
+                .atPage(4)
                 .pageSize(PageSize.A3)
                 .orientation(Orientation.LANDSCAPE)
                 .add();

@@ -41,7 +41,7 @@ public class LineBuilder {
      * Creates a builder bound to a specific page.
      *
      * @param client    PDFDancer client used to submit the object
-     * @param pageNumber zero-based index of the page to draw the line on
+     * @param pageNumber number of the page to draw the line on (1-based)
      */
     public LineBuilder(PDFDancer client, int pageNumber) {
         this.client = client;
@@ -174,7 +174,7 @@ public class LineBuilder {
         if (dashPhase != null) {
             line.setDashPhase(dashPhase);
         }
-        // Set position on the line segment (page index is what matters)
+        // Set position on the line segment (page number is what matters)
         line.setPosition(Position.atPageCoordinates(pageNumber, from.x(), from.y()));
 
         // Build the Path
