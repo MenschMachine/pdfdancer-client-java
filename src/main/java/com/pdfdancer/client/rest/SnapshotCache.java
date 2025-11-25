@@ -1,11 +1,14 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.client.http.HttpRequest;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.PageSnapshot;
-import com.pdfdancer.client.http.HttpRequest;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -117,7 +120,7 @@ final class SnapshotCache implements SnapshotFetcher {
         documentSnapshotCache.put(key, snapshot);
         List<PageSnapshot> pages = snapshot.pages();
         for (int i = 0; i < pages.size(); i++) {
-            pageSnapshotCache.put(new PageSnapshotKey(i, key), pages.get(i));
+            pageSnapshotCache.put(new PageSnapshotKey(i + 1, key), pages.get(i));
         }
         return snapshot;
     }
@@ -142,7 +145,7 @@ final class SnapshotCache implements SnapshotFetcher {
         typedDocumentSnapshotCache.put(cacheKey, snapshot);
         List<TypedPageSnapshot<T>> pages = snapshot.getPages();
         for (int i = 0; i < pages.size(); i++) {
-            typedPageSnapshotCache.put(new TypedPageSnapshotKey(i, elementClass, key), pages.get(i));
+            typedPageSnapshotCache.put(new TypedPageSnapshotKey(i + 1, elementClass, key), pages.get(i));
         }
         return snapshot;
     }

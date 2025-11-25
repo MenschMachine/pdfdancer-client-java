@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class Position {
     private String name;
     /**
-     * Page number where this getPosition is located (0-based indexing).
+     * Page number where this getPosition is located (1-based indexing).
      * null indicates the getPosition applies across all pages.
      */
     private Integer pageNumber;
@@ -43,7 +43,7 @@ public class Position {
      * This constructor allows full specification of getPosition parameters for
      * complex positioning requirements.
      *
-     * @param pageNumber    the page number where the getPosition is located
+     * @param pageNumber   the page number where the getPosition is located
      * @param boundingRect the spatial bounds of the getPosition area
      * @param mode         how object matching should be performed
      */
@@ -72,7 +72,7 @@ public class Position {
      * This factory method creates a getPosition that encompasses the entire specified page,
      * useful for page-level operations or when precise coordinates are not needed.
      *
-     * @param pageNumber the page number (0-based) to reference
+     * @param pageNumber the page number (1-based) to reference
      * @return a Position object representing the entire specified page
      */
     public static Position atPage(int pageNumber) {
@@ -84,9 +84,9 @@ public class Position {
      * This factory method creates a precise point location within the specified page,
      * enabling accurate positioning for object placement and searching operations.
      *
-     * @param pageNumber the page number (0-based) containing the coordinates
-     * @param x         the horizontal coordinate within the page
-     * @param y         the vertical coordinate within the page
+     * @param pageNumber the page number (1-based) containing the coordinates
+     * @param x          the horizontal coordinate within the page
+     * @param y          the vertical coordinate within the page
      * @return a Position object representing the specified point location
      */
     public static Position atPageCoordinates(int pageNumber, double x, double y) {
@@ -203,16 +203,24 @@ public class Position {
     /**
      * Returns the page number where this getPosition is located.
      *
-     * @return the page number (0-based), or null if getPosition applies to all pages
+     * @return the page number (1-based), or null if getPosition applies to all pages
      */
     public Integer getPageNumber() {
         return pageNumber;
     }
 
     /**
+     * Use {@link #getPageNumber()} instead.
+     */
+    @Deprecated
+    public int getPageIndex() {
+        return pageNumber - 1;
+    }
+
+    /**
      * Sets the page number for this getPosition.
      *
-     * @param pageNumber the page number (0-based), or null for all pages
+     * @param pageNumber the page number (1-based), or null for all pages
      */
     public void setPageNumber(Integer pageNumber) {
         this.pageNumber = pageNumber;

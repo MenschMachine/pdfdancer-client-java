@@ -36,8 +36,8 @@ public class PageBuilder {
      * @deprecated Use {@link #atPage(int)} instead. This method will be removed in a future release.
      */
     @Deprecated
-    public PageBuilder atIndex(int pageNumber) {
-        return atPage(pageNumber + 1);
+    public PageBuilder atIndex(int pageIndex) {
+        return atPage(pageIndex + 1);
     }
 
     public PageBuilder orientation(Orientation orientation) {
