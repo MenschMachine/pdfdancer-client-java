@@ -43,6 +43,25 @@ public class AcroformTest extends BaseTest {
     }
 
     @Test
+    public void findFormFieldByName() {
+        PDFDancer pdf = createClient();
+
+        List<FormFieldReference> fields = pdf.page(1).selectFormFields();
+        assertEquals(10, fields.size());
+        boolean found = false;
+        for (FormFieldReference field : fields) {
+            if ("firstName".equals(field.getName())) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+        Optional<FormFieldReference> field = pdf.page(1).selectFormFieldByName("firstName");
+        assertTrue(field.isPresent());
+        assertEquals("firstName", field.get().getName());
+    }
+
+    @Test
     public void findSingularFormFieldByPosition() {
         PDFDancer pdf = createClient();
 
