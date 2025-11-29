@@ -866,6 +866,16 @@ public class PDFDancer {
         );
     }
 
+    /**
+     * Selects a single form field with the specified name.
+     * @param elementName the name of the form field to find
+     * @return Optional containing the first form field with the given name, or empty if none found
+     */
+    public java.util.Optional<FormFieldReference> selectFormFieldByName(String elementName) {
+        List<FormFieldReference> formFields = selectFormFieldsByName(elementName);
+        return formFields.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(formFields.get(0));
+    }
+
     public List<ObjectRef> selectElements() {
         List<ObjectRef> fallback = find(null, null);
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
