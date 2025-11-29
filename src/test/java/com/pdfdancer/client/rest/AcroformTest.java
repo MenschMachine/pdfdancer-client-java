@@ -63,6 +63,44 @@ public class AcroformTest extends BaseTest {
     }
 
     @Test
+    public void findSingularFormFieldByName() {
+        PDFDancer pdf = createClient();
+
+        // Test document-level selectFormFieldByName
+        Optional<FormFieldReference> formField = pdf.selectFormFieldByName("firstName");
+        assertTrue(formField.isPresent(), "Should find form field by name");
+        assertEquals("firstName", formField.get().getName());
+        assertEquals("FORM_FIELD_000001", formField.get().getInternalId());
+
+        // Test with non-existent name
+        Optional<FormFieldReference> emptyResult = pdf.selectFormFieldByName("nonExistentField");
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form field found");
+    }
+
+    @Test
+    public void findFormFieldsByNameOnPage() {
+        PDFDancer pdf = createClient();
+
+        // Test page-level selectFormFieldsByName
+        List<FormFieldReference> fields = pdf.page(1).selectFormFieldsByName("firstName");
+        assertEquals(1, fields.size());
+        assertEquals("firstName", fields.get(0).getName());
+
+        // Test singular variant on page
+        Optional<FormFieldReference> formField = pdf.page(1).selectFormFieldByName("firstName");
+        assertTrue(formField.isPresent(), "Should find form field by name on page");
+        assertEquals("firstName", formField.get().getName());
+
+        // Test with non-existent name on page
+        Optional<FormFieldReference> emptyResult = pdf.page(1).selectFormFieldByName("nonExistentField");
+        assertFalse(emptyResult.isPresent(), "Should return empty Optional when no form field found on page");
+
+        // Test plural with non-existent name
+        List<FormFieldReference> emptyList = pdf.page(1).selectFormFieldsByName("nonExistentField");
+        assertTrue(emptyList.isEmpty(), "Should return empty list when no form field found on page");
+    }
+
+    @Test
     public void deleteFormFields() {
 
         PDFDancer pdf = createClient();
