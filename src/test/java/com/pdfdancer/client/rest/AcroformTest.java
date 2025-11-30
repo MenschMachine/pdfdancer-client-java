@@ -120,6 +120,10 @@ public class AcroformTest extends BaseTest {
         FormFieldReference updatedField = updated.get(0);
         assertEquals("firstName", updatedField.getName());
         assertEquals("Donald Duck", updatedField.value());
+
+        new PDFAssertions(pdf)
+                .assertFormFieldExists("firstName", 1)
+                .assertFormFieldHasValue("firstName", "Donald Duck", 1);
     }
 
     @Test
