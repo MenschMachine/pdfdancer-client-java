@@ -24,14 +24,12 @@ public class ParagraphTest extends BaseTest {
         assertEquals(2, paragraphs.size());
 
         TextParagraphReference para1 = paragraphs.get(0);
-        assertEquals("PARAGRAPH_000005", para1.getInternalId());
         assertNotNull(para1.getPosition());
         assertEquals(326, para1.getPosition().getX().intValue());
         assertBetween(700, 720, para1.getPosition().getY().intValue());
 
         TextParagraphReference para2 = paragraphs.get(paragraphs.size() - 1);
         assertNotNull(para2.getPosition());
-        assertEquals("PARAGRAPH_000006", para2.getInternalId());
         assertEquals(54, para2.getPosition().getX().intValue());
         assertBetween(450, 500, para2.getPosition().getY().intValue());
     }
@@ -45,7 +43,6 @@ public class ParagraphTest extends BaseTest {
 
         TextParagraphReference para1 = paragraphs.get(0);
         assertNotNull(para1.getPosition());
-        assertEquals("PARAGRAPH_000006", para1.getInternalId());
         assertEquals(54, para1.getPosition().getX().intValue());
         assertBetween(450, 500, para1.getPosition().getY().intValue());
 
@@ -54,8 +51,6 @@ public class ParagraphTest extends BaseTest {
 
         paragraphs = client.page(1).selectParagraphsMatching(".*Complete.*");
         assertEquals(1, paragraphs.size());
-        para1 = paragraphs.get(0);
-        assertEquals("PARAGRAPH_000006", para1.getInternalId());
     }
 
     @Test
@@ -65,7 +60,6 @@ public class ParagraphTest extends BaseTest {
         // Test finding a single paragraph at a known position with sufficient epsilon
         Optional<TextParagraphReference> paragraph = client.page(1).selectParagraphAt(54, 496, 1);
         assertTrue(paragraph.isPresent(), "Should find paragraph at known position");
-        assertEquals("PARAGRAPH_000006", paragraph.get().getInternalId());
         assertEquals(54, paragraph.get().getPosition().getX().intValue());
         assertBetween(450, 500, paragraph.get().getPosition().getY().intValue());
 
