@@ -4,6 +4,7 @@ import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.response.PageSnapshot;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -269,6 +270,30 @@ class PageClientImpl {
      */
     public Optional<FormFieldReference> selectFormFieldAt(double x, double y, double epsilon) {
         List<FormFieldReference> formFields = selectFormFieldsAt(x, y, epsilon);
+        return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
+    }
+
+    /**
+     * Selects all form fields on this page with the specified name.
+     * @param name the name of the form fields to find
+     * @return list of form fields with the given name on this page
+     */
+    public List<FormFieldReference> selectFormFieldsByName(String name) {
+        List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageNumber);
+        return root.toFormFieldObject(
+                formFields.stream()
+                        .filter(ref -> Objects.equals(ref.getName(), name))
+                        .collect(Collectors.toUnmodifiableList())
+        );
+    }
+
+    /**
+     * Selects a single form field on this page with the specified name.
+     * @param name the name of the form field to find
+     * @return Optional containing the first form field with the given name, or empty if none found
+     */
+    public Optional<FormFieldReference> selectFormFieldByName(String name) {
+        List<FormFieldReference> formFields = selectFormFieldsByName(name);
         return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
     }
 
