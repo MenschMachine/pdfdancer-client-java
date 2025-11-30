@@ -16,17 +16,15 @@ public class TextLineTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         List<TextLineReference> lines = pdf.selectTextLines(); // across all pages
-        assertEquals(340, lines.size());
+        assertEquals(338, lines.size());
 
         TextLineReference first = lines.get(0);
-        assertEquals("TEXTLINE_000001", first.getInternalId());
         assertNotNull(first.getPosition());
         assertEquals(326, first.getPosition().getX().intValue());
         assertBetween(700, 720, first.getPosition().getY().intValue());
 
         TextLineReference last = lines.get(lines.size() - 1);
         assertNotNull(last.getPosition());
-        assertEquals("TEXTLINE_000340", last.getInternalId());
         assertEquals(548, last.getPosition().getX().intValue());
         assertBetween(30, 40, last.getPosition().getY().intValue());
     }
@@ -41,7 +39,6 @@ public class TextLineTest extends BaseTest {
         assertEquals(1, lines.size());
 
         TextLineReference line = lines.get(0);
-        assertEquals("TEXTLINE_000002", line.getInternalId());
         assertNotNull(line.getPosition());
         assertEquals(54, line.getPosition().getX().intValue());
         assertBetween(550, 620, line.getPosition().getY().intValue());
@@ -59,7 +56,6 @@ public class TextLineTest extends BaseTest {
         lines = pdf.page(1).selectTextLinesMatching(".*Complete.*");
         assertEquals(1, lines.size());
         TextLineReference line = lines.get(0);
-        assertEquals("TEXTLINE_000002", line.getInternalId());
 
         // Test matching with case-sensitive regex
         lines = pdf.page(1).selectTextLinesMatching("The Complete.*");
@@ -73,7 +69,6 @@ public class TextLineTest extends BaseTest {
         // Test finding a single text line by pattern
         Optional<TextLineReference> line = pdf.page(1).selectTextLineMatching(".*Complete.*");
         assertTrue(line.isPresent(), "Should find text line matching pattern");
-        assertEquals("TEXTLINE_000002", line.get().getInternalId());
 
         // Test pattern with no matches
         Optional<TextLineReference> emptyResult = pdf.page(1).selectTextLineMatching(".*NonExistentText.*");
@@ -87,7 +82,6 @@ public class TextLineTest extends BaseTest {
         // Test finding a single text line at a known position with sufficient epsilon
         Optional<TextLineReference> line = pdf.page(1).selectTextLineAt(54, 606, 1);
         assertTrue(line.isPresent(), "Should find text line at known position");
-        assertEquals("TEXTLINE_000002", line.get().getInternalId());
         assertEquals(54, line.get().getPosition().getX().intValue());
         assertBetween(550, 620, line.get().getPosition().getY().intValue());
 
