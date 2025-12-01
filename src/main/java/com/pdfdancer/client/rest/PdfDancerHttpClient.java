@@ -38,7 +38,7 @@ import static java.net.http.HttpResponse.BodyHandlers;
  */
 public final class PdfDancerHttpClient {
 
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
     private static final String DEFAULT_API_VERSION = "1";
 
     private final HttpClient delegate;
