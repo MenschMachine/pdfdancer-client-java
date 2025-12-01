@@ -26,7 +26,7 @@ public abstract class BaseTest {
         baseUrl = URI.create(baseUrlValue);
 
         HttpClient delegate = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(Duration.ofSeconds(60))
                 .build();
         httpClient = PdfDancerHttpClient.create(delegate, baseUrl);
     }
