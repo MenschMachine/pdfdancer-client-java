@@ -3,11 +3,8 @@ package com.pdfdancer.common.request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pdfdancer.common.model.Color;
-import com.pdfdancer.common.model.ObjectType;
-import com.pdfdancer.common.model.Position;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,12 +91,12 @@ public final class RedactRequest {
             return this;
         }
 
-        public Builder addTarget(ObjectType objectType, Position position) {
-            return addTarget(objectType, position, null);
+        public Builder addTargetById(String id) {
+            return addTargetById(id, null);
         }
 
-        public Builder addTarget(ObjectType objectType, Position position, String replacement) {
-            this.targets.add(new RedactTarget(objectType, position, replacement));
+        public Builder addTargetById(String id, String replacement) {
+            this.targets.add(new RedactTarget(id, replacement));
             return this;
         }
 
