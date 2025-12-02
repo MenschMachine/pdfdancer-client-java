@@ -7,6 +7,7 @@ import com.pdfdancer.client.rest.PdfDancerHttpClient;
 import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.CommandResult;
+import com.pdfdancer.common.response.RedactResponse;
 
 /**
  * Encapsulates all mutation HTTP operations. Stateless and reusable per session.
@@ -151,6 +152,17 @@ public final class ModificationService {
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),
                 Boolean.class
+        );
+    }
+
+    public RedactResponse redact(RedactRequest request) {
+        String path = "/pdf/redact";
+        return blocking.retrieve(
+                HttpRequest.POST(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                RedactResponse.class
         );
     }
 }
