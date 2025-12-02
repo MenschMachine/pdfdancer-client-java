@@ -13,6 +13,7 @@ import com.pdfdancer.common.model.ErrorResponse;
 import com.pdfdancer.common.model.FontNotFoundException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -22,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import static java.net.http.HttpRequest.BodyPublishers;
 import static java.net.http.HttpResponse.BodyHandlers;
@@ -40,6 +42,20 @@ public final class PdfDancerHttpClient {
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
     private static final String DEFAULT_API_VERSION = "1";
+    private static final String CLIENT_VERSION = loadClientVersion();
+
+    private static String loadClientVersion() {
+        try (InputStream in = PdfDancerHttpClient.class.getResourceAsStream("/pdfdancer-client.properties")) {
+            if (in != null) {
+                Properties props = new Properties();
+                props.load(in);
+                String version = props.getProperty("version", "unknown");
+                return "java/" + version;
+            }
+        } catch (IOException ignored) {
+        }
+        return "java/unknown";
+    }
 
     private final HttpClient delegate;
     private final URI baseUrl;
@@ -259,6 +275,7 @@ public final class PdfDancerHttpClient {
 
         // Add API version header
         builder.header("X-API-VERSION", apiVersion);
+        builder.header("X-PDFDancer-Client", CLIENT_VERSION);
 
         request.headers().forEach(builder::header);
 
