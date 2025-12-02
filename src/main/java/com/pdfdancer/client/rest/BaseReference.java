@@ -1,8 +1,11 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.ObjectType;
 import com.pdfdancer.common.model.Position;
+import com.pdfdancer.common.request.RedactRequest;
+import com.pdfdancer.common.response.RedactResponse;
 
 public abstract class BaseReference {
     protected final PDFDancer client;
@@ -43,5 +46,41 @@ public abstract class BaseReference {
 
     public ObjectType type() {
         return objectRef.getType();
+    }
+
+    public RedactEdit redact() {
+        return new RedactEdit(client, objectRef);
+    }
+
+    public static class RedactEdit {
+        private final PDFDancer client;
+        private final ObjectRef ref;
+        private String replacement = "[REDACTED]";
+        private Color placeholderColor = Color.BLACK;
+
+        public RedactEdit(PDFDancer client, ObjectRef ref) {
+            this.client = client;
+            this.ref = ref;
+        }
+
+        public RedactEdit withReplacement(String replacement) {
+            this.replacement = replacement;
+            return this;
+        }
+
+        public RedactEdit withColor(Color color) {
+            this.placeholderColor = color;
+            return this;
+        }
+
+        public boolean apply() {
+            RedactRequest request = RedactRequest.builder()
+                    .defaultReplacement(replacement)
+                    .placeholderColor(placeholderColor)
+                    .addTarget(ref.getType(), ref.getPosition())
+                    .build();
+            RedactResponse response = client.redact(request);
+            return response.success();
+        }
     }
 }
