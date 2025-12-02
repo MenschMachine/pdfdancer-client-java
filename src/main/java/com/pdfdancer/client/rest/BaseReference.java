@@ -77,7 +77,7 @@ public abstract class BaseReference {
             RedactRequest request = RedactRequest.builder()
                     .defaultReplacement(replacement)
                     .placeholderColor(placeholderColor)
-                    .addTarget(ref.getType(), ref.getPosition())
+                    .addTargetById(ref.getInternalId())
                     .build();
             RedactResponse response = client.redact(request);
             return response.success();
