@@ -228,4 +228,70 @@ public class RedactTest extends BaseTest {
                     "PDF should be modified after redaction");
         }
     }
+
+    // Fluent API tests
+
+    @Test
+    public void fluentRedactParagraph() {
+        PDFDancer pdf = createClient();
+
+        boolean result = pdf.page(1).selectParagraphsMatching(".*Obvious.*").get(0)
+                .redact()
+                .withReplacement("[REDACTED]")
+                .withColor(Color.BLACK)
+                .apply();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void fluentRedactTextLine() {
+        PDFDancer pdf = createClient();
+
+        boolean result = pdf.page(1).selectTextLinesMatching(".*Obvious.*").get(0)
+                .redact()
+                .withReplacement("***")
+                .apply();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void fluentRedactImage() {
+        PDFDancer pdf = createClient();
+
+        boolean result = pdf.page(1).selectImages().get(0)
+                .redact()
+                .withColor(new Color(128, 128, 128))
+                .apply();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void fluentRedactWithDefaults() {
+        PDFDancer pdf = createClient();
+
+        boolean result = pdf.page(1).selectTextLinesMatching(".*Obvious.*").get(0)
+                .redact()
+                .apply();
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void fluentRedactMultipleWithForEach() {
+        PDFDancer pdf = createClient();
+
+        var textLines = pdf.page(1).selectTextLinesMatching(".*");
+        assertTrue(textLines.size() >= 3);
+
+        for (int i = 0; i < 3; i++) {
+            boolean result = textLines.get(i)
+                    .redact()
+                    .withReplacement("[REMOVED]")
+                    .apply();
+            assertTrue(result);
+        }
+    }
 }
