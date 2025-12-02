@@ -47,6 +47,12 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.processResources {
+    filesMatching("pdfdancer-client.properties") {
+        expand("version" to project.version)
+    }
+}
+
 fun bumpVersion(part: String) {
     val propsFile = file("version.properties")
     val props = Properties()
