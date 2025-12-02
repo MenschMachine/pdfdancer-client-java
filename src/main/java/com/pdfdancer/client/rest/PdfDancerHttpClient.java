@@ -40,6 +40,7 @@ public final class PdfDancerHttpClient {
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
     private static final String DEFAULT_API_VERSION = "1";
+    private static final String CLIENT_VERSION = "java/0.2.0";
 
     private final HttpClient delegate;
     private final URI baseUrl;
@@ -259,6 +260,7 @@ public final class PdfDancerHttpClient {
 
         // Add API version header
         builder.header("X-API-VERSION", apiVersion);
+        builder.header("X-PDFDancer-Client", CLIENT_VERSION);
 
         request.headers().forEach(builder::header);
 
