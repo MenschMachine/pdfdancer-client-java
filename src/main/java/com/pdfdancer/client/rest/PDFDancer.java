@@ -9,8 +9,10 @@ import com.pdfdancer.common.model.text.Paragraph;
 import com.pdfdancer.common.request.AddPageRequest;
 import com.pdfdancer.common.request.CreateBlankPdfRequest;
 import com.pdfdancer.common.request.FindRequest;
+import com.pdfdancer.common.request.RedactRequest;
 import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.PageSnapshot;
+import com.pdfdancer.common.response.RedactResponse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -931,6 +933,20 @@ public class PDFDancer {
         Boolean result = modification.movePage(fromPage, toPage);
         invalidateSnapshotCaches();
         return Boolean.TRUE.equals(result);
+    }
+
+    /**
+     * Redacts content from the PDF document based on the provided request.
+     * Text content is replaced with a replacement string, while images and paths
+     * are replaced with solid color placeholder rectangles.
+     *
+     * @param request the redaction request containing targets and options
+     * @return response containing the count of redacted items and any warnings
+     */
+    public RedactResponse redact(RedactRequest request) {
+        RedactResponse result = modification.redact(request);
+        invalidateSnapshotCaches();
+        return result;
     }
 
     /**
