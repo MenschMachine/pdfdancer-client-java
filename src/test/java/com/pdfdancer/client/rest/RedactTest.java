@@ -15,7 +15,7 @@ public class RedactTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         var textLines = pdf.page(1).selectTextLinesMatching(".*Obvious.*");
-        assertTrue(textLines.size() > 0, "Should find at least one matching text line");
+        assertEquals(1, textLines.size(), "Should find at least one matching text line");
 
         RedactRequest request = RedactRequest.builder()
                 .defaultReplacement("[REDACTED]")
@@ -28,6 +28,10 @@ public class RedactTest extends BaseTest {
         assertNotNull(response);
         assertTrue(response.success());
         assertTrue(response.count() > 0);
+
+        new PDFAssertions(pdf)
+                .assertTextlineDoesNotExist("Obvious", 1)
+                .assertTextlineExists("[Redacted]", 1);
     }
 
     @Test
@@ -35,7 +39,7 @@ public class RedactTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         var paragraphs = pdf.page(1).selectParagraphsMatching(".*Obvious.*");
-        assertTrue(paragraphs.size() > 0, "Should find at least one matching paragraph");
+        assertEquals(1, paragraphs.size(), "Should find at least one matching paragraph");
 
         RedactRequest request = RedactRequest.builder()
                 .defaultReplacement("***")
@@ -47,6 +51,9 @@ public class RedactTest extends BaseTest {
 
         assertNotNull(response);
         assertTrue(response.success());
+        new PDFAssertions(pdf)
+                .assertParagraphNotExists("Obvious", 1)
+                .assertParagraphExists("\\*\\*\\*", 1);
     }
 
     @Test
@@ -54,7 +61,7 @@ public class RedactTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         var images = pdf.page(1).selectImages();
-        assertTrue(images.size() > 0, "Should find at least one image");
+        assertEquals(2, images.size(), "Should find at least one image");
 
         RedactRequest request = RedactRequest.builder()
                 .defaultReplacement("")
@@ -66,6 +73,8 @@ public class RedactTest extends BaseTest {
 
         assertNotNull(response);
         assertTrue(response.success());
+        new PDFAssertions(pdf)
+                .assertNumberOfImages(1, 1);
     }
 
     @Test
