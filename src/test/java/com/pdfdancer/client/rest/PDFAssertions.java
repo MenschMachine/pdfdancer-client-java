@@ -1,12 +1,14 @@
 package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
+import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Orientation;
 import com.pdfdancer.common.model.PageRef;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +45,11 @@ public class PDFAssertions {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create PDFAssertions", e);
         }
+    }
+
+    public void assertElementMatches(Predicate<? super ObjectRef> predicate, int pageIndex) {
+        boolean found = pdf.getPageSnapshot(pageIndex).elements().stream().anyMatch(predicate);
+        assertTrue(found, "Element not found");
     }
 
     // ===========================

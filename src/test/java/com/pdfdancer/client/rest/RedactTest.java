@@ -78,6 +78,27 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
+    public void redactImageOnPage2() {
+        PDFDancer pdf = createClient("Showcase.pdf");
+
+        var images = pdf.page(3).selectImages();
+        assertEquals(5, images.size());
+
+        RedactRequest request = RedactRequest.builder()
+                .defaultReplacement("")
+                .placeholderColor(new Color(128, 128, 128))
+                .addTargetById(images.get(0).getInternalId())
+                .build();
+
+        RedactResponse response = pdf.redact(request);
+
+        assertNotNull(response);
+        assertTrue(response.success());
+        new PDFAssertions(pdf)
+                .assertNumberOfImages(4, 3);
+    }
+
+    @Test
     public void redactMultipleTargetsInSingleRequest() {
         PDFDancer pdf = createClient();
 
