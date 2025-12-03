@@ -214,7 +214,7 @@ public class RedactTest extends BaseTest {
         byte[] beforeBytes = pdf.getFileBytes();
 
         var textLines = pdf.page(1).selectTextLinesMatching(".*Obvious.*");
-        assertTrue(textLines.size() > 0, "Should find at least one matching text line");
+        assertEquals(1, textLines.size(), "Should find one matching text line");
 
         RedactRequest request = RedactRequest.builder()
                 .defaultReplacement("[REDACTED]")
@@ -225,11 +225,9 @@ public class RedactTest extends BaseTest {
         RedactResponse response = pdf.redact(request);
         assertTrue(response.success());
 
-        if (response.count() > 0) {
-            byte[] afterBytes = pdf.getFileBytes();
-            assertNotEquals(beforeBytes.length, afterBytes.length,
-                    "PDF should be modified after redaction");
-        }
+        byte[] afterBytes = pdf.getFileBytes();
+        assertNotEquals(beforeBytes.length, afterBytes.length,
+                "PDF should be modified after redaction");
     }
 
     // Fluent API tests
