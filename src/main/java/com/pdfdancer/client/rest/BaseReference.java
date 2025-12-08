@@ -4,8 +4,8 @@ import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.ObjectType;
 import com.pdfdancer.common.model.Position;
-import com.pdfdancer.common.request.RedactRequest;
-import com.pdfdancer.common.response.RedactResponse;
+
+import java.util.List;
 
 public abstract class BaseReference {
     protected final PDFDancer client;
@@ -48,39 +48,44 @@ public abstract class BaseReference {
         return objectRef.getType();
     }
 
-    public RedactEdit redact() {
-        return new RedactEdit(client, objectRef);
+    /**
+     * Redacts this object from the PDF using default replacement text "[REDACTED]".
+     *
+     * @return true if redaction was successful
+     */
+    public boolean redact() {
+        return redact("[REDACTED]", Color.BLACK);
     }
 
-    public static class RedactEdit {
-        private final PDFDancer client;
-        private final ObjectRef ref;
-        private String replacement = "[REDACTED]";
-        private Color placeholderColor = Color.BLACK;
+    /**
+     * Redacts this object from the PDF with custom replacement text.
+     *
+     * @param replacement the replacement text for text content
+     * @return true if redaction was successful
+     */
+    public boolean redact(String replacement) {
+        return redact(replacement, Color.BLACK);
+    }
 
-        public RedactEdit(PDFDancer client, ObjectRef ref) {
-            this.client = client;
-            this.ref = ref;
-        }
+    /**
+     * Redacts this object from the PDF with custom placeholder color.
+     * Useful for images and paths.
+     *
+     * @param placeholderColor the color for image/path placeholders
+     * @return true if redaction was successful
+     */
+    public boolean redact(Color placeholderColor) {
+        return redact("[REDACTED]", placeholderColor);
+    }
 
-        public RedactEdit withReplacement(String replacement) {
-            this.replacement = replacement;
-            return this;
-        }
-
-        public RedactEdit withColor(Color color) {
-            this.placeholderColor = color;
-            return this;
-        }
-
-        public boolean apply() {
-            RedactRequest request = RedactRequest.builder()
-                    .defaultReplacement(replacement)
-                    .placeholderColor(placeholderColor)
-                    .addTargetById(ref.getInternalId())
-                    .build();
-            RedactResponse response = client.redact(request);
-            return response.success();
-        }
+    /**
+     * Redacts this object from the PDF with custom replacement text and placeholder color.
+     *
+     * @param replacement      the replacement text for text content
+     * @param placeholderColor the color for image/path placeholders
+     * @return true if redaction was successful
+     */
+    public boolean redact(String replacement, Color placeholderColor) {
+        return client.redact(List.of(this), replacement, placeholderColor).success();
     }
 }

@@ -936,6 +936,65 @@ public class PDFDancer {
     }
 
     /**
+     * Redacts multiple objects from the PDF document using default replacement text.
+     *
+     * @param objects the objects to redact
+     * @return response containing the count of redacted items and any warnings
+     * @throws IllegalArgumentException if objects is null or empty
+     */
+    public RedactResponse redact(List<? extends BaseReference> objects) {
+        return redact(objects, "[REDACTED]", Color.BLACK);
+    }
+
+    /**
+     * Redacts multiple objects from the PDF document with custom replacement text.
+     *
+     * @param objects     the objects to redact
+     * @param replacement the replacement text for text content
+     * @return response containing the count of redacted items and any warnings
+     * @throws IllegalArgumentException if objects is null or empty
+     */
+    public RedactResponse redact(List<? extends BaseReference> objects, String replacement) {
+        return redact(objects, replacement, Color.BLACK);
+    }
+
+    /**
+     * Redacts multiple objects from the PDF document with custom placeholder color.
+     *
+     * @param objects          the objects to redact
+     * @param placeholderColor the color for image/path placeholders
+     * @return response containing the count of redacted items and any warnings
+     * @throws IllegalArgumentException if objects is null or empty
+     */
+    public RedactResponse redact(List<? extends BaseReference> objects, Color placeholderColor) {
+        return redact(objects, "[REDACTED]", placeholderColor);
+    }
+
+    /**
+     * Redacts multiple objects from the PDF document.
+     * Text content is replaced with the replacement string, while images and paths
+     * are replaced with solid color placeholder rectangles.
+     *
+     * @param objects          the objects to redact
+     * @param replacement      the replacement text for text content
+     * @param placeholderColor the color for image/path placeholders
+     * @return response containing the count of redacted items and any warnings
+     * @throws IllegalArgumentException if objects is null or empty
+     */
+    public RedactResponse redact(List<? extends BaseReference> objects, String replacement, Color placeholderColor) {
+        if (objects == null || objects.isEmpty()) {
+            throw new IllegalArgumentException("At least one object is required");
+        }
+        RedactRequest.Builder builder = RedactRequest.builder()
+                .defaultReplacement(replacement)
+                .placeholderColor(placeholderColor);
+        for (BaseReference obj : objects) {
+            builder.addTargetById(obj.getInternalId());
+        }
+        return redact(builder.build());
+    }
+
+    /**
      * Redacts content from the PDF document based on the provided request.
      * Text content is replaced with a replacement string, while images and paths
      * are replaced with solid color placeholder rectangles.
@@ -943,7 +1002,7 @@ public class PDFDancer {
      * @param request the redaction request containing targets and options
      * @return response containing the count of redacted items and any warnings
      */
-    public RedactResponse redact(RedactRequest request) {
+    RedactResponse redact(RedactRequest request) {
         RedactResponse result = modification.redact(request);
         invalidateSnapshotCaches();
         return result;
