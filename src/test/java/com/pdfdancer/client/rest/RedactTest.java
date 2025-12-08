@@ -1,10 +1,10 @@
 package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
-import com.pdfdancer.common.request.RedactRequest;
-import com.pdfdancer.common.request.RedactTarget;
 import com.pdfdancer.common.response.RedactResponse;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,17 +17,9 @@ public class RedactTest extends BaseTest {
         var textLines = pdf.page(1).selectTextLinesMatching(".*Obvious.*");
         assertEquals(1, textLines.size(), "Should find at least one matching text line");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("[REDACTED]")
-                .placeholderColor(Color.BLACK)
-                .addTargetById(textLines.get(0).getInternalId())
-                .build();
+        boolean result = textLines.get(0).redact();
 
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
-        assertTrue(response.count() > 0);
+        assertTrue(result);
 
         new PDFAssertions(pdf)
                 .assertTextlineDoesNotExist("Obvious", 1)
@@ -41,16 +33,9 @@ public class RedactTest extends BaseTest {
         var paragraphs = pdf.page(1).selectParagraphsMatching(".*Obvious.*");
         assertEquals(1, paragraphs.size(), "Should find at least one matching paragraph");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("***")
-                .placeholderColor(Color.BLACK)
-                .addTargetById(paragraphs.get(0).getInternalId())
-                .build();
+        boolean result = paragraphs.get(0).redact("***");
 
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        assertTrue(result);
         new PDFAssertions(pdf)
                 .assertParagraphNotExists("Obvious", 1)
                 .assertParagraphExists("\\*\\*\\*", 1);
@@ -63,16 +48,9 @@ public class RedactTest extends BaseTest {
         var images = pdf.page(1).selectImages();
         assertEquals(2, images.size(), "Should find at least one image");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("")
-                .placeholderColor(new Color(128, 128, 128))
-                .addTargetById(images.get(0).getInternalId())
-                .build();
+        boolean result = images.get(0).redact(new Color(128, 128, 128));
 
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        assertTrue(result);
         new PDFAssertions(pdf)
                 .assertNumberOfImages(1, 1);
     }
@@ -84,16 +62,9 @@ public class RedactTest extends BaseTest {
         var images = pdf.page(3).selectImages();
         assertEquals(5, images.size());
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("")
-                .placeholderColor(new Color(128, 128, 128))
-                .addTargetById(images.get(0).getInternalId())
-                .build();
+        boolean result = images.get(0).redact(new Color(128, 128, 128));
 
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        assertTrue(result);
         new PDFAssertions(pdf)
                 .assertNumberOfImages(4, 3);
     }
@@ -107,41 +78,32 @@ public class RedactTest extends BaseTest {
         var images = pdf.page(1).selectImages();
         assertTrue(images.size() > 0, "Should find at least one image");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("[REDACTED]")
-                .placeholderColor(Color.BLACK)
-                .addTargetById(textLines.get(0).getInternalId(), "[TEXT REMOVED]")
-                .addTargetById(images.get(0).getInternalId())
-                .build();
-
-        RedactResponse response = pdf.redact(request);
+        RedactResponse response = pdf.redact(List.of(textLines.get(0), images.get(0)));
 
         assertNotNull(response);
         assertTrue(response.success());
     }
 
     @Test
-    public void redactWithCustomReplacementPerTarget() {
+    public void redactWithCustomReplacement() {
         PDFDancer pdf = createClient();
 
         var textLines1 = pdf.page(1).selectTextLinesMatching(".*Obviously.*");
         var textLines2 = pdf.page(1).selectTextLinesMatching(".*Awesome.*");
 
-        RedactRequest.Builder builder = RedactRequest.builder()
-                .defaultReplacement("[DEFAULT]")
-                .placeholderColor(Color.BLACK);
-
+        java.util.List<BaseReference> toRedact = new java.util.ArrayList<>();
         if (textLines1.size() > 0) {
-            builder.addTargetById(textLines1.get(0).getInternalId(), "[FIRST]");
+            toRedact.add(textLines1.get(0));
         }
         if (textLines2.size() > 0) {
-            builder.addTargetById(textLines2.get(0).getInternalId(), "[SECOND]");
+            toRedact.add(textLines2.get(0));
         }
 
-        RedactResponse response = pdf.redact(builder.build());
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        if (!toRedact.isEmpty()) {
+            RedactResponse response = pdf.redact(toRedact, "[CUSTOM]");
+            assertNotNull(response);
+            assertTrue(response.success());
+        }
     }
 
     @Test
@@ -152,17 +114,9 @@ public class RedactTest extends BaseTest {
         assertTrue(images.size() > 0, "Should find at least one image");
 
         Color redColor = new Color(255, 0, 0);
+        boolean result = images.get(0).redact(redColor);
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("")
-                .placeholderColor(redColor)
-                .addTargetById(images.get(0).getInternalId())
-                .build();
-
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        assertTrue(result);
     }
 
     @Test
@@ -183,16 +137,9 @@ public class RedactTest extends BaseTest {
         var textLinesPage2 = pdf.page(2).selectTextLinesMatching(".*");
 
         if (textLinesPage2.size() > 0) {
-            RedactRequest request = RedactRequest.builder()
-                    .defaultReplacement("[PAGE2]")
-                    .placeholderColor(Color.BLACK)
-                    .addTargetById(textLinesPage2.get(0).getInternalId())
-                    .build();
+            boolean result = textLinesPage2.get(0).redact("[PAGE2]");
 
-            RedactResponse response = pdf.redact(request);
-
-            assertNotNull(response);
-            assertTrue(response.success());
+            assertTrue(result);
         }
     }
 
@@ -203,38 +150,22 @@ public class RedactTest extends BaseTest {
         var paths = pdf.page(1).selectPaths();
 
         if (paths.size() > 0) {
-            RedactRequest request = RedactRequest.builder()
-                    .defaultReplacement("")
-                    .placeholderColor(new Color(0, 0, 0))
-                    .addTargetById(paths.get(0).getInternalId())
-                    .build();
+            boolean result = paths.get(0).redact();
 
-            RedactResponse response = pdf.redact(request);
-
-            assertNotNull(response);
-            assertTrue(response.success());
+            assertTrue(result);
         }
     }
 
     @Test
-    public void redactUsingRedactTargetDirectly() {
+    public void redactSingleObject() {
         PDFDancer pdf = createClient();
 
         var textLines = pdf.page(1).selectTextLinesMatching(".*Obvious.*");
         assertTrue(textLines.size() > 0, "Should find at least one matching text line");
 
-        RedactTarget target = new RedactTarget(textLines.get(0).getInternalId(), "[DIRECT]");
+        boolean result = textLines.get(0).redact("[DIRECT]");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("[DEFAULT]")
-                .placeholderColor(Color.BLACK)
-                .addTarget(target)
-                .build();
-
-        RedactResponse response = pdf.redact(request);
-
-        assertNotNull(response);
-        assertTrue(response.success());
+        assertTrue(result);
     }
 
     @Test
@@ -246,21 +177,15 @@ public class RedactTest extends BaseTest {
         var textLines = pdf.page(1).selectTextLinesMatching(".*Obvious.*");
         assertEquals(1, textLines.size(), "Should find one matching text line");
 
-        RedactRequest request = RedactRequest.builder()
-                .defaultReplacement("[REDACTED]")
-                .placeholderColor(Color.BLACK)
-                .addTargetById(textLines.get(0).getInternalId())
-                .build();
-
-        RedactResponse response = pdf.redact(request);
-        assertTrue(response.success());
+        boolean result = textLines.get(0).redact();
+        assertTrue(result);
 
         byte[] afterBytes = pdf.getFileBytes();
         assertNotEquals(beforeBytes.length, afterBytes.length,
                 "PDF should be modified after redaction");
     }
 
-    // Fluent API tests
+    // Simple API tests
 
     private PDFDancer reloadPdf(PDFDancer pdf) {
         byte[] bytes = pdf.getFileBytes();
@@ -268,17 +193,14 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
-    public void fluentRedactParagraph() {
+    public void simpleRedactParagraph() {
         PDFDancer pdf = createClient();
 
         var paragraph = pdf.page(1).selectParagraphsMatching(".*Obvious.*").get(0);
         String originalText = paragraph.getText();
         int redactedCountBefore = pdf.page(1).selectParagraphsMatching(".*REDACTED.*").size();
 
-        boolean result = paragraph.redact()
-                .withReplacement("[REDACTED]")
-                .withColor(Color.BLACK)
-                .apply();
+        boolean result = paragraph.redact("[REDACTED]");
         assertTrue(result);
 
         PDFDancer reloaded = reloadPdf(pdf);
@@ -290,16 +212,14 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
-    public void fluentRedactTextLine() {
+    public void simpleRedactTextLine() {
         PDFDancer pdf = createClient();
 
         var textLine = pdf.page(1).selectTextLinesMatching(".*Obvious.*").get(0);
         String originalText = textLine.getText();
         int redactedCountBefore = pdf.page(1).selectTextLinesMatching(".*\\*\\*\\*.*").size();
 
-        boolean result = textLine.redact()
-                .withReplacement("***")
-                .apply();
+        boolean result = textLine.redact("***");
         assertTrue(result);
 
         PDFDancer reloaded = reloadPdf(pdf);
@@ -311,16 +231,13 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
-    public void fluentRedactImage() {
+    public void simpleRedactImage() {
         PDFDancer pdf = createClient();
 
         int imageCountBefore = pdf.page(1).selectImages().size();
         assertTrue(imageCountBefore >= 1, "Should have at least 1 image before redaction");
 
-        boolean result = pdf.page(1).selectImages().get(0)
-                .redact()
-                .withColor(new Color(128, 128, 128))
-                .apply();
+        boolean result = pdf.page(1).selectImages().get(0).redact();
         assertTrue(result);
 
         PDFDancer reloaded = reloadPdf(pdf);
@@ -329,14 +246,14 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
-    public void fluentRedactWithDefaults() {
+    public void simpleRedactWithDefaults() {
         PDFDancer pdf = createClient();
 
         var textLine = pdf.page(1).selectTextLinesMatching(".*Obvious.*").get(0);
         String originalText = textLine.getText();
         int redactedCountBefore = pdf.page(1).selectTextLinesMatching(".*REDACTED.*").size();
 
-        boolean result = textLine.redact().apply();
+        boolean result = textLine.redact();
         assertTrue(result);
 
         PDFDancer reloaded = reloadPdf(pdf);
@@ -348,7 +265,7 @@ public class RedactTest extends BaseTest {
     }
 
     @Test
-    public void fluentRedactMultipleTextLines() {
+    public void simpleRedactMultipleTextLines() {
         PDFDancer pdf = createClient();
 
         var textLines = pdf.page(1).selectTextLinesMatching(".*");
@@ -360,10 +277,7 @@ public class RedactTest extends BaseTest {
         int redactedCountBefore = pdf.page(1).selectTextLinesMatching(".*REMOVED.*").size();
 
         for (int i = 0; i < 3; i++) {
-            boolean result = textLines.get(i)
-                    .redact()
-                    .withReplacement("[REMOVED]")
-                    .apply();
+            boolean result = textLines.get(i).redact("[REMOVED]");
             assertTrue(result, "Redaction " + i + " should succeed");
         }
 
