@@ -190,8 +190,9 @@ public class TextLineTest extends BaseTest {
         client.save("/tmp/modifyLineWithFluentBuilder.pdf");
 
         // Verify the text was changed
-        assertTrue(client.page(1).selectTextLinesMatching(".*Complete.*").isEmpty());
-        assertFalse(client.page(1).selectTextLinesStartingWith("This line was replaced!").isEmpty());
+        new PDFAssertions(client)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertTextlineExists("This line was replaced!", 1);
     }
 
     @Test
