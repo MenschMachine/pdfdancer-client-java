@@ -88,6 +88,20 @@ jobs:
           PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
           PDFDANCER_TOKEN: 42
 
+      - name: Collect PDF artifacts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build/pdf-artifacts
+          cp /tmp/*.pdf build/pdf-artifacts/ 2>/dev/null || true
+
+      - name: Collect PDF artifacts (Windows)
+        if: always() && runner.os == 'Windows'
+        shell: cmd
+        run: |
+          mkdir build\pdf-artifacts 2>nul
+          copy %TEMP%\*.pdf build\pdf-artifacts\ 2>nul || exit 0
+
       - name: Upload test reports
         uses: actions/upload-artifact@v4
         if: failure()
@@ -96,7 +110,8 @@ jobs:
           path: |
             build/reports/
             build/test-results/
-          retention-days: 7
+            build/pdf-artifacts/
+          retention-days: 3
 
   notify:
     needs: daily-test
