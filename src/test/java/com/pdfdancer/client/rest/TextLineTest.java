@@ -101,7 +101,7 @@ public class TextLineTest extends BaseTest {
         assertTrue(ref.delete());
         assertTrue(client.page(1)
                 .selectTextLinesStartingWith("the complete").isEmpty());
-        client.save("/tmp/deleteLine.pdf");
+        saveTo(client, "deleteLine.pdf");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class TextLineTest extends BaseTest {
 
         ref = client.page(1).selectTextLinesAt(originalX + 100, originalY).get(0);
         assertNotNull(ref);
-        client.save("/tmp/moveLine.pdf");
+        saveTo(client, "moveLine.pdf");
     }
 
     @Test
@@ -128,7 +128,7 @@ public class TextLineTest extends BaseTest {
 
         assertTrue(ref.edit().replace(" replaced ").apply());
 
-        client.save("/tmp/modifyLine.pdf");
+        saveTo(client, "modifyLine.pdf");
 
         assertTrue(client.page(1).selectTextLinesStartingWith("The Complete").isEmpty());
 
@@ -187,7 +187,7 @@ public class TextLineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithFluentBuilder.pdf");
+        saveTo(client, "modifyLineWithFluentBuilder.pdf");
 
         // Verify the text was changed
         new PDFAssertions(client)
@@ -207,7 +207,7 @@ public class TextLineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithFont.pdf");
+        saveTo(client, "modifyLineWithFont.pdf");
 
         new PDFAssertions(client)
                 .assertTextlineExists("Modified Line", 1)
@@ -225,7 +225,7 @@ public class TextLineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithColor.pdf");
+        saveTo(client, "modifyLineWithColor.pdf");
 
         TextLineReference modifiedLine = client.page(1).selectTextLinesStartingWith("The Complete").get(0);
         Color color = modifiedLine.getColor();
@@ -246,7 +246,7 @@ public class TextLineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithPosition.pdf");
+        saveTo(client, "modifyLineWithPosition.pdf");
 
         List<TextLineReference> movedLines = client.page(1).selectTextLinesAt(100, 400, 5);
         assertFalse(movedLines.isEmpty());
@@ -267,7 +267,7 @@ public class TextLineTest extends BaseTest {
                         .apply()
         );
 
-        client.save("/tmp/modifyLineWithAllProperties.pdf");
+        saveTo(client, "modifyLineWithAllProperties.pdf");
 
         // Verify all changes
         List<TextLineReference> modifiedLines = client.page(1).selectTextLinesAt(150, 450, 5);

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.nio.file.Path;
 import java.time.Duration;
 
 /**
@@ -54,5 +55,10 @@ public abstract class BaseTest {
 
     protected PDFDancer createAnonClient() {
         return TestPDFDancer.createAnon(httpClient, getPdfFile());
+    }
+
+    protected void saveTo(PDFDancer client, String fileName) {
+        Path out = Path.of(System.getProperty("java.io.tmpdir"), fileName);
+        client.save(out.toString());
     }
 }
