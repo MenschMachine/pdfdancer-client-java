@@ -5,9 +5,6 @@ import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Orientation;
 import com.pdfdancer.common.model.PageRef;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -23,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class PDFAssertions {
-
-    private static final Logger log = LoggerFactory.getLogger(PDFAssertions.class);
 
     private final PDFDancer pdf;
     private final String token;
@@ -460,10 +455,10 @@ public class PDFAssertions {
 
     private void dumpTextLines(int page) {
         List<TextLineReference> allLines = pdf.page(page).selectTextLines();
-        log.debug("=== All TextLines on page {} ({} total) ===", page, allLines.size());
+        System.err.printf("=== All TextLines on page %d (%d total) ===%n", page, allLines.size());
         for (int i = 0; i < allLines.size(); i++) {
             TextLineReference line = allLines.get(i);
-            log.debug("[{}] text='{}' pos=({}, {}) font='{}' size={} color={}",
+            System.err.printf("[%d] text='%s' pos=(%f, %f) font='%s' size=%f color=%s%n",
                     i,
                     line.getText(),
                     line.getPosition().getX(),
@@ -472,12 +467,12 @@ public class PDFAssertions {
                     line.getFontSize(),
                     line.getColor());
         }
-        log.debug("=== End TextLines ===");
+        System.err.println("=== End TextLines ===");
     }
 
     private void dumpParagraphs(int page) {
         List<TextParagraphReference> allParagraphs = pdf.page(page).selectParagraphs();
-        log.debug("=== All Paragraphs on page {} ({} total) ===", page, allParagraphs.size());
+        System.err.printf("=== All Paragraphs on page %d (%d total) ===%n", page, allParagraphs.size());
         for (int i = 0; i < allParagraphs.size(); i++) {
             TextParagraphReference para = allParagraphs.get(i);
             String textPreview = para.getText();
@@ -485,7 +480,7 @@ public class PDFAssertions {
                 textPreview = textPreview.substring(0, 50) + "...";
             }
             textPreview = textPreview.replace("\n", "\\n");
-            log.debug("[{}] text='{}' pos=({}, {}) font='{}' size={} color={}",
+            System.err.printf("[%d] text='%s' pos=(%f, %f) font='%s' size=%f color=%s%n",
                     i,
                     textPreview,
                     para.getPosition().getX(),
@@ -494,7 +489,7 @@ public class PDFAssertions {
                     para.getFontSize(),
                     para.getColor());
         }
-        log.debug("=== End Paragraphs ===");
+        System.err.println("=== End Paragraphs ===");
     }
 
     private <T> T withTextLineDump(int page, java.util.function.Supplier<T> assertion) {
