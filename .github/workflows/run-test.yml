@@ -103,4 +103,5 @@ jobs:
           path: |
             build/reports/tests/
             build/test-results/
-          retention-days: 7
+            /tmp/*.pdf
+          retention-days: 1
