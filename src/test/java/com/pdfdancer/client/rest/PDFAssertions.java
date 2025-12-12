@@ -209,9 +209,9 @@ public class PDFAssertions {
         });
     }
 
-    public PDFAssertions assertTextlineExists(String text, int page) {
+    public PDFAssertions assertTextlineExists(String pattern, int page) {
         return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesMatching(".*" + text + ".*");
+            List<TextLineReference> lines = pdf.page(page).selectTextLinesMatching(".*" + pattern + ".*");
             assertEquals(1, lines.size());
             return this;
         });

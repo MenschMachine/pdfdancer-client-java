@@ -23,7 +23,7 @@ public class RedactTest extends BaseTest {
 
         new PDFAssertions(pdf)
                 .assertTextlineDoesNotExist("Obvious", 1)
-                .assertTextlineExists("[Redacted]", 1);
+                .assertTextlineExists("REDACTED", 1);
     }
 
     @Test
