@@ -211,7 +211,7 @@ public class PDFAssertions {
 
     public PDFAssertions assertTextlineExists(String text, int page) {
         return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
+            List<TextLineReference> lines = pdf.page(page).selectTextLinesMatching(".*" + text + ".*");
             assertEquals(1, lines.size());
             return this;
         });
