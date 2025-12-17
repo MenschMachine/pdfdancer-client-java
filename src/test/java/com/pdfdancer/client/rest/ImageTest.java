@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for image operations using basic-image-test.pdf which contains:
  * - 1 page
  * - 3 images on page 1:
- *   - IMAGE_000001 at (50, 600) size 100x100
- *   - IMAGE_000002 at (200, 600) size 150x100
- *   - IMAGE_000003 at (400, 600) size 100x150
+ * - IMAGE_000001 at (50, 600) size 100x100
+ * - IMAGE_000002 at (200, 600) size 150x100
+ * - IMAGE_000003 at (400, 600) size 100x150
  */
 public class ImageTest extends BaseTest {
 
@@ -246,12 +246,13 @@ public class ImageTest extends BaseTest {
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
-                .assertImageAt(50, 600, 1);
+                .assertImageAt(image.getPosition().getCenter().x(), image.getPosition().getCenter().y(), 1);
     }
 
     @Test
     public void rotateImage90Degrees() {
-        PDFDancer client = createClient();
+        PDFDancer client = createClient("basic-image-test.pdf");
+        assertEquals(1, client.getPages().size());
 
         ImageReference image = client.page(1).selectImagesAt(200, 600, 1).get(0);
         assertEquals(150, image.getWidth(), 0.01);
@@ -261,7 +262,7 @@ public class ImageTest extends BaseTest {
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
-                .assertImageSize(200, 600, 1, 100, 150, 5);
+                .assertImageSize(350, 600, 1, 100, 150, 5);
     }
 
     @Test
