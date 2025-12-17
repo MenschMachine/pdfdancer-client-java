@@ -60,5 +60,6 @@ public abstract class BaseTest {
     protected void saveTo(PDFDancer client, String fileName) {
         Path out = Path.of(System.getProperty("java.io.tmpdir"), fileName);
         client.save(out.toString());
+        System.out.println("Saved file: " + out);
     }
 }

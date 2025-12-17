@@ -9,6 +9,7 @@ import com.pdfdancer.common.model.text.Paragraph;
 import com.pdfdancer.common.request.AddPageRequest;
 import com.pdfdancer.common.request.CreateBlankPdfRequest;
 import com.pdfdancer.common.request.FindRequest;
+import com.pdfdancer.common.request.ImageTransformRequest;
 import com.pdfdancer.common.request.RedactRequest;
 import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.PageSnapshot;
@@ -1004,6 +1005,18 @@ public class PDFDancer {
      */
     RedactResponse redact(RedactRequest request) {
         RedactResponse result = modification.redact(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    /**
+     * Transforms an image in the PDF document.
+     *
+     * @param request the transformation request
+     * @return true if the transformation was successful
+     */
+    protected boolean transformImage(ImageTransformRequest request) {
+        boolean result = modification.transformImage(request);
         invalidateSnapshotCaches();
         return result;
     }
