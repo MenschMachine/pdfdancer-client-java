@@ -165,4 +165,16 @@ public final class ModificationService {
                 RedactResponse.class
         );
     }
+
+    public boolean transformImage(ImageTransformRequest request) {
+        String path = "/pdf/image/transform";
+        CommandResult result = blocking.retrieve(
+                HttpRequest.PUT(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                CommandResult.class
+        );
+        return result.success();
+    }
 }
