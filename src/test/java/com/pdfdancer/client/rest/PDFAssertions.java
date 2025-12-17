@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Fluent assertion helper for PDF validation.
@@ -346,6 +345,65 @@ public class PDFAssertions {
                 String.format("Expected 1 image but got %d", images.size()));
         assertEquals(internalId, images.get(0).getInternalId(),
                 String.format("%s != %s", internalId, images.get(0).getInternalId()));
+        return this;
+    }
+
+    public PDFAssertions assertImageSize(double x, double y, int page, double expectedWidth, double expectedHeight, double epsilon) {
+        List<ImageReference> images = pdf.page(page).selectImagesAt(x, y, epsilon);
+        assertEquals(1, images.size(),
+                String.format("Expected 1 image at %f/%f but got %d", x, y, images.size()));
+        ImageReference image = images.get(0);
+        assertEquals(expectedWidth, image.getWidth(), epsilon,
+                String.format("Image width: expected %f but got %f", expectedWidth, image.getWidth()));
+        assertEquals(expectedHeight, image.getHeight(), epsilon,
+                String.format("Image height: expected %f but got %f", expectedHeight, image.getHeight()));
+        return this;
+    }
+
+    public PDFAssertions assertImageSize(double x, double y, int page, double expectedWidth, double expectedHeight) {
+        return assertImageSize(x, y, page, expectedWidth, expectedHeight, 1.0);
+    }
+
+    public PDFAssertions assertImageWidthChanged(double x, double y, int page, double originalWidth, double epsilon) {
+        List<ImageReference> images = pdf.page(page).selectImagesAt(x, y, epsilon);
+        assertEquals(1, images.size(),
+                String.format("Expected 1 image at %f/%f but got %d", x, y, images.size()));
+        ImageReference image = images.get(0);
+        assertTrue(Math.abs(image.getWidth() - originalWidth) > epsilon,
+                String.format("Image width should have changed from %f but is still %f", originalWidth, image.getWidth()));
+        return this;
+    }
+
+    public PDFAssertions assertImageHeightChanged(double x, double y, int page, double originalHeight, double epsilon) {
+        List<ImageReference> images = pdf.page(page).selectImagesAt(x, y, epsilon);
+        assertEquals(1, images.size(),
+                String.format("Expected 1 image at %f/%f but got %d", x, y, images.size()));
+        ImageReference image = images.get(0);
+        assertTrue(Math.abs(image.getHeight() - originalHeight) > epsilon,
+                String.format("Image height should have changed from %f but is still %f", originalHeight, image.getHeight()));
+        return this;
+    }
+
+    public PDFAssertions assertImageAspectRatio(double x, double y, int page, double expectedAspectRatio, double epsilon) {
+        List<ImageReference> images = pdf.page(page).selectImagesAt(x, y, epsilon);
+        assertEquals(1, images.size(),
+                String.format("Expected 1 image at %f/%f but got %d", x, y, images.size()));
+        ImageReference image = images.get(0);
+        Double actualRatio = image.getAspectRatio();
+        assertNotNull(actualRatio, "Image aspect ratio should not be null");
+        assertEquals(expectedAspectRatio, actualRatio, epsilon,
+                String.format("Image aspect ratio: expected %f but got %f", expectedAspectRatio, actualRatio));
+        return this;
+    }
+
+    public PDFAssertions assertImageAspectRatioPreserved(double x, double y, int page, double originalAspectRatio, double epsilon) {
+        return assertImageAspectRatio(x, y, page, originalAspectRatio, epsilon);
+    }
+
+    public PDFAssertions assertFirstImageOnPage(int page, java.util.function.Consumer<ImageReference> assertion) {
+        List<ImageReference> images = pdf.page(page).selectImages();
+        assertTrue(images.size() >= 1, "Expected at least 1 image on page " + page);
+        assertion.accept(images.get(0));
         return this;
     }
 
