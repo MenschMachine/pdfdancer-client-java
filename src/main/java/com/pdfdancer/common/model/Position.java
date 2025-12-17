@@ -318,4 +318,15 @@ public class Position {
          */
         RECT
     }
+
+    public Point getCenter() {
+        if (getBoundingRect() == null) return null;
+        double x = getX();
+        double y = getY();
+        double w = getBoundingRect().getWidth();
+        double h = getBoundingRect().getHeight();
+        double center_x = x + (w / 2.0);
+        double center_y = y + (h / 2.0);
+        return new Point(center_x, center_y);
+    }
 }
