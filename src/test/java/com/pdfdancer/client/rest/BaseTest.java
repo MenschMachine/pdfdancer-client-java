@@ -33,8 +33,15 @@ public abstract class BaseTest {
     }
 
     protected String getValidToken() {
-        return System.getProperty("pdfdancer.token",
-                System.getenv().getOrDefault("PDFDANCER_TOKEN", DEFAULT_TOKEN));
+        String sysProp = System.getProperty("pdfdancer.token");
+        if (sysProp != null) {
+            return sysProp;
+        }
+        String apiToken = System.getenv("PDFDANCER_API_TOKEN");
+        if (apiToken != null && !apiToken.isBlank()) {
+            return apiToken;
+        }
+        return System.getenv().getOrDefault("PDFDANCER_TOKEN", DEFAULT_TOKEN);
     }
 
     protected PDFDancer createClient() {
