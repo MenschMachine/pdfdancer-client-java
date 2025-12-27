@@ -13,12 +13,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class EnvironmentInfo {
-    private static final String ENV_TOKEN = "PDFDANCER_TOKEN";
+    private static final String ENV_API_TOKEN = "PDFDANCER_API_TOKEN";
+    private static final String ENV_TOKEN_LEGACY = "PDFDANCER_TOKEN";
 
     private EnvironmentInfo() {}
 
     public static String envTokenOrNull() {
-        String token = System.getenv(ENV_TOKEN);
+        String token = System.getenv(ENV_API_TOKEN);
+        if (token == null || token.isBlank()) {
+            token = System.getenv(ENV_TOKEN_LEGACY);
+        }
         return (token == null || token.isBlank()) ? null : token;
     }
 
