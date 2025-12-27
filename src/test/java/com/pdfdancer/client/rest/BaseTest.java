@@ -34,7 +34,7 @@ public abstract class BaseTest {
 
     protected String getValidToken() {
         return System.getProperty("pdfdancer.token",
-                System.getenv().getOrDefault("PDFDANCER_TOKEN", DEFAULT_TOKEN));
+                System.getenv().getOrDefault("PDFDANCER_API_TOKEN", DEFAULT_TOKEN));
     }
 
     protected PDFDancer createClient() {

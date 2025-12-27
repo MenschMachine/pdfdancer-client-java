@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public final class EnvironmentInfo {
-    private static final String ENV_TOKEN = "PDFDANCER_TOKEN";
+    private static final String ENV_TOKEN = "PDFDANCER_API_TOKEN";
 
     private EnvironmentInfo() {}
 
