@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  */
 public class TextLine extends PDFObject {
     private List<TextElement> textElements;
+    private List<Word> words;
     private Color color;
     private Double fontSize;
     private String fontName;
@@ -115,5 +116,13 @@ public class TextLine extends PDFObject {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public List<Word> getWords() {
+        return words;
+    }
+
+    public void setWords(List<Word> words) {
+        this.words = words;
     }
 }

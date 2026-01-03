@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.*;
         @JsonSubTypes.Type(value = FormFieldRef.class, name = "TEXT_FIELD"),
         @JsonSubTypes.Type(value = FormFieldRef.class, name = "CHECKBOX"),
         @JsonSubTypes.Type(value = FormFieldRef.class, name = "RADIO_BUTTON"),
+        @JsonSubTypes.Type(value = FormFieldRef.class, name = "DROPDOWN"),
+        @JsonSubTypes.Type(value = FormFieldRef.class, name = "BUTTON"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "PATH"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "IMAGE"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "FORM_X_OBJECT")
