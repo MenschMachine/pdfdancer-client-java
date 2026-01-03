@@ -8,11 +8,14 @@ import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.CommandResult;
 import com.pdfdancer.common.response.RedactResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates all mutation HTTP operations. Stateless and reusable per session.
  */
 public final class ModificationService {
+    private static final Logger log = LoggerFactory.getLogger(ModificationService.class);
     private final String token;
     private final String sessionId;
     private final PdfDancerHttpClient.Blocking blocking;
@@ -176,5 +179,18 @@ public final class ModificationService {
                 CommandResult.class
         );
         return result.success();
+    }
+
+    public boolean replaceTemplates(TemplateReplaceRequest request) {
+        String path = "/template/replace";
+        log.debug("Replacing templates with {} replacements", request.replacements().size());
+        Boolean result = blocking.retrieve(
+                HttpRequest.POST(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+        return Boolean.TRUE.equals(result);
     }
 }
