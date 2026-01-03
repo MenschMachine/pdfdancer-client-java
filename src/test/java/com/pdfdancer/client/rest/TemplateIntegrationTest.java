@@ -198,13 +198,11 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("no-placeholders.pdf");
 
         // When/Then: Attempting to replace non-existent placeholder fails
-        assertThrows(Exception.class, () -> {
-            client.replaceTemplates(
-                    TemplateReplaceRequest.builder()
-                            .replace("__MISSING__", "value")
-                            .build()
-            );
-        });
+        assertThrows(Exception.class, () -> client.replaceTemplates(
+                TemplateReplaceRequest.builder()
+                        .replace("__MISSING__", "value")
+                        .build()
+        ));
     }
 
     @Test
@@ -215,7 +213,7 @@ public class TemplateIntegrationTest extends BaseTest {
         // Verify session works with read operations
         List<TextParagraphReference> before = client.page(1).selectParagraphs();
         log.debug("Found {} paragraphs", before.size());
-        assertTrue(before.size() > 0, "Should have paragraphs");
+        assertFalse(before.isEmpty(), "Should have paragraphs");
 
         // When: Replacing known text via template replacement
         boolean success = client.replaceTemplates(
