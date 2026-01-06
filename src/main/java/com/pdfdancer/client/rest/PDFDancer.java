@@ -91,7 +91,7 @@ public class PDFDancer {
      * Creates a new PDFDancer client by uploading an existing PDF file.
      * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
-     * - If PDFDANCER_TOKEN is set, uses it
+     * - If PDFDANCER_API_TOKEN or PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
      *
      * @param pdfFile PDF file to upload and process
@@ -109,7 +109,7 @@ public class PDFDancer {
      * Creates a new PDFDancer client by uploading an existing PDF file.
      * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
-     * - If PDFDANCER_TOKEN is set, uses it
+     * - If PDFDANCER_API_TOKEN or PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
      *
      * @param pdfFile PDF file to upload and process
@@ -160,7 +160,7 @@ public class PDFDancer {
      * Uses default page size (A4), orientation (PORTRAIT), and page count (1).
      * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
-     * - If PDFDANCER_TOKEN is set, uses it
+     * - If PDFDANCER_API_TOKEN or PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
      *
      * @return PDFDancer client instance with a blank PDF session
@@ -214,7 +214,7 @@ public class PDFDancer {
      * Creates a new PDFDancer client with a blank PDF using custom parameters.
      * Uses the default HTTP client configured for https://api.pdfdancer.com.
      * Authentication:
-     * - If PDFDANCER_TOKEN is set, uses it
+     * - If PDFDANCER_API_TOKEN or PDFDANCER_TOKEN is set, uses it
      * - Otherwise, automatically issues an anonymous token and proceeds
      *
      * @param pageSize         page size (use PageSize.A4, PageSize.LETTER, PageSize.LEGAL, or PageSize.custom(width, height))

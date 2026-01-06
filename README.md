@@ -55,7 +55,7 @@ implementation("com.pdfdancer.client:pdfdancer-client-java:0.1.3")
 ### Requirements
 
 - Java 11 or newer (toolchains configured in `build.gradle.kts`).
-- A PDFDancer API token. Set `PDFDANCER_TOKEN` or pass the token explicitly.
+- A PDFDancer API token. Set `PDFDANCER_API_TOKEN` (or `PDFDANCER_TOKEN`) or pass the token explicitly.
 - Access to the PDFDancer API host (defaults to `https://api.pdfdancer.com`; override via `PdfDancerHttpClient`).
 
 ## Quick Start — Edit an Existing PDF
@@ -169,7 +169,7 @@ what you grabbed.
 
 ## Configuration
 
-- `PDFDANCER_TOKEN` — preferred way to authenticate; `PDFDancer.createSession(File)` and `PDFDancer.createNew()` will read it automatically.
+- `PDFDANCER_API_TOKEN` (or `PDFDANCER_TOKEN`) — preferred way to authenticate; `PDFDancer.createSession(File)` and `PDFDancer.createNew()` will read it automatically.
 - `PDFDANCER_BASE_URL` — integration tests (and your code) can override the host via `PdfDancerHttpClient.create(...)`.
 - Timeouts — rely on your `HttpClient` instance; defaults to 30 s in `PdfDancerHttpClient.createDefault`.
 - Anonymous sessions — `PDFDancer.createSession(File)` will request an ephemeral token when no credentials are provided (useful for local demos).
@@ -264,7 +264,7 @@ For more information, see the [Maven Central Publishing Guide](https://central.s
 The tests in `src/test/java` exercise the live API. To run them locally:
 
 1. **Start a PDFDancer server** at `http://localhost:8080` (tests default to this host; override with `PDFDANCER_BASE_URL` if needed).
-2. **Provide an API token** via `PDFDANCER_TOKEN=your-token` (or `-Dpdfdancer.token=...`).
+2. **Provide an API token** via `PDFDANCER_API_TOKEN=your-token` (or `PDFDANCER_TOKEN`, or `-Dpdfdancer.token=...`).
 3. **Ensure fixtures exist** under `src/test/resources/fixtures/` (`ObviouslyAwesome.pdf`, `mixed-form-types.pdf`, `basic-paths.pdf`, `Showcase.pdf`, `logo-80.png`, `DancingScript-Regular.ttf`, `JetBrainsMono-Regular.ttf`, ...).
 4. Run `./gradlew test`.
 
