@@ -264,4 +264,5 @@ public class TemplateIntegrationTest extends BaseTest {
                 .assertParagraphExists("John", 1)
                 .assertParagraphExists("Doe", 1);
     }
+
 }
