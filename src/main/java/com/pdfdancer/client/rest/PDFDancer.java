@@ -6,11 +6,7 @@ import com.pdfdancer.client.rest.selection.SelectionService;
 import com.pdfdancer.client.rest.session.SessionService;
 import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.model.text.Paragraph;
-import com.pdfdancer.common.request.AddPageRequest;
-import com.pdfdancer.common.request.CreateBlankPdfRequest;
-import com.pdfdancer.common.request.FindRequest;
-import com.pdfdancer.common.request.ImageTransformRequest;
-import com.pdfdancer.common.request.RedactRequest;
+import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.PageSnapshot;
 import com.pdfdancer.common.response.RedactResponse;
@@ -871,6 +867,7 @@ public class PDFDancer {
 
     /**
      * Selects a single form field with the specified name.
+     *
      * @param elementName the name of the form field to find
      * @return Optional containing the first form field with the given name, or empty if none found
      */
@@ -1017,6 +1014,20 @@ public class PDFDancer {
      */
     protected boolean transformImage(ImageTransformRequest request) {
         boolean result = modification.transformImage(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    /**
+     * Replaces template placeholders in the PDF document.
+     * Finds exact text matches for placeholders and replaces them with specified content.
+     * All placeholders must be found or the operation fails atomically.
+     *
+     * @param request the template replacement request
+     * @return true if all replacements were successful
+     */
+    public boolean replaceTemplates(TemplateReplaceRequest request) {
+        boolean result = modification.replaceTemplates(request);
         invalidateSnapshotCaches();
         return result;
     }
