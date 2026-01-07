@@ -4,19 +4,17 @@ import com.pdfdancer.common.model.ReflowPreset;
 import com.pdfdancer.common.request.TemplateReplaceRequest;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TemplateIntegrationOATest extends BaseTest {
 
     @Test
-    public void testReplaceMultipleTemplatesDefaultReflowPreset() throws IOException {
+    public void testReplaceMultipleTemplatesDefaultReflowPreset() {
         // Given: Showcase.pdf with multiple placeholders
         PDFDancer client = createClient("ObviouslyAwesome.pdf");
 
         // When: Replacing multiple placeholders
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("Complete", "Entire")
                         .replace("Awesome", "Amazing")
@@ -33,12 +31,12 @@ public class TemplateIntegrationOATest extends BaseTest {
     }
 
     @Test
-    public void testReplaceMultipleTemplatesNoReflowPreset() throws IOException {
+    public void testReplaceMultipleTemplatesNoReflowPreset() {
         // Given: Showcase.pdf with multiple placeholders
         PDFDancer client = createClient("ObviouslyAwesome.pdf");
 
         // When: Replacing multiple placeholders
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .reflowPreset(ReflowPreset.NONE)
                         .replace("Complete", "Entire")
