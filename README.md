@@ -42,14 +42,14 @@ Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The 
 <dependency>
   <groupId>com.pdfdancer.client</groupId>
   <artifactId>pdfdancer-client-java</artifactId>
-  <version>0.1.3</version>
+  <version>0.2.3</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("com.pdfdancer.client:pdfdancer-client-java:0.1.3")
+implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.3")
 ```
 
 ### Requirements
