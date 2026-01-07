@@ -16,7 +16,7 @@ public class TemplateIntegration2Test extends BaseTest {
         PDFDancer client = createClient("Showcase.pdf");
 
         // When: Replacing multiple placeholders
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("PDFDancer", "TestApp")
                         .replace("Engine", "System")
@@ -38,7 +38,7 @@ public class TemplateIntegration2Test extends BaseTest {
         PDFDancer client = createClient("Showcase.pdf");
 
         // When: Replacing multiple placeholders
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .reflowPreset(ReflowPreset.NONE)
                         .replace("PDFDancer", "TestApp")

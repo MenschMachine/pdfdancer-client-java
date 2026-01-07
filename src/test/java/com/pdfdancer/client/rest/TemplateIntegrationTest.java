@@ -130,7 +130,7 @@ public class TemplateIntegrationTest extends BaseTest {
         paragraphsBefore.forEach(p -> log.debug("  - {}", p.getText()));
 
         // When: Performing template replacement
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("__FIRSTNAME__", "John")
                         .replace("__LASTNAME__", "Doe")
@@ -152,7 +152,7 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("multipage-placeholder.pdf");
 
         // When: Replacing only on page 1
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("__TITLE__", "Chapter 1")
                         .pageIndex(0)
@@ -173,7 +173,7 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("duplicate-placeholders.pdf");
 
         // When: Replacing the placeholder
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("__NAME__", "Alice")
                         .build()
@@ -198,7 +198,7 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("no-placeholders.pdf");
 
         // When/Then: Attempting to replace non-existent placeholder fails
-        assertThrows(Exception.class, () -> client.replaceTemplates(
+        assertThrows(Exception.class, () -> client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("__MISSING__", "value")
                         .build()
@@ -216,7 +216,7 @@ public class TemplateIntegrationTest extends BaseTest {
         assertFalse(before.isEmpty(), "Should have paragraphs");
 
         // When: Replacing known text via template replacement
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .replace("Obvious", "Amazing")
                         .build()
@@ -232,7 +232,7 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("two-placeholders.pdf");
 
         // When: Explicitly using BEST_EFFORT preset
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .reflowPreset(ReflowPreset.BEST_EFFORT)
                         .replace("__FIRSTNAME__", "A very long first name that requires reflow")
@@ -250,7 +250,7 @@ public class TemplateIntegrationTest extends BaseTest {
         PDFDancer client = loadFixture("two-placeholders.pdf");
 
         // When: Using NONE preset (no reflow)
-        boolean success = client.replaceTemplates(
+        boolean success = client.applyReplacements(
                 TemplateReplaceRequest.builder()
                         .reflowPreset(ReflowPreset.NONE)
                         .replace("__FIRSTNAME__", "John")
