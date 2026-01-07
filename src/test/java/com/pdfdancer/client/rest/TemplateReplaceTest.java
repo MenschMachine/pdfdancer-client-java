@@ -117,7 +117,7 @@ public class TemplateReplaceTest extends BaseTest {
     //     // This would require a test PDF with {{placeholder}} text
     //     PDFDancer pdf = createClient("template-test.pdf");
     //
-    //     boolean result = pdf.replaceTemplates(
+    //     boolean result = pdf.applyReplacements(
     //             TemplateReplaceRequest.builder()
     //                     .replace("{{name}}", "Test User")
     //                     .build()

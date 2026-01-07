@@ -1026,7 +1026,7 @@ public class PDFDancer {
      * @param request the template replacement request
      * @return true if all replacements were successful
      */
-    public boolean replaceTemplates(TemplateReplaceRequest request) {
+    public boolean applyReplacements(TemplateReplaceRequest request) {
         boolean result = modification.replaceTemplates(request);
         invalidateSnapshotCaches();
         return result;
