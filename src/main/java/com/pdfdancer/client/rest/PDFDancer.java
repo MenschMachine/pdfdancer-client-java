@@ -1033,6 +1033,33 @@ public class PDFDancer {
     }
 
     /**
+     * Starts a fluent template replacement operation.
+     * <p>Example usage:
+     * <pre>{@code
+     * // Simple replacement
+     * client.replace("{{name}}", "John").apply();
+     *
+     * // With formatting
+     * client.replace("{{name}}", "John")
+     *     .withFont("Helvetica-Bold", 14)
+     *     .withColor(255, 0, 0)
+     *     .apply();
+     *
+     * // Multiple replacements
+     * client.replace("{{name}}", "John")
+     *     .replace("{{title}}", "Manager")
+     *     .apply();
+     * }</pre>
+     *
+     * @param placeholder the placeholder text to find
+     * @param text the replacement text
+     * @return a ReplaceBuilder for chaining options
+     */
+    public ReplaceBuilder replace(String placeholder, String text) {
+        return new ReplaceBuilder(this, placeholder, text);
+    }
+
+    /**
      * Gets the HTTP client used by this PDFDancer instance.
      * Useful for testing and creating new instances with the same client.
      *

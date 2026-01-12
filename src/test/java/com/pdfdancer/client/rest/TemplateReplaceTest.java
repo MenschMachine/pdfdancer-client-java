@@ -111,6 +111,133 @@ public class TemplateReplaceTest extends BaseTest {
         assertNotNull(ReflowPreset.NONE);
     }
 
+    @Test
+    public void chainedBuilderWithFont() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withFont("Helvetica", 12.0)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        TemplateReplacement r = request.replacements().get(0);
+        assertEquals("{{name}}", r.placeholder());
+        assertEquals("John", r.text());
+        assertNotNull(r.font());
+        assertEquals("Helvetica", r.font().getName());
+        assertEquals(12.0, r.font().getSize());
+        assertNull(r.color());
+    }
+
+    @Test
+    public void chainedBuilderWithColor() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{status}}", "ACTIVE")
+                .withColor(0, 255, 0)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        TemplateReplacement r = request.replacements().get(0);
+        assertNull(r.font());
+        assertNotNull(r.color());
+        assertEquals(0, r.color().getRed());
+        assertEquals(255, r.color().getGreen());
+        assertEquals(0, r.color().getBlue());
+    }
+
+    @Test
+    public void chainedBuilderWithFontAndColor() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{header}}", "Title")
+                .withFont("Arial", 14.0)
+                .withColor(255, 0, 0)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        TemplateReplacement r = request.replacements().get(0);
+        assertNotNull(r.font());
+        assertNotNull(r.color());
+        assertEquals("Arial", r.font().getName());
+        assertEquals(255, r.color().getRed());
+    }
+
+    @Test
+    public void chainedBuilderMultipleReplacements() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withFont("Helvetica", 12.0)
+                .replace("{{title}}", "Manager")
+                .withColor(0, 0, 255)
+                .replace("{{date}}", "2024-01-01")
+                .build();
+
+        assertEquals(3, request.replacements().size());
+
+        // First replacement has font
+        TemplateReplacement r1 = request.replacements().get(0);
+        assertEquals("{{name}}", r1.placeholder());
+        assertNotNull(r1.font());
+        assertNull(r1.color());
+
+        // Second replacement has color
+        TemplateReplacement r2 = request.replacements().get(1);
+        assertEquals("{{title}}", r2.placeholder());
+        assertNull(r2.font());
+        assertNotNull(r2.color());
+
+        // Third replacement has no formatting
+        TemplateReplacement r3 = request.replacements().get(2);
+        assertEquals("{{date}}", r3.placeholder());
+        assertNull(r3.font());
+        assertNull(r3.color());
+    }
+
+    @Test
+    public void chainedBuilderWithReflowPreset() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withFont("Helvetica", 12.0)
+                .reflowPreset(ReflowPreset.BEST_EFFORT)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        assertEquals(ReflowPreset.BEST_EFFORT, request.reflowPreset());
+    }
+
+    @Test
+    public void chainedBuilderWithPageIndex() {
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .pageIndex(0)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        assertEquals(Integer.valueOf(0), request.pageIndex());
+    }
+
+    @Test
+    public void chainedBuilderWithFontObject() {
+        Font font = new Font("Times", 16.0);
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withFont(font)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        assertEquals("Times", request.replacements().get(0).font().getName());
+    }
+
+    @Test
+    public void chainedBuilderWithColorObject() {
+        Color color = new Color(100, 150, 200);
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withColor(color)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        assertEquals(100, request.replacements().get(0).color().getRed());
+    }
+
     // Integration test - requires a PDF with placeholders
     // @Test
     // public void replaceTemplatesInPdf() {
