@@ -306,6 +306,23 @@ class PageClientImpl {
     public LineBuilder newLine() { return new LineBuilder(root, pageNumber); }
 
     /**
+     * Starts a fluent template replacement operation scoped to this page.
+     * <p>Example:
+     * <pre>{@code
+     * client.page(1).replace("{{header}}", "Page 1 Title")
+     *     .withFont("Helvetica-Bold", 18)
+     *     .apply();
+     * }</pre>
+     *
+     * @param placeholder the placeholder text to find
+     * @param text the replacement text
+     * @return a ReplaceBuilder for chaining options
+     */
+    public ReplaceBuilder replace(String placeholder, String text) {
+        return new ReplaceBuilder(root, pageNumber, placeholder, text);
+    }
+
+    /**
      * Deletes the current page from the PDF document.
      * This method removes the page at the current pageNumber from the document permanently,
      * updating the page numbering for subsequent pages.
