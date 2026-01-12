@@ -2,6 +2,8 @@ package com.pdfdancer.common.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pdfdancer.common.model.Color;
+import com.pdfdancer.common.model.Font;
 import com.pdfdancer.common.model.ReflowPreset;
 
 import java.util.ArrayList;
@@ -102,15 +104,108 @@ public final class TemplateReplaceRequest {
         }
 
         /**
-         * Adds a simple text replacement.
+         * Adds a text replacement with optional formatting via chained methods.
+         * <p>Example:
+         * <pre>{@code
+         * builder.replace("{{name}}", "John")
+         *        .withFont("Helvetica", 12)
+         *        .withColor(255, 0, 0)
+         *        .replace("{{title}}", "Manager")
+         *        .build();
+         * }</pre>
          */
-        public Builder replace(String placeholder, String text) {
-            this.replacements.add(TemplateReplacement.of(placeholder, text));
-            return this;
+        public ReplacementBuilder replace(String placeholder, String text) {
+            return new ReplacementBuilder(this, placeholder, text);
         }
 
         public TemplateReplaceRequest build() {
             return new TemplateReplaceRequest(replacements, pageIndex, reflowPreset);
+        }
+    }
+
+    /**
+     * Fluent builder for a single replacement with optional formatting.
+     * Allows chaining font and color settings before continuing to the next replacement.
+     */
+    public static class ReplacementBuilder {
+        private final Builder parent;
+        private final String placeholder;
+        private final String text;
+        private Font font;
+        private Color color;
+
+        ReplacementBuilder(Builder parent, String placeholder, String text) {
+            this.parent = parent;
+            this.placeholder = placeholder;
+            this.text = text;
+        }
+
+        /**
+         * Sets the font for this replacement.
+         */
+        public ReplacementBuilder withFont(String name, double size) {
+            this.font = new Font(name, size);
+            return this;
+        }
+
+        /**
+         * Sets the font for this replacement.
+         */
+        public ReplacementBuilder withFont(Font font) {
+            this.font = font;
+            return this;
+        }
+
+        /**
+         * Sets the color for this replacement.
+         */
+        public ReplacementBuilder withColor(int r, int g, int b) {
+            this.color = new Color(r, g, b);
+            return this;
+        }
+
+        /**
+         * Sets the color for this replacement.
+         */
+        public ReplacementBuilder withColor(Color color) {
+            this.color = color;
+            return this;
+        }
+
+        /**
+         * Adds the current replacement and starts a new one.
+         */
+        public ReplacementBuilder replace(String placeholder, String text) {
+            commit();
+            return new ReplacementBuilder(parent, placeholder, text);
+        }
+
+        /**
+         * Sets the page index for page-specific replacements.
+         */
+        public Builder pageIndex(Integer pageIndex) {
+            commit();
+            return parent.pageIndex(pageIndex);
+        }
+
+        /**
+         * Sets the reflow preset for text fitting behavior.
+         */
+        public Builder reflowPreset(ReflowPreset reflowPreset) {
+            commit();
+            return parent.reflowPreset(reflowPreset);
+        }
+
+        /**
+         * Builds the request with all replacements.
+         */
+        public TemplateReplaceRequest build() {
+            commit();
+            return parent.build();
+        }
+
+        private void commit() {
+            parent.replacements.add(new TemplateReplacement(placeholder, text, font, color));
         }
     }
 }
