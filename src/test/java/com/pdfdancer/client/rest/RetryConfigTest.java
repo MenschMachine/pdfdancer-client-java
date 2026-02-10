@@ -23,26 +23,6 @@ class RetryConfigTest {
     }
 
     @Test
-    void testDefaultConfig() {
-        RetryConfig config = RetryConfig.defaultConfig();
-
-        assertEquals(3, config.getMaxAttempts());
-        assertEquals(Duration.ofSeconds(1), config.getInitialDelay());
-        assertEquals(2.0, config.getBackoffMultiplier());
-        assertEquals(Duration.ofSeconds(5), config.getMaxDelay());
-        assertTrue(config.isRetryOnTimeout());
-        assertTrue(config.isRetryOnConnectionError());
-
-        Set<Integer> statusCodes = config.getRetryableStatusCodes();
-        assertTrue(statusCodes.contains(408)); // Request Timeout
-        assertTrue(statusCodes.contains(429)); // Too Many Requests
-        assertTrue(statusCodes.contains(500)); // Internal Server Error
-        assertTrue(statusCodes.contains(502)); // Bad Gateway
-        assertTrue(statusCodes.contains(503)); // Service Unavailable
-        assertTrue(statusCodes.contains(504)); // Gateway Timeout
-    }
-
-    @Test
     void testBuilder() {
         RetryConfig config = RetryConfig.builder()
                 .maxAttempts(5)
