@@ -3,6 +3,7 @@ package com.pdfdancer.client.rest;
 import com.pdfdancer.common.model.Color;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -127,6 +128,7 @@ public class TextLineTest extends BaseTest {
         TextLineReference ref = client.page(1).selectTextLinesStartingWith("The Complete").get(0);
 
         assertTrue(ref.edit().replace(" replaced ").apply());
+        //TODO assertEquals(" replaced ", ref.getText());
 
         saveTo(client, "modifyLine.pdf");
 
@@ -304,6 +306,49 @@ public class TextLineTest extends BaseTest {
         // Font should remain unchanged when only text is modified
         assertEquals(originalFont, modifiedLine.getFontName());
         assertEquals(originalSize, modifiedLine.getFontSize(), 0.1);
+    }
+
+    @Test
+    public void modifyLineWithCustomTTFFont() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(1).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .replace("Custom Font Text")
+                        .font(new File("src/test/resources/fixtures/SourceSans3-Regular.ttf"), 14.0)
+                        .apply()
+        );
+
+        saveTo(client, "modifyLineWithCustomTTFFont.pdf");
+
+        new PDFAssertions(client)
+                .assertTextlineExists("Custom Font Text", 1)
+                .assertTextlineHasFontMatching("Custom Font Text", "SourceSans3", 14.0, 1);
+    }
+
+    @Test
+    public void modifyLineWithReplaceAndColor() {
+        PDFDancer client = createClient();
+        TextLineReference line = client.page(1).selectTextLinesStartingWith("The Complete").get(0);
+
+        assertTrue(
+                line.edit()
+                        .replace("Red Text", new Color(255, 0, 0))
+                        .apply()
+        );
+
+        saveTo(client, "modifyLineWithReplaceAndColor.pdf");
+
+        new PDFAssertions(client)
+                .assertTextlineExists("Red Text", 1);
+
+        TextLineReference modifiedLine = client.page(1).selectTextLinesStartingWith("Red Text").get(0);
+        Color color = modifiedLine.getColor();
+        assertNotNull(color);
+        assertEquals(255, color.getRed());
+        assertEquals(0, color.getGreen());
+        assertEquals(0, color.getBlue());
     }
 
 }

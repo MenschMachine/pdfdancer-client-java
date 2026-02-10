@@ -75,7 +75,7 @@ public final class RetryConfig {
                 .initialDelay(Duration.ofSeconds(1))
                 .backoffMultiplier(2.0)
                 .maxDelay(Duration.ofSeconds(5))
-                .retryOnStatus(408, 429, 500, 502, 503, 504)
+                .retryOnStatus(408, 429, 502, 503, 504)
                 .retryOnTimeout(true)
                 .retryOnConnectionError(true)
                 .build();
