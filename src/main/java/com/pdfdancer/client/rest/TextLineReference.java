@@ -7,6 +7,8 @@ import com.pdfdancer.common.model.Position;
 import com.pdfdancer.common.model.TextTypeObjectRef;
 import com.pdfdancer.common.model.text.TextLine;
 
+import java.io.File;
+
 public class TextLineReference extends BaseReference {
     public TextLineReference(PDFDancer client, TextTypeObjectRef objectRef) {
         super(client, objectRef);
@@ -81,6 +83,18 @@ public class TextLineReference extends BaseReference {
         }
 
         /**
+         * Sets the new text content and color for this text line.
+         * @param newText the replacement text
+         * @param color the new color
+         * @return this TextLineEdit for method chaining
+         */
+        public TextLineEdit replace(String newText, Color color) {
+            this.newText = newText;
+            this.newColor = color;
+            return this;
+        }
+
+        /**
          * Sets the font for this text line.
          * @param fontName the font name
          * @param fontSize the font size
@@ -98,6 +112,21 @@ public class TextLineReference extends BaseReference {
          */
         public TextLineEdit font(Font font) {
             this.newFont = font;
+            return this;
+        }
+
+        /**
+         * Registers a custom TTF font file and sets it for this text line.
+         * @param ttfFile the TTF font file
+         * @param fontSize the font size
+         * @return this TextLineEdit for method chaining
+         */
+        public TextLineEdit font(File ttfFile, double fontSize) {
+            if (!ttfFile.exists()) throw new IllegalArgumentException("TTF file does not exist");
+            if (!ttfFile.isFile()) throw new IllegalArgumentException("TTF file is not a file");
+            if (!ttfFile.canRead()) throw new IllegalArgumentException("TTF file is not readable");
+            String fontName = client.registerFont(ttfFile);
+            this.newFont = new Font(fontName, fontSize);
             return this;
         }
 
