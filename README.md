@@ -4,7 +4,11 @@
 
 # PDFDancer Java Client
 
-> Edit text in any real-world PDF. Even ones you didn't create.
+## PDF used to be read-only. We fixed that.
+
+**Stop fighting PDFs. Start editing them.**
+
+**Edit text in any real-world PDF. Even ones you didn't create.**
 
 PDFDancer gives you pixel-perfect programmatic control over real-world PDF documents from Java. Locate existing elements
 by coordinates or text, adjust them precisely, add brand-new content, and ship the modified PDF in memory or on disk.
@@ -34,7 +38,7 @@ languages when you need it.
 
 ## Installation
 
-Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.1.3`).
+Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.2.5`).
 
 ### Maven
 
@@ -42,14 +46,14 @@ Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The 
 <dependency>
   <groupId>com.pdfdancer.client</groupId>
   <artifactId>pdfdancer-client-java</artifactId>
-  <version>0.2.3</version>
+  <version>0.2.5</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.3")
+implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.5")
 ```
 
 ### Requirements
@@ -285,6 +289,12 @@ pdfdancer-client-java/
 - **Font issues** — use `PDFDancer.findFonts("Helvetica", 12)` or upload a TTF via `pdf.registerFont(new File("MyFont.ttf"))`.
 - **Empty selections** — call `pdf.getDocumentSnapshot("PARAGRAPH")` to inspect what the server sees and validate coordinates.
 - **Large PDFs** — prefer snapshot APIs to reduce repeated network calls while iterating.
+
+## Helpful links
+
+- Docs: https://docs.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java
+- Product overview: https://www.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java
+- Maven Central: https://central.sonatype.com/artifact/com.pdfdancer.client/pdfdancer-client-java
 
 ## Related SDKs
 
