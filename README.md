@@ -4,6 +4,8 @@
 
 # PDFDancer Java Client
 
+## PDF used to be read-only. We fixed that.
+
 > Edit text in any real-world PDF. Even ones you didn't create.
 
 PDFDancer gives you pixel-perfect programmatic control over real-world PDF documents from Java. Locate existing elements
@@ -285,6 +287,14 @@ pdfdancer-client-java/
 - **Font issues** — use `PDFDancer.findFonts("Helvetica", 12)` or upload a TTF via `pdf.registerFont(new File("MyFont.ttf"))`.
 - **Empty selections** — call `pdf.getDocumentSnapshot("PARAGRAPH")` to inspect what the server sees and validate coordinates.
 - **Large PDFs** — prefer snapshot APIs to reduce repeated network calls while iterating.
+
+## Helpful links
+
+- [API documentation](https://docs.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
+- [Product overview](https://www.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
+- [Maven Central](https://central.sonatype.com/artifact/com.pdfdancer.client/pdfdancer-client-java)
+- [Changelog](https://www.pdfdancer.com/changelog/?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
+- [Status](https://status.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
 
 ## Related SDKs
 
