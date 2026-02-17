@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/main/resources/logo-orange-60h.webp" alt="PDFDancer logo" height="60">
+  <img src="src/main/resources/logo-silver-60h.webp" alt="PDFDancer logo" height="60">
 </p>
 
 # PDFDancer Java Client
