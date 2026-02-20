@@ -1,5 +1,6 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.Size;
 import com.pdfdancer.common.request.ImageTransformRequest.FlipDirection;
@@ -330,5 +331,69 @@ public class ImageTest extends BaseTest {
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
                 .assertImageSize(50, 600, 1, 100, 100, 5);
+    }
+
+    // ===========================
+    // Fill Region Tests
+    // ===========================
+
+    @Test
+    public void fillRegionBasic() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertTrue(image.fillRegion(10, 10, 50, 30, Color.BLACK));
+    }
+
+    @Test
+    public void fillRegionWithRedColor() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertTrue(image.fillRegion(0, 0, 5, 5, Color.RED));
+    }
+
+    @Test
+    public void fillRegionWithDifferentColors() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+        assertTrue(image.fillRegion(0, 0, 10, 10, Color.WHITE));
+
+        // Re-select to get fresh reference
+        ImageReference image2 = client.page(1).selectImagesAt(50, 600, 1).get(0);
+        assertTrue(image2.fillRegion(20, 20, 10, 10, new Color(0, 0, 255)));
+    }
+
+    @Test
+    public void fillRegionInvalidWidthRaisesError() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                image.fillRegion(10, 10, 0, 30, Color.BLACK));
+    }
+
+    @Test
+    public void fillRegionInvalidHeightRaisesError() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                image.fillRegion(10, 10, 50, -5, Color.BLACK));
+    }
+
+    @Test
+    public void fillRegionInvalidColorTypeRaisesError() {
+        PDFDancer client = createClient();
+
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                image.fillRegion(10, 10, 50, 30, null));
     }
 }
