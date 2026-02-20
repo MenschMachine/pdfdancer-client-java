@@ -1,5 +1,6 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Size;
@@ -212,5 +213,22 @@ public class ImageReference extends BaseReference {
      */
     public boolean flipVertical() {
         return flip(FlipDirection.VERTICAL);
+    }
+
+    /**
+     * Fills a rectangular pixel region of the image with a solid color.
+     *
+     * @param x      the x coordinate of the top-left corner
+     * @param y      the y coordinate of the top-left corner
+     * @param width  the width of the region in pixels
+     * @param height the height of the region in pixels
+     * @param color  the fill color
+     * @return true if the operation was successful
+     */
+    public boolean fillRegion(int x, int y, int width, int height, Color color) {
+        ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
+                .fillRegion(x, y, width, height, color)
+                .build();
+        return client.transformImage(request);
     }
 }
