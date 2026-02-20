@@ -36,7 +36,7 @@ languages when you need it.
 
 ## Installation
 
-Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.1.3`).
+Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.2.5`).
 
 ### Maven
 
@@ -295,6 +295,7 @@ pdfdancer-client-java/
 - [Maven Central](https://central.sonatype.com/artifact/com.pdfdancer.client/pdfdancer-client-java)
 - [Changelog](https://www.pdfdancer.com/changelog/?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
 - [Status](https://status.pdfdancer.com?utm_source=github&utm_medium=readme&utm_campaign=pdfdancer-java)
+- [Issue tracker](https://github.com/MenschMachine/pdfdancer)
 
 ## Related SDKs
 
