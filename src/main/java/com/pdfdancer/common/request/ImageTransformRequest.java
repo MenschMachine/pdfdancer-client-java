@@ -2,6 +2,7 @@ package com.pdfdancer.common.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Size;
@@ -27,7 +28,9 @@ public final class ImageTransformRequest {
         /** Set the opacity/transparency of the image. */
         OPACITY,
         /** Flip the image horizontally or vertically. */
-        FLIP
+        FLIP,
+        /** Fill a rectangular region with a solid color. */
+        FILL_REGION
     }
 
     /**
@@ -81,6 +84,21 @@ public final class ImageTransformRequest {
     @JsonProperty("flipDirection")
     private final FlipDirection flipDirection;
 
+    @JsonProperty("fillRegionX")
+    private final Integer fillRegionX;
+
+    @JsonProperty("fillRegionY")
+    private final Integer fillRegionY;
+
+    @JsonProperty("fillRegionWidth")
+    private final Integer fillRegionWidth;
+
+    @JsonProperty("fillRegionHeight")
+    private final Integer fillRegionHeight;
+
+    @JsonProperty("fillColor")
+    private final Integer fillColor;
+
     @JsonCreator
     public ImageTransformRequest(
             @JsonProperty("objectRef") ObjectRef objectRef,
@@ -95,7 +113,12 @@ public final class ImageTransformRequest {
             @JsonProperty("cropRight") Integer cropRight,
             @JsonProperty("cropBottom") Integer cropBottom,
             @JsonProperty("opacity") Double opacity,
-            @JsonProperty("flipDirection") FlipDirection flipDirection
+            @JsonProperty("flipDirection") FlipDirection flipDirection,
+            @JsonProperty("fillRegionX") Integer fillRegionX,
+            @JsonProperty("fillRegionY") Integer fillRegionY,
+            @JsonProperty("fillRegionWidth") Integer fillRegionWidth,
+            @JsonProperty("fillRegionHeight") Integer fillRegionHeight,
+            @JsonProperty("fillColor") Integer fillColor
     ) {
         this.objectRef = objectRef;
         this.transformType = transformType;
@@ -110,6 +133,11 @@ public final class ImageTransformRequest {
         this.cropBottom = cropBottom;
         this.opacity = opacity;
         this.flipDirection = flipDirection;
+        this.fillRegionX = fillRegionX;
+        this.fillRegionY = fillRegionY;
+        this.fillRegionWidth = fillRegionWidth;
+        this.fillRegionHeight = fillRegionHeight;
+        this.fillColor = fillColor;
     }
 
     public static Builder builder(ObjectRef objectRef) {
@@ -168,6 +196,26 @@ public final class ImageTransformRequest {
         return flipDirection;
     }
 
+    public Integer fillRegionX() {
+        return fillRegionX;
+    }
+
+    public Integer fillRegionY() {
+        return fillRegionY;
+    }
+
+    public Integer fillRegionWidth() {
+        return fillRegionWidth;
+    }
+
+    public Integer fillRegionHeight() {
+        return fillRegionHeight;
+    }
+
+    public Integer fillColor() {
+        return fillColor;
+    }
+
     public static class Builder {
         private final ObjectRef objectRef;
         private TransformType transformType;
@@ -182,6 +230,11 @@ public final class ImageTransformRequest {
         private Integer cropBottom;
         private Double opacity;
         private FlipDirection flipDirection;
+        private Integer fillRegionX;
+        private Integer fillRegionY;
+        private Integer fillRegionWidth;
+        private Integer fillRegionHeight;
+        private Integer fillColor;
 
         private Builder(ObjectRef objectRef) {
             this.objectRef = objectRef;
@@ -257,6 +310,25 @@ public final class ImageTransformRequest {
             return flip(FlipDirection.BOTH);
         }
 
+        public Builder fillRegion(int x, int y, int width, int height, Color color) {
+            if (color == null) {
+                throw new IllegalArgumentException("Color cannot be null");
+            }
+            if (width <= 0) {
+                throw new IllegalArgumentException("Width must be positive, got " + width);
+            }
+            if (height <= 0) {
+                throw new IllegalArgumentException("Height must be positive, got " + height);
+            }
+            this.transformType = TransformType.FILL_REGION;
+            this.fillRegionX = x;
+            this.fillRegionY = y;
+            this.fillRegionWidth = width;
+            this.fillRegionHeight = height;
+            this.fillColor = (color.getRed() << 16) | (color.getGreen() << 8) | color.getBlue();
+            return this;
+        }
+
         public ImageTransformRequest build() {
             if (transformType == null) {
                 throw new IllegalStateException("Transform type must be specified");
@@ -274,7 +346,12 @@ public final class ImageTransformRequest {
                     cropRight,
                     cropBottom,
                     opacity,
-                    flipDirection
+                    flipDirection,
+                    fillRegionX,
+                    fillRegionY,
+                    fillRegionWidth,
+                    fillRegionHeight,
+                    fillColor
             );
         }
     }
