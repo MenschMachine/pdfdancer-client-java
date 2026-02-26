@@ -1060,6 +1060,32 @@ public class PDFDancer {
     }
 
     /**
+     * Replaces a template placeholder with an image.
+     *
+     * @param placeholder the placeholder text to find
+     * @param imageFile the image file to use as replacement
+     * @return a ReplaceBuilder for chaining options
+     * @throws IOException if the image file cannot be read
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile) throws IOException {
+        return new ReplaceBuilder(this).replaceWithImage(placeholder, imageFile);
+    }
+
+    /**
+     * Replaces a template placeholder with an image at a specific size.
+     *
+     * @param placeholder the placeholder text to find
+     * @param imageFile the image file to use as replacement
+     * @param width the desired width
+     * @param height the desired height
+     * @return a ReplaceBuilder for chaining options
+     * @throws IOException if the image file cannot be read
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile, double width, double height) throws IOException {
+        return new ReplaceBuilder(this).replaceWithImage(placeholder, imageFile, width, height);
+    }
+
+    /**
      * Gets the HTTP client used by this PDFDancer instance.
      * Useful for testing and creating new instances with the same client.
      *

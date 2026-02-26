@@ -2,14 +2,18 @@ package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Font;
+import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ReflowPreset;
-import com.pdfdancer.common.request.TemplateReplacement;
 import com.pdfdancer.common.request.TemplateReplaceRequest;
+import com.pdfdancer.common.request.TemplateReplacement;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -238,18 +242,208 @@ public class TemplateReplaceTest extends BaseTest {
         assertEquals(100, request.replacements().get(0).color().getRed());
     }
 
-    // Integration test - requires a PDF with placeholders
-    // @Test
-    // public void replaceTemplatesInPdf() {
-    //     // This would require a test PDF with {{placeholder}} text
-    //     PDFDancer pdf = createClient("template-test.pdf");
-    //
-    //     boolean result = pdf.applyReplacements(
-    //             TemplateReplaceRequest.builder()
-    //                     .replace("{{name}}", "Test User")
-    //                     .build()
-    //     );
-    //
-    //     assertTrue(result);
-    // }
+    @Test
+    public void templateReplacementWithImage() throws IOException {
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+        Image image = Image.fromFile(imageFile);
+        TemplateReplacement replacement = TemplateReplacement.withImage("{{logo}}", image);
+
+        assertEquals("{{logo}}", replacement.placeholder());
+        assertNull(replacement.text());
+        assertNull(replacement.font());
+        assertNull(replacement.color());
+        assertNotNull(replacement.image());
+    }
+
+    @Test
+    public void templateReplacementRequiresTextOrImage() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new TemplateReplacement("{{placeholder}}", null, null, null, null);
+        });
+    }
+
+    @Test
+    public void templateReplaceRequestBuilderWithImage() throws IOException {
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+        Image image = Image.fromFile(imageFile);
+
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replaceWithImage("{{logo}}", image)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        TemplateReplacement r = request.replacements().get(0);
+        assertEquals("{{logo}}", r.placeholder());
+        assertNull(r.text());
+        assertNotNull(r.image());
+    }
+
+    @Test
+    public void mixedTextAndImageReplacements() throws IOException {
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+        Image image = Image.fromFile(imageFile);
+
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("{{name}}", "John")
+                .withFont("Helvetica", 12.0)
+                .replaceWithImage("{{logo}}", image)
+                .build();
+
+        assertEquals(2, request.replacements().size());
+
+        TemplateReplacement textReplacement = request.replacements().get(0);
+        assertEquals("{{name}}", textReplacement.placeholder());
+        assertEquals("John", textReplacement.text());
+        assertNotNull(textReplacement.font());
+        assertNull(textReplacement.image());
+
+        TemplateReplacement imageReplacement = request.replacements().get(1);
+        assertEquals("{{logo}}", imageReplacement.placeholder());
+        assertNull(imageReplacement.text());
+        assertNotNull(imageReplacement.image());
+    }
+
+    // ===========================
+    // E2E Integration Tests
+    // ===========================
+
+    @Test
+    public void replaceWordWithImage() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+
+        assertEquals(2, client.page(1).selectImages().size());
+        assertEquals(1, client.page(1).selectTextLinesStartingWith("The Complete").size());
+
+        boolean result = client.replaceWithImage("Complete", imageFile).apply();
+        assertTrue(result);
+
+        // Image placed at the containing paragraph's origin (x=54, y≈469.5), with logo-80.png natural size (80x80)
+        new PDFAssertions(client)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+
+        saveTo(client, "replaceWordWithImage.pdf");
+    }
+
+    @Test
+    public void replaceWordWithImageExplicitSize() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+
+        List<ImageReference> imagesBefore = client.page(1).selectImages();
+        assertEquals(2, imagesBefore.size());
+
+        boolean result = client.replaceWithImage("Complete", imageFile, 50, 30).apply();
+        assertTrue(result);
+
+        new PDFAssertions(client)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1);
+
+        // Find the newly added image by diffing IDs
+        List<ImageReference> imagesAfter = client.page(1).selectImages();
+        List<String> beforeIds = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
+        ImageReference newImage = imagesAfter.stream()
+                .filter(img -> !beforeIds.contains(img.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("New image not found after replacement"));
+        assertEquals(146.75, newImage.getPosition().getX(), 1.0);
+        assertEquals(579.48, newImage.getPosition().getY(), 1.0);
+
+        saveTo(client, "replaceWordWithImageExplicitSize.pdf");
+    }
+
+    @Test
+    public void replaceWordWithImageViaFluentBuilder() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+
+        boolean result = client.replace("Obviously", "Clearly")
+                .replaceWithImage("Complete", imageFile)
+                .apply();
+        assertTrue(result);
+
+        new PDFAssertions(client)
+                .assertTextlineExists("Clearly", 1)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+
+        saveTo(client, "replaceWordWithImageFluent.pdf");
+    }
+
+    @Test
+    public void replaceWordWithImageOnSpecificPage() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+
+        boolean result = client.page(1).replaceWithImage("Complete", imageFile).apply();
+        assertTrue(result);
+
+        new PDFAssertions(client)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+
+        saveTo(client, "replaceWordWithImageOnPage.pdf");
+    }
+
+    @Test
+    public void replaceWordWithImageViaRequestBuilder() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+        Image image = Image.fromFile(imageFile);
+
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replaceWithImage("Complete", image)
+                .build();
+
+        assertEquals(1, request.replacements().size());
+        assertNull(request.replacements().get(0).text());
+        assertNotNull(request.replacements().get(0).image());
+
+        boolean result = client.applyReplacements(request);
+        assertTrue(result);
+
+        new PDFAssertions(client)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+
+        saveTo(client, "replaceWordWithImageViaRequest.pdf");
+    }
+
+    @Test
+    public void mixedTextAndImageReplacementE2E() throws IOException {
+        PDFDancer client = createClient();
+        File imageFile = new File("src/test/resources/fixtures/logo-80.png");
+        Image image = Image.fromFile(imageFile);
+
+        TemplateReplaceRequest request = TemplateReplaceRequest.builder()
+                .replace("Obviously", "Clearly")
+                .replaceWithImage("Complete", image)
+                .build();
+
+        assertEquals(2, request.replacements().size());
+
+        boolean result = client.applyReplacements(request);
+        assertTrue(result);
+
+        new PDFAssertions(client)
+                .assertTextlineExists("Clearly", 1)
+                .assertParagraphNotExists("Obviously", 1)
+                .assertTextlineDoesNotExist("The Complete", 1)
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+
+        saveTo(client, "mixedTextAndImageE2E.pdf");
+    }
 }
