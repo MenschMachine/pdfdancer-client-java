@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Font;
+import com.pdfdancer.common.model.Image;
 
 import java.util.Objects;
 
 /**
  * Represents a single template placeholder replacement.
  * Specifies the placeholder text to find and the replacement content,
- * with optional font and color overrides.
+ * with optional font and color overrides. The replacement can be either
+ * text-based or image-based (but not both).
  */
 public final class TemplateReplacement {
     @JsonProperty("placeholder")
@@ -21,18 +23,29 @@ public final class TemplateReplacement {
     private final Font font;
     @JsonProperty("color")
     private final Color color;
+    @JsonProperty("image")
+    private final Image image;
 
     @JsonCreator
     public TemplateReplacement(
             @JsonProperty("placeholder") String placeholder,
             @JsonProperty("text") String text,
             @JsonProperty("font") Font font,
-            @JsonProperty("color") Color color
+            @JsonProperty("color") Color color,
+            @JsonProperty("image") Image image
     ) {
         this.placeholder = Objects.requireNonNull(placeholder, "placeholder is required");
-        this.text = Objects.requireNonNull(text, "text is required");
+        if (text == null && image == null) {
+            throw new IllegalArgumentException("either text or image must be provided");
+        }
+        this.text = text;
         this.font = font;
         this.color = color;
+        this.image = image;
+    }
+
+    public TemplateReplacement(String placeholder, String text, Font font, Color color) {
+        this(placeholder, text, font, color, null);
     }
 
     /**
@@ -40,6 +53,13 @@ public final class TemplateReplacement {
      */
     public static TemplateReplacement of(String placeholder, String text) {
         return new TemplateReplacement(placeholder, text, null, null);
+    }
+
+    /**
+     * Creates a replacement with an image instead of text.
+     */
+    public static TemplateReplacement withImage(String placeholder, Image image) {
+        return new TemplateReplacement(placeholder, null, null, null, image);
     }
 
     /**
@@ -79,6 +99,10 @@ public final class TemplateReplacement {
         return color;
     }
 
+    public Image image() {
+        return image;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -87,12 +111,13 @@ public final class TemplateReplacement {
         return Objects.equals(this.placeholder, that.placeholder) &&
                 Objects.equals(this.text, that.text) &&
                 Objects.equals(this.font, that.font) &&
-                Objects.equals(this.color, that.color);
+                Objects.equals(this.color, that.color) &&
+                Objects.equals(this.image, that.image);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(placeholder, text, font, color);
+        return Objects.hash(placeholder, text, font, color, image);
     }
 
     @Override
@@ -101,6 +126,7 @@ public final class TemplateReplacement {
                 "placeholder=" + placeholder + ", " +
                 "text=" + text + ", " +
                 "font=" + font + ", " +
-                "color=" + color + ']';
+                "color=" + color + ", " +
+                "image=" + image + ']';
     }
 }

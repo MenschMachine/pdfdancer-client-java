@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Font;
+import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ReflowPreset;
 
 import java.util.ArrayList;
@@ -118,6 +119,14 @@ public final class TemplateReplaceRequest {
             return new ReplacementBuilder(this, placeholder, text);
         }
 
+        /**
+         * Adds an image replacement.
+         */
+        public Builder replaceWithImage(String placeholder, Image image) {
+            this.replacements.add(TemplateReplacement.withImage(placeholder, image));
+            return this;
+        }
+
         public TemplateReplaceRequest build() {
             return new TemplateReplaceRequest(replacements, pageIndex, reflowPreset);
         }
@@ -181,6 +190,14 @@ public final class TemplateReplaceRequest {
         }
 
         /**
+         * Adds the current replacement and adds an image replacement.
+         */
+        public Builder replaceWithImage(String placeholder, Image image) {
+            commit();
+            return parent.replaceWithImage(placeholder, image);
+        }
+
+        /**
          * Sets the page index for page-specific replacements.
          */
         public Builder pageIndex(Integer pageIndex) {
@@ -205,7 +222,7 @@ public final class TemplateReplaceRequest {
         }
 
         private void commit() {
-            parent.replacements.add(new TemplateReplacement(placeholder, text, font, color));
+            parent.replacements.add(new TemplateReplacement(placeholder, text, font, color, null));
         }
     }
 }
