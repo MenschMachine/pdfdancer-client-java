@@ -4,9 +4,8 @@ import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Font;
 import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ReflowPreset;
-import com.pdfdancer.common.model.Size;
-import com.pdfdancer.common.request.TemplateReplacement;
 import com.pdfdancer.common.request.TemplateReplaceRequest;
+import com.pdfdancer.common.request.TemplateReplacement;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -312,22 +312,18 @@ public class TemplateReplaceTest extends BaseTest {
         PDFDancer client = createClient();
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
 
-        // Capture baseline state
-        int imageCountBefore = client.page(1).selectImages().size();
-        log.debug("Images on page 1 before replacement: {}", imageCountBefore);
+        assertEquals(2, client.page(1).selectImages().size());
+        assertEquals(1, client.page(1).selectTextLinesStartingWith("The Complete").size());
 
-        // Use an actual word from the PDF as the placeholder
-        List<TextLineReference> linesBefore = client.page(1).selectTextLinesStartingWith("The Complete");
-        assertEquals(1, linesBefore.size(), "Expected 'The Complete' text line to exist before replacement");
-
-        // Replace the word with an image
         boolean result = client.replaceWithImage("Complete", imageFile).apply();
-        assertTrue(result, "replaceWithImage should succeed");
+        assertTrue(result);
 
-        // Verify the placeholder text is gone
+        // Image placed at the containing paragraph's origin (x=54, y≈469.5), with logo-80.png natural size (80x80)
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImage.pdf");
     }
@@ -337,16 +333,26 @@ public class TemplateReplaceTest extends BaseTest {
         PDFDancer client = createClient();
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
 
-        int imageCountBefore = client.page(1).selectImages().size();
-        log.debug("Images on page 1 before replacement: {}", imageCountBefore);
+        List<ImageReference> imagesBefore = client.page(1).selectImages();
+        assertEquals(2, imagesBefore.size());
 
-        // Replace with explicit dimensions
         boolean result = client.replaceWithImage("Complete", imageFile, 50, 30).apply();
-        assertTrue(result, "replaceWithImage with explicit size should succeed");
+        assertTrue(result);
 
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1);
+
+        // Find the newly added image by diffing IDs
+        List<ImageReference> imagesAfter = client.page(1).selectImages();
+        List<String> beforeIds = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
+        ImageReference newImage = imagesAfter.stream()
+                .filter(img -> !beforeIds.contains(img.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("New image not found after replacement"));
+        assertEquals(146.75, newImage.getPosition().getX(), 1.0);
+        assertEquals(579.48, newImage.getPosition().getY(), 1.0);
 
         saveTo(client, "replaceWordWithImageExplicitSize.pdf");
     }
@@ -356,18 +362,17 @@ public class TemplateReplaceTest extends BaseTest {
         PDFDancer client = createClient();
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
 
-        int imageCountBefore = client.page(1).selectImages().size();
-
-        // Use the fluent builder to chain a text replacement and an image replacement
         boolean result = client.replace("Obviously", "Clearly")
                 .replaceWithImage("Complete", imageFile)
                 .apply();
-        assertTrue(result, "Mixed text+image replacement should succeed");
+        assertTrue(result);
 
         new PDFAssertions(client)
                 .assertTextlineExists("Clearly", 1)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImageFluent.pdf");
     }
@@ -377,15 +382,14 @@ public class TemplateReplaceTest extends BaseTest {
         PDFDancer client = createClient();
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
 
-        int imageCountBefore = client.page(1).selectImages().size();
-
-        // Use the page-scoped API
         boolean result = client.page(1).replaceWithImage("Complete", imageFile).apply();
-        assertTrue(result, "Page-scoped replaceWithImage should succeed");
+        assertTrue(result);
 
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImageOnPage.pdf");
     }
@@ -396,9 +400,6 @@ public class TemplateReplaceTest extends BaseTest {
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
         Image image = Image.fromFile(imageFile);
 
-        int imageCountBefore = client.page(1).selectImages().size();
-
-        // Use the lower-level TemplateReplaceRequest builder
         TemplateReplaceRequest request = TemplateReplaceRequest.builder()
                 .replaceWithImage("Complete", image)
                 .build();
@@ -408,11 +409,13 @@ public class TemplateReplaceTest extends BaseTest {
         assertNotNull(request.replacements().get(0).image());
 
         boolean result = client.applyReplacements(request);
-        assertTrue(result, "applyReplacements with image should succeed");
+        assertTrue(result);
 
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImageViaRequest.pdf");
     }
@@ -423,9 +426,6 @@ public class TemplateReplaceTest extends BaseTest {
         File imageFile = new File("src/test/resources/fixtures/logo-80.png");
         Image image = Image.fromFile(imageFile);
 
-        int imageCountBefore = client.page(1).selectImages().size();
-
-        // Mix text and image replacements in the same request
         TemplateReplaceRequest request = TemplateReplaceRequest.builder()
                 .replace("Obviously", "Clearly")
                 .replaceWithImage("Complete", image)
@@ -434,13 +434,15 @@ public class TemplateReplaceTest extends BaseTest {
         assertEquals(2, request.replacements().size());
 
         boolean result = client.applyReplacements(request);
-        assertTrue(result, "Mixed text+image replacement request should succeed");
+        assertTrue(result);
 
         new PDFAssertions(client)
                 .assertTextlineExists("Clearly", 1)
                 .assertParagraphNotExists("Obviously", 1)
                 .assertTextlineDoesNotExist("The Complete", 1)
-                .assertNumberOfImages(imageCountBefore + 1, 1);
+                .assertNumberOfImages(3, 1)
+                .assertImageAt(146.75, 579.48, 1)
+                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "mixedTextAndImageE2E.pdf");
     }
