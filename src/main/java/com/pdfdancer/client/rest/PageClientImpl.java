@@ -3,6 +3,8 @@ package com.pdfdancer.client.rest;
 import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.response.PageSnapshot;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -320,6 +322,20 @@ class PageClientImpl {
      */
     public ReplaceBuilder replace(String placeholder, String text) {
         return new ReplaceBuilder(root, pageNumber, placeholder, text);
+    }
+
+    /**
+     * Replaces a template placeholder with an image on this page.
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile) throws IOException {
+        return new ReplaceBuilder(root, pageNumber).replaceWithImage(placeholder, imageFile);
+    }
+
+    /**
+     * Replaces a template placeholder with an image at a specific size on this page.
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile, double width, double height) throws IOException {
+        return new ReplaceBuilder(root, pageNumber).replaceWithImage(placeholder, imageFile, width, height);
     }
 
     /**

@@ -2,10 +2,14 @@ package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Font;
+import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.ReflowPreset;
+import com.pdfdancer.common.model.Size;
 import com.pdfdancer.common.request.TemplateReplacement;
 import com.pdfdancer.common.request.TemplateReplaceRequest;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +47,7 @@ public class ReplaceBuilder {
     private String currentText;
     private Font currentFont;
     private Color currentColor;
+    private Image currentImage;
 
     ReplaceBuilder(PDFDancer client, String placeholder, String text) {
         this.client = client;
@@ -53,6 +58,15 @@ public class ReplaceBuilder {
     ReplaceBuilder(PDFDancer client, int pageNumber, String placeholder, String text) {
         this(client, placeholder, text);
         this.pageIndex = pageNumber - 1; // Convert 1-based page number to 0-based index
+    }
+
+    ReplaceBuilder(PDFDancer client) {
+        this.client = client;
+    }
+
+    ReplaceBuilder(PDFDancer client, int pageNumber) {
+        this.client = client;
+        this.pageIndex = pageNumber - 1;
     }
 
     /**
@@ -112,6 +126,34 @@ public class ReplaceBuilder {
         this.currentText = text;
         this.currentFont = null;
         this.currentColor = null;
+        this.currentImage = null;
+        return this;
+    }
+
+    /**
+     * Adds an image replacement to the batch.
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile) throws IOException {
+        commitCurrent();
+        this.currentPlaceholder = placeholder;
+        this.currentText = null;
+        this.currentImage = Image.fromFile(imageFile);
+        this.currentFont = null;
+        this.currentColor = null;
+        return this;
+    }
+
+    /**
+     * Adds an image replacement with explicit size to the batch.
+     */
+    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile, double width, double height) throws IOException {
+        commitCurrent();
+        this.currentPlaceholder = placeholder;
+        this.currentText = null;
+        this.currentImage = Image.fromFile(imageFile);
+        this.currentImage.setSize(new Size(width, height));
+        this.currentFont = null;
+        this.currentColor = null;
         return this;
     }
 
@@ -125,7 +167,7 @@ public class ReplaceBuilder {
 
         List<TemplateReplacement> replacements = new ArrayList<>();
         for (Entry e : entries) {
-            replacements.add(new TemplateReplacement(e.placeholder, e.text, e.font, e.color));
+            replacements.add(new TemplateReplacement(e.placeholder, e.text, e.font, e.color, e.image));
         }
 
         TemplateReplaceRequest request = new TemplateReplaceRequest(replacements, pageIndex, reflowPreset);
@@ -134,7 +176,7 @@ public class ReplaceBuilder {
 
     private void commitCurrent() {
         if (currentPlaceholder != null) {
-            entries.add(new Entry(currentPlaceholder, currentText, currentFont, currentColor));
+            entries.add(new Entry(currentPlaceholder, currentText, currentFont, currentColor, currentImage));
             currentPlaceholder = null; // Prevent double-commit
         }
     }
@@ -144,12 +186,14 @@ public class ReplaceBuilder {
         final String text;
         final Font font;
         final Color color;
+        final Image image;
 
-        Entry(String placeholder, String text, Font font, Color color) {
+        Entry(String placeholder, String text, Font font, Color color, Image image) {
             this.placeholder = placeholder;
             this.text = text;
             this.font = font;
             this.color = color;
+            this.image = image;
         }
     }
 }
