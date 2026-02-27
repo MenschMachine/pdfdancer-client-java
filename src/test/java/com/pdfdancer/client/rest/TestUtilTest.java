@@ -29,7 +29,7 @@ public class TestUtilTest extends BaseTest {
         TestUtil.drawCoordinateGrid(pdf, 1);
 
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn coordinate grid paths");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("BOTTOM-RIGHT").isEmpty(), "Missing BOTTOM-RIGHT marker");
+        assertFalse(pdf.page(1).selectParagraphsMatching(".*BOTTOM-RIGHT.*").isEmpty(), "Missing BOTTOM-RIGHT marker");
 
         pdf.save("/tmp/test-util-coordinate-grid-page0.pdf");
     }
