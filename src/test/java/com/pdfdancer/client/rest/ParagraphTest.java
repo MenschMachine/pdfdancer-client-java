@@ -194,6 +194,9 @@ public class ParagraphTest extends BaseTest {
                     .lineSpacing(0.7)
                     .at(1, 300.1, 500)   // page 1, coordinates (x=300.1, y=500)
                     .add());
+
+            assertFalse(client.page(1).selectParagraphsStartingWith("Awesomely").isEmpty());
+
             fail("Should have thrown an FontNotFoundException");
         } catch (FontNotFoundException e) {
             assertEquals("Font not found: Roboto", e.getMessage());
