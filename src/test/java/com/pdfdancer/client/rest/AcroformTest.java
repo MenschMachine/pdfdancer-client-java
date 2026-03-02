@@ -39,7 +39,7 @@ public class AcroformTest extends BaseTest {
                 pdf.page(1).selectFormFieldsAt(280, 455, 1);
         assertEquals(1, byPosition.size());
         assertEquals(ObjectType.RADIO_BUTTON, byPosition.get(0).type());
-        assertEquals("FORM_FIELD_000008", byPosition.get(0).getInternalId());
+        assertEquals("FORM_FIELD_0_000008", byPosition.get(0).getInternalId());
     }
 
     @Test
@@ -69,12 +69,12 @@ public class AcroformTest extends BaseTest {
         Optional<FormFieldReference> formField = pdf.page(1).selectFormFieldAt(280, 455, 1);
         assertTrue(formField.isPresent(), "Should find form field at known position");
         assertEquals(ObjectType.RADIO_BUTTON, formField.get().type());
-        assertEquals("FORM_FIELD_000008", formField.get().getInternalId());
+        assertEquals("FORM_FIELD_0_000008", formField.get().getInternalId());
 
         // Test with default epsilon
         Optional<FormFieldReference> formFieldDefaultEpsilon = pdf.page(1).selectFormFieldAt(280, 455);
         assertTrue(formFieldDefaultEpsilon.isPresent(), "Should find form field with default epsilon");
-        assertEquals("FORM_FIELD_000008", formFieldDefaultEpsilon.get().getInternalId());
+        assertEquals("FORM_FIELD_0_000008", formFieldDefaultEpsilon.get().getInternalId());
 
         // Test at position with no form field
         Optional<FormFieldReference> emptyResult = pdf.page(1).selectFormFieldAt(0, 0);
@@ -89,7 +89,7 @@ public class AcroformTest extends BaseTest {
         Optional<FormFieldReference> formField = pdf.selectFormFieldByName("firstName");
         assertTrue(formField.isPresent(), "Should find form field by name");
         assertEquals("firstName", formField.get().getName());
-        assertEquals("FORM_FIELD_000001", formField.get().getInternalId());
+        assertEquals("FORM_FIELD_0_000001", formField.get().getInternalId());
 
         // Test with non-existent name
         Optional<FormFieldReference> emptyResult = pdf.selectFormFieldByName("nonExistentField");
@@ -169,7 +169,7 @@ public class AcroformTest extends BaseTest {
         assertEquals("firstName", field.getName());
         assertNull(field.value());
         assertEquals(ObjectType.TEXT_FIELD, field.type());
-        assertEquals("FORM_FIELD_000001", field.getInternalId());
+        assertEquals("FORM_FIELD_0_000001", field.getInternalId());
 
         assertTrue(field.setValue("Donald Duck"));
 
