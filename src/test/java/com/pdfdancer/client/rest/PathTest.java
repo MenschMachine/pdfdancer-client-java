@@ -27,7 +27,7 @@ public class PathTest extends BaseTest {
 
         PathReference path1 = paths.get(0);
         assertNotNull(path1);
-        assertEquals("PATH_000001", path1.getInternalId());
+        assertEquals("PATH_0_000001", path1.getInternalId());
 
         Position pos = path1.getPosition();
         assertEquals(80, pos.getX().intValue());
@@ -41,7 +41,7 @@ public class PathTest extends BaseTest {
         // Page 1, hit-test at (80, 720)
         List<PathReference> paths = pdf.page(1).selectPathsAt(80, 720);
         assertEquals(1, paths.size());
-        assertEquals("PATH_000001", paths.get(0).getInternalId());
+        assertEquals("PATH_0_000001", paths.get(0).getInternalId());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class PathTest extends BaseTest {
         // Test finding a single path at a known position
         Optional<PathReference> path = pdf.page(1).selectPathAt(80, 720);
         assertTrue(path.isPresent(), "Should find path at known position");
-        assertEquals("PATH_000001", path.get().getInternalId());
+        assertEquals("PATH_0_000001", path.get().getInternalId());
         assertEquals(80, path.get().getPosition().getX().intValue());
         assertEquals(720, path.get().getPosition().getY().intValue());
 
@@ -65,7 +65,7 @@ public class PathTest extends BaseTest {
         PDFDancer client = createClient();
         List<PathReference> paths = client.page(1).selectPathsAt(80, 720);
         assertEquals(1, paths.size());
-        assertEquals("PATH_000001", paths.get(0).getInternalId());
+        assertEquals("PATH_0_000001", paths.get(0).getInternalId());
 
         paths.get(0).delete();
         paths = client.page(1).selectPathsAt(80, 720);
@@ -111,7 +111,7 @@ public class PathTest extends BaseTest {
 
         List<PathReference> paths = pdf.page(1).selectPathsAt(100, 201.5);
         assertEquals(1, paths.size());
-        assertEquals("PATH_000001", paths.get(0).getInternalId());
+        assertEquals("PATH_0_000001", paths.get(0).getInternalId());
         pdf.save("/tmp/addPath.pdf");
     }
 

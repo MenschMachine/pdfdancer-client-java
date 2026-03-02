@@ -94,7 +94,7 @@ public class FormXObjectTest extends BaseTest {
 
         List<FormXObjectReference> found = pdf.page(5).selectFormsAt(76, 623, 1);
         assertEquals(1, found.size());
-        assertEquals("FORM_000001", found.get(0).getInternalId());
+        assertEquals("FORM_4_000001", found.get(0).getInternalId());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class FormXObjectTest extends BaseTest {
         // Test finding a single form at a known position with sufficient epsilon
         Optional<FormXObjectReference> form = pdf.page(5).selectFormAt(76, 623, 1);
         assertTrue(form.isPresent(), "Should find form at known position");
-        assertEquals("FORM_000001", form.get().getInternalId());
+        assertEquals("FORM_4_000001", form.get().getInternalId());
 
         // Test at position with no form
         Optional<FormXObjectReference> emptyResult = pdf.page(1).selectFormAt(0, 0, 1);

@@ -45,7 +45,7 @@ public class ImageTest extends BaseTest {
 
         List<ImageReference> images = client.page(1).selectImagesAt(50, 600, 1);
         assertEquals(1, images.size());
-        assertEquals("IMAGE_000001", images.get(0).getInternalId());
+        assertEquals("IMAGE_0_000001", images.get(0).getInternalId());
 
         List<ImageReference> noImages = client.page(1).selectImagesAt(0, 0, 1);
         assertEquals(0, noImages.size());
@@ -57,7 +57,7 @@ public class ImageTest extends BaseTest {
 
         Optional<ImageReference> image = client.page(1).selectImageAt(200, 600, 1);
         assertTrue(image.isPresent());
-        assertEquals("IMAGE_000002", image.get().getInternalId());
+        assertEquals("IMAGE_0_000002", image.get().getInternalId());
         assertEquals(150, image.get().getWidth(), 0.01);
         assertEquals(100, image.get().getHeight(), 0.01);
 
@@ -73,7 +73,7 @@ public class ImageTest extends BaseTest {
 
         // IMAGE_000001: 100x100 (square)
         ImageReference img1 = images.stream()
-                .filter(i -> i.getInternalId().equals("IMAGE_000001"))
+                .filter(i -> i.getInternalId().equals("IMAGE_0_000001"))
                 .findFirst().orElseThrow();
         assertEquals(100, img1.getWidth(), 0.01);
         assertEquals(100, img1.getHeight(), 0.01);
@@ -81,7 +81,7 @@ public class ImageTest extends BaseTest {
 
         // IMAGE_000002: 150x100 (landscape)
         ImageReference img2 = images.stream()
-                .filter(i -> i.getInternalId().equals("IMAGE_000002"))
+                .filter(i -> i.getInternalId().equals("IMAGE_0_000002"))
                 .findFirst().orElseThrow();
         assertEquals(150, img2.getWidth(), 0.01);
         assertEquals(100, img2.getHeight(), 0.01);
@@ -89,7 +89,7 @@ public class ImageTest extends BaseTest {
 
         // IMAGE_000003: 100x150 (portrait)
         ImageReference img3 = images.stream()
-                .filter(i -> i.getInternalId().equals("IMAGE_000003"))
+                .filter(i -> i.getInternalId().equals("IMAGE_0_000003"))
                 .findFirst().orElseThrow();
         assertEquals(100, img3.getWidth(), 0.01);
         assertEquals(150, img3.getHeight(), 0.01);
