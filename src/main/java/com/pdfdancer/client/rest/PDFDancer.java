@@ -1024,14 +1024,14 @@ public class PDFDancer {
         return result;
     }
 
-    public boolean movePathGroup(int pageIndex, String groupId, double x, double y) {
+    boolean movePathGroup(int pageIndex, String groupId, double x, double y) {
         boolean result = Boolean.TRUE.equals(modification.movePathGroup(
                 new MovePathGroupRequest(pageIndex, groupId, x, y)));
         invalidateSnapshotCaches();
         return result;
     }
 
-    public boolean scalePathGroup(int pageIndex, String groupId, double scaleFactor) {
+    boolean scalePathGroup(int pageIndex, String groupId, double scaleFactor) {
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.SCALE, scaleFactor, null, null, null)));
@@ -1039,7 +1039,7 @@ public class PDFDancer {
         return result;
     }
 
-    public boolean rotatePathGroup(int pageIndex, String groupId, double degrees) {
+    boolean rotatePathGroup(int pageIndex, String groupId, double degrees) {
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.ROTATE, null, degrees, null, null)));
@@ -1047,7 +1047,7 @@ public class PDFDancer {
         return result;
     }
 
-    public boolean resizePathGroup(int pageIndex, String groupId, double width, double height) {
+    boolean resizePathGroup(int pageIndex, String groupId, double width, double height) {
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.RESIZE, null, null, width, height)));
@@ -1055,7 +1055,7 @@ public class PDFDancer {
         return result;
     }
 
-    public boolean removePathGroup(int pageIndex, String groupId) {
+    boolean removePathGroup(int pageIndex, String groupId) {
         boolean result = Boolean.TRUE.equals(modification.removePathGroup(
                 new RemovePathGroupRequest(pageIndex, groupId)));
         invalidateSnapshotCaches();

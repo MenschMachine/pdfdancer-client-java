@@ -216,16 +216,16 @@ class PageClientImpl {
         return root.toPathObject(forms);
     }
 
-    public PathGroupReference groupPaths(String groupId, List<String> pathIds) {
+    public PathGroupReference groupPaths(List<String> pathIds) {
         int pageIndex = pageNumber - 1;
-        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, groupId, pathIds, null);
+        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, pathIds, null);
         PathGroupInfo info = root.createPathGroup(request);
         return new PathGroupReference(root, info, pageIndex);
     }
 
-    public PathGroupReference groupPathsInRegion(String groupId, BoundingRect region) {
+    public PathGroupReference groupPathsInRegion(BoundingRect region) {
         int pageIndex = pageNumber - 1;
-        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, groupId, null, region);
+        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, null, region);
         PathGroupInfo info = root.createPathGroup(request);
         return new PathGroupReference(root, info, pageIndex);
     }
