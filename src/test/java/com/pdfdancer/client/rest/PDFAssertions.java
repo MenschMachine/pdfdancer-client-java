@@ -298,6 +298,32 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFDancer getPdf() {
+        return pdf;
+    }
+
+    public PDFAssertions assertPathHasBounds(String internalId, double expectedWidth, double expectedHeight, int page) {
+        return assertPathHasBounds(internalId, expectedWidth, expectedHeight, page, 1.0);
+    }
+
+    public PDFAssertions assertPathHasBounds(String internalId, double expectedWidth, double expectedHeight, int page, double epsilon) {
+        List<PathReference> paths = pdf.page(page).selectPaths();
+        PathReference ref = paths.stream()
+                .filter(p -> internalId.equals(p.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Path with ID " + internalId + " not found on page " + page));
+
+        com.pdfdancer.common.model.BoundingRect bounds = ref.getPosition().getBoundingRect();
+        assertNotNull(bounds, "Path " + internalId + " has no bounding rect");
+        assertEquals(expectedWidth, bounds.getWidth(), epsilon,
+                String.format("Path %s width: expected %f but got %f", internalId, expectedWidth, bounds.getWidth()));
+        assertEquals(expectedHeight, bounds.getHeight(), epsilon,
+                String.format("Path %s height: expected %f but got %f", internalId, expectedHeight, bounds.getHeight()));
+
+        return this;
+    }
+
     public PDFAssertions assertNumberOfPaths(int pathCount, int page) {
         List<PathReference> paths = pdf.selectPaths();
         // Filter to specific page
