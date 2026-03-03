@@ -347,6 +347,9 @@ public final class PdfDancerHttpClient {
             if ("FontNotFoundException".equals(err.error())) {
                 return new FontNotFoundException(err.message());
             }
+            if ("SessionNotFoundException".equals(err.error())) {
+                return new SessionNotFoundException(err.message());
+            }
         }
 
         String message = error.map(ErrorResponse::message)

@@ -1018,6 +1018,62 @@ public class PDFDancer {
         return result;
     }
 
+    PathGroupInfo createPathGroup(CreatePathGroupRequest request) {
+        PathGroupInfo result = modification.createPathGroup(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean movePathGroup(int pageIndex, String groupId, double x, double y) {
+        boolean result = Boolean.TRUE.equals(modification.movePathGroup(
+                new MovePathGroupRequest(pageIndex, groupId, x, y)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean scalePathGroup(int pageIndex, String groupId, double scaleFactor) {
+        boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
+                new TransformPathGroupRequest(pageIndex, groupId,
+                        TransformPathGroupRequest.TransformType.SCALE, scaleFactor, null, null, null)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean rotatePathGroup(int pageIndex, String groupId, double degrees) {
+        boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
+                new TransformPathGroupRequest(pageIndex, groupId,
+                        TransformPathGroupRequest.TransformType.ROTATE, null, degrees, null, null)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean resizePathGroup(int pageIndex, String groupId, double width, double height) {
+        boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
+                new TransformPathGroupRequest(pageIndex, groupId,
+                        TransformPathGroupRequest.TransformType.RESIZE, null, null, width, height)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean removePathGroup(int pageIndex, String groupId) {
+        boolean result = Boolean.TRUE.equals(modification.removePathGroup(
+                new RemovePathGroupRequest(pageIndex, groupId)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public List<PathGroupReference> getPathGroups(int pageIndex) {
+        List<PathGroupInfo> infos = blockingClient.retrieve(
+                HttpRequest.GET("/pdf/page/" + pageIndex + "/path-groups")
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Argument.listOf(PathGroupInfo.class)
+        );
+        return infos.stream()
+                .map(info -> new PathGroupReference(this, info, pageIndex))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     /**
      * Replaces template placeholders in the PDF document.
      * Finds exact text matches for placeholders and replaces them with specified content.
