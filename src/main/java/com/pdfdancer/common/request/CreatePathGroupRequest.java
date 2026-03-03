@@ -25,6 +25,9 @@ public final class CreatePathGroupRequest {
             @JsonProperty("groupId") String groupId,
             @JsonProperty("pathIds") List<String> pathIds,
             @JsonProperty("region") BoundingRect region) {
+        if ((pathIds == null || pathIds.isEmpty()) && region == null) {
+            throw new IllegalArgumentException("Either pathIds or region must be provided");
+        }
         this.pageIndex = pageIndex;
         this.groupId = groupId;
         this.pathIds = pathIds;
