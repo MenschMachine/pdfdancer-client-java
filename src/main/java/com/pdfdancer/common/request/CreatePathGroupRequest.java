@@ -12,8 +12,6 @@ import java.util.Objects;
 public final class CreatePathGroupRequest {
     @JsonProperty("pageIndex")
     private final int pageIndex;
-    @JsonProperty("groupId")
-    private final String groupId;
     @JsonProperty("pathIds")
     private final List<String> pathIds;
     @JsonProperty("region")
@@ -22,20 +20,17 @@ public final class CreatePathGroupRequest {
     @JsonCreator
     public CreatePathGroupRequest(
             @JsonProperty("pageIndex") int pageIndex,
-            @JsonProperty("groupId") String groupId,
             @JsonProperty("pathIds") List<String> pathIds,
             @JsonProperty("region") BoundingRect region) {
         if ((pathIds == null || pathIds.isEmpty()) && region == null) {
             throw new IllegalArgumentException("Either pathIds or region must be provided");
         }
         this.pageIndex = pageIndex;
-        this.groupId = groupId;
         this.pathIds = pathIds;
         this.region = region;
     }
 
     public int pageIndex() { return pageIndex; }
-    public String groupId() { return groupId; }
     public List<String> pathIds() { return pathIds; }
     public BoundingRect region() { return region; }
 
@@ -45,21 +40,19 @@ public final class CreatePathGroupRequest {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (CreatePathGroupRequest) obj;
         return pageIndex == that.pageIndex &&
-                Objects.equals(groupId, that.groupId) &&
                 Objects.equals(pathIds, that.pathIds) &&
                 Objects.equals(region, that.region);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pageIndex, groupId, pathIds, region);
+        return Objects.hash(pageIndex, pathIds, region);
     }
 
     @Override
     public String toString() {
         return "CreatePathGroupRequest[" +
                 "pageIndex=" + pageIndex + ", " +
-                "groupId=" + groupId + ", " +
                 "pathIds=" + pathIds + ", " +
                 "region=" + region + ']';
     }
