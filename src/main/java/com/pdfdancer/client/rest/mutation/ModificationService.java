@@ -5,6 +5,7 @@ import com.pdfdancer.client.http.MediaType;
 import com.pdfdancer.client.http.MutableHttpRequest;
 import com.pdfdancer.client.rest.PdfDancerHttpClient;
 import com.pdfdancer.common.model.*;
+import com.pdfdancer.common.model.PathGroupInfo;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.CommandResult;
 import com.pdfdancer.common.response.RedactResponse;
@@ -179,6 +180,50 @@ public final class ModificationService {
                 CommandResult.class
         );
         return result.success();
+    }
+
+    public PathGroupInfo createPathGroup(CreatePathGroupRequest request) {
+        String path = "/pdf/path-group/create";
+        return blocking.retrieve(
+                HttpRequest.POST(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                PathGroupInfo.class
+        );
+    }
+
+    public Boolean movePathGroup(MovePathGroupRequest request) {
+        String path = "/pdf/path-group/move";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
+    public Boolean transformPathGroup(TransformPathGroupRequest request) {
+        String path = "/pdf/path-group/transform";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
+    public Boolean removePathGroup(RemovePathGroupRequest request) {
+        String path = "/pdf/path-group/remove";
+        return blocking.retrieve(
+                HttpRequest.DELETE(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
     }
 
     public boolean replaceTemplates(TemplateReplaceRequest request) {

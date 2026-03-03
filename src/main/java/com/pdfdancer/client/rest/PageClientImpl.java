@@ -214,6 +214,27 @@ class PageClientImpl {
         return root.toPathObject(forms);
     }
 
+    public PathGroupReference groupPaths(String groupId, List<String> pathIds) {
+        int pageIndex = pageNumber - 1;
+        com.pdfdancer.common.request.CreatePathGroupRequest request =
+                new com.pdfdancer.common.request.CreatePathGroupRequest(pageIndex, groupId, pathIds, null);
+        com.pdfdancer.common.model.PathGroupInfo info = root.createPathGroup(request);
+        return new PathGroupReference(root, info, pageIndex);
+    }
+
+    public PathGroupReference groupPathsInRegion(String groupId, BoundingRect region) {
+        int pageIndex = pageNumber - 1;
+        com.pdfdancer.common.request.CreatePathGroupRequest request =
+                new com.pdfdancer.common.request.CreatePathGroupRequest(pageIndex, groupId, null, region);
+        com.pdfdancer.common.model.PathGroupInfo info = root.createPathGroup(request);
+        return new PathGroupReference(root, info, pageIndex);
+    }
+
+    public List<PathGroupReference> getPathGroups() {
+        int pageIndex = pageNumber - 1;
+        return root.getPathGroups(pageIndex);
+    }
+
     public List<FormXObjectReference> selectFormsAt(double x, double y) { return selectFormsAt(x, y, PDFDancer.DEFAULT_EPSILON); }
 
     public List<FormXObjectReference> selectFormsAt(double x, double y, double epsilon) {
