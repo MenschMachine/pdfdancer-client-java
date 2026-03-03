@@ -5,7 +5,6 @@ import com.pdfdancer.client.http.MediaType;
 import com.pdfdancer.client.http.MutableHttpRequest;
 import com.pdfdancer.client.rest.PdfDancerHttpClient;
 import com.pdfdancer.common.model.*;
-import com.pdfdancer.common.model.PathGroupInfo;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.CommandResult;
 import com.pdfdancer.common.response.RedactResponse;

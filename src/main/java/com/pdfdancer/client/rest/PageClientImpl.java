@@ -1,6 +1,8 @@
 package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.*;
+import com.pdfdancer.common.model.PathGroupInfo;
+import com.pdfdancer.common.request.CreatePathGroupRequest;
 import com.pdfdancer.common.response.PageSnapshot;
 
 import java.io.File;
@@ -216,17 +218,15 @@ class PageClientImpl {
 
     public PathGroupReference groupPaths(String groupId, List<String> pathIds) {
         int pageIndex = pageNumber - 1;
-        com.pdfdancer.common.request.CreatePathGroupRequest request =
-                new com.pdfdancer.common.request.CreatePathGroupRequest(pageIndex, groupId, pathIds, null);
-        com.pdfdancer.common.model.PathGroupInfo info = root.createPathGroup(request);
+        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, groupId, pathIds, null);
+        PathGroupInfo info = root.createPathGroup(request);
         return new PathGroupReference(root, info, pageIndex);
     }
 
     public PathGroupReference groupPathsInRegion(String groupId, BoundingRect region) {
         int pageIndex = pageNumber - 1;
-        com.pdfdancer.common.request.CreatePathGroupRequest request =
-                new com.pdfdancer.common.request.CreatePathGroupRequest(pageIndex, groupId, null, region);
-        com.pdfdancer.common.model.PathGroupInfo info = root.createPathGroup(request);
+        CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, groupId, null, region);
+        PathGroupInfo info = root.createPathGroup(request);
         return new PathGroupReference(root, info, pageIndex);
     }
 
