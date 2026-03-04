@@ -41,6 +41,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    failFast = true
 }
 
 tasks.withType<JavaCompile>().configureEach {
