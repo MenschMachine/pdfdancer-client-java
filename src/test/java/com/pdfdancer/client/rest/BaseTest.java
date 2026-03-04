@@ -32,7 +32,7 @@ public abstract class BaseTest {
         httpClient = PdfDancerHttpClient.create(delegate, baseUrl);
     }
 
-    protected String getValidToken() {
+    public static String getValidToken() {
         String sysProp = System.getProperty("pdfdancer.token");
         if (sysProp != null) {
             return sysProp;
