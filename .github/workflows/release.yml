@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Extract version from tag
         id: version
@@ -64,21 +62,6 @@ jobs:
             -Psigning.keyFile="$KEY_FILE" \
             -Psigning.password="${{ secrets.SIGNING_PASSWORD }}"
           rm -f "$KEY_FILE"
-
-      - name: Push updated version.properties
-        run: |
-          BRANCH=$(git branch -r --contains ${{ github.ref }} | grep -v HEAD | head -1 | sed 's|origin/||' | xargs)
-          if [ -z "$BRANCH" ]; then
-            echo "Could not determine branch for tag, skipping version commit"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout "$BRANCH"
-          git add version.properties
-          git diff --cached --quiet && exit 0
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]"
-          git push origin "$BRANCH"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
