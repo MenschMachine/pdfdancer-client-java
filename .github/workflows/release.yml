@@ -77,7 +77,7 @@ jobs:
           git checkout "$BRANCH"
           git add version.properties
           git diff --cached --quiet && exit 0
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]"
           git push origin "$BRANCH"
 
       - name: Create GitHub Release
