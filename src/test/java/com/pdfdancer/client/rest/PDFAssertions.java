@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.pdfdancer.client.rest.BaseTest.getValidToken;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -25,7 +26,7 @@ public class PDFAssertions {
     private final PdfDancerHttpClient httpClient;
 
     public PDFAssertions(PDFDancer pdfDancer) {
-        this(pdfDancer, "42", pdfDancer.getHttpClient());
+        this(pdfDancer, getValidToken(), pdfDancer.getHttpClient());
     }
 
     public PDFAssertions(PDFDancer pdfDancer, String token, PdfDancerHttpClient httpClient) {
