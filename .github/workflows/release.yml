@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Write version to version.properties
+        run: echo "version=${{ steps.version.outputs.version }}" > version.properties
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-wrapper-
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build and test
+        run: ./gradlew build
+        env:
+          PDFDANCER_BASE_URL: https://api.pdfdancer.com
+          PDFDANCER_API_TOKEN: ${{ secrets.PDFDANCER_API_TOKEN_PRODUCTION }}
+
+      - name: Create Maven Central bundle
+        run: |
+          KEY_FILE=$(mktemp)
+          echo "${{ secrets.SIGNING_KEY_FILE }}" > "$KEY_FILE"
+          ./gradlew mavenCentralBundle \
+            -Psigning.keyFile="$KEY_FILE" \
+            -Psigning.password="${{ secrets.SIGNING_PASSWORD }}"
+          rm -f "$KEY_FILE"
+
+      - name: Push updated version.properties
+        run: |
+          BRANCH=$(git branch -r --contains ${{ github.ref }} | grep -v HEAD | head -1 | sed 's|origin/||' | xargs)
+          if [ -z "$BRANCH" ]; then
+            echo "Could not determine branch for tag, skipping version commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout "$BRANCH"
+          git add version.properties
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin "$BRANCH"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: build/distributions/bundle.zip
