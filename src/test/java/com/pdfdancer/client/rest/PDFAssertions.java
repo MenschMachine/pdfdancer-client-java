@@ -293,6 +293,22 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertPathWithIdIsAt(String internalId, double x, double y, int page, double epsilon) {
+        List<PathReference> paths = pdf.page(page).selectPaths();
+        PathReference ref = paths.stream()
+                .filter(path -> internalId.equals(path.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Path with ID " + internalId + " not found on page " + page));
+
+        assertEquals(x, ref.getPosition().getX(), epsilon,
+                String.format("%f != %f", x, ref.getPosition().getX()));
+        assertEquals(y, ref.getPosition().getY(), epsilon,
+                String.format("%f != %f", y, ref.getPosition().getY()));
+
+        return this;
+    }
+
     public PDFAssertions assertNoPathAt(double x, double y, int page) {
         List<PathReference> paths = pdf.page(page).selectPathsAt(x, y);
         assertEquals(0, paths.size());

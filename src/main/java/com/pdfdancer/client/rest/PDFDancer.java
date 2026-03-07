@@ -470,6 +470,12 @@ public class PDFDancer {
         return result;
     }
 
+    protected boolean clearClipping(ObjectRef objectRef) {
+        Boolean result = modification.clearClipping(objectRef);
+        invalidateSnapshotCaches();
+        return Boolean.TRUE.equals(result);
+    }
+
     /**
      * Adds an image to the PDF document at the specified getPosition.
      * This convenience method sets the image getPosition and adds it to the document
@@ -1058,6 +1064,14 @@ public class PDFDancer {
     boolean removePathGroup(int pageIndex, String groupId) {
         boolean result = Boolean.TRUE.equals(modification.removePathGroup(
                 new RemovePathGroupRequest(pageIndex, groupId)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    boolean clearPathGroupClipping(int pageIndex, String groupId) {
+        int pageNumber = pageIndex + 1;
+        boolean result = Boolean.TRUE.equals(modification.clearPathGroupClipping(
+                new ClearPathGroupClippingRequest(pageNumber, groupId)));
         invalidateSnapshotCaches();
         return result;
     }

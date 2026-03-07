@@ -1,0 +1,27 @@
+Implemented `clearClipping` end-to-end in the Java SDK and added e2e coverage.
+
+1. SDK API additions
+- Added `clearClipping()` to all element references via [`BaseReference.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/client/rest/BaseReference.java).
+- Added `clearClipping()` to path groups via [`PathGroupReference.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/client/rest/PathGroupReference.java).
+- Wired new endpoints in [`ModificationService.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/client/rest/mutation/ModificationService.java):
+  - `PUT /pdf/clipping/clear`
+  - `PUT /pdf/path-group/clipping/clear`
+- Added client-level methods in [`PDFDancer.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/client/rest/PDFDancer.java), including page-index to page-number conversion for path-group clipping clear.
+
+2. New request models
+- [`ClearClippingRequest.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/common/request/ClearClippingRequest.java)
+- [`ClearPathGroupClippingRequest.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/main/java/com/pdfdancer/common/request/ClearPathGroupClippingRequest.java)
+
+3. E2E tests
+- Implemented clipping tests in [`ClippingTest.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/test/java/com/pdfdancer/client/rest/ClippingTest.java):
+  - clear clipping on path + move + persistence assertions
+  - clear clipping on text/image/paragraph references
+  - clear clipping on path group + group operations
+- Added precise assertion helper [`PDFAssertions.java`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/src/test/java/com/pdfdancer/client/rest/PDFAssertions.java):
+  - `assertPathWithIdIsAt(...)`
+
+4. Docs
+- Updated helper list in [`README.md`](/private/var/folders/cr/4kbt5vt168zbpw3tt9h9lpvc0000gn/T/propagate-pdfdancer-client-java-158ktO/README.md) to include `clearClipping()`.
+
+Validation run:
+- `./gradlew test --tests com.pdfdancer.client.rest.ClippingTest` passed.

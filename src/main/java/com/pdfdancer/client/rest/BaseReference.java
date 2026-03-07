@@ -44,6 +44,16 @@ public abstract class BaseReference {
         return this.client.move(objectRef, newPosition);
     }
 
+    /**
+     * Removes clipping from this element.
+     * Useful when inherited clipping masks hide this object after transformations.
+     *
+     * @return true if clipping was cleared successfully
+     */
+    public boolean clearClipping() {
+        return this.client.clearClipping(objectRef);
+    }
+
     public ObjectType type() {
         return objectRef.getType();
     }
