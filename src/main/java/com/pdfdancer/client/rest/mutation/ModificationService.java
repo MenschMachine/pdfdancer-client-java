@@ -225,6 +225,28 @@ public final class ModificationService {
         );
     }
 
+    public Boolean clearClipping(ObjectRef objectRef) {
+        String path = "/pdf/clipping/clear";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, new ClearClippingRequest(objectRef))
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
+    public Boolean clearPathGroupClipping(ClearPathGroupClippingRequest request) {
+        String path = "/pdf/path-group/clipping/clear";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
     public boolean replaceTemplates(TemplateReplaceRequest request) {
         String path = "/template/replace";
         log.debug("Replacing templates with {} replacements", request.replacements().size());

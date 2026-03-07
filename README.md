@@ -166,8 +166,8 @@ public class FormExample {
 ```
 
 Selectors return typed objects (`TextParagraphReference`, `TextLineReference`, `ImageReference`, `FormFieldReference`,
-`PathReference`, `PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `edit()`, or `setValue()` depending on
-what you grabbed.
+`PathReference`, `PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `clearClipping()`, `edit()`, or
+`setValue()` depending on what you grabbed.
 
 ## Configuration
 
