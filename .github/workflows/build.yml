@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ main ]
   pull_request:
     branches: [ '**' ]
   workflow_dispatch:
@@ -76,6 +76,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Resolve API URL
+        if: github.event_name == 'pull_request'
         id: api-url
         shell: bash
         run: |
@@ -172,6 +173,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Resolve API URL
+        if: github.event_name == 'pull_request'
         id: api-url
         shell: bash
         run: |
