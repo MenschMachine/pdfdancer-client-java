@@ -56,8 +56,8 @@ include
 
 - Added client API helpers to expose clipping removal directly on references and the top-level client:
   - `BaseReference.clearClipping()` delegates to `PDFDancer.clearClipping(ObjectRef)`.
-  - `PathGroupReference.clearClipping()` delegates to `PDFDancer.clearPathGroupClipping(pageNumber, groupId)`.
-  - `PDFDancer` now provides both `clearClipping(ObjectRef)` and `clearPathGroupClipping(int pageNumber, String groupId)`, and invalidates snapshot caches after each mutation.
+  - `PathGroupReference.clearClipping()` delegates to `PDFDancer.clearPathGroupClipping(pageIndex, groupId)`.
+  - `PDFDancer` now provides both `clearClipping(ObjectRef)` and `clearPathGroupClipping(int pageIndex, String groupId)`, and invalidates snapshot caches after each mutation.
 - Wired REST mutation calls in `ModificationService`:
   - `PUT /pdf/clipping/clear` with `ClearClippingRequest`.
   - `PUT /pdf/path-group/clipping/clear` with `ClearPathGroupClippingRequest`.

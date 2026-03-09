@@ -336,6 +336,18 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertTextlineHasClipping(String internalId, int page) {
+        boolean clipped = findTextLineClippingState(internalId, page);
+        assertTrue(clipped, String.format("Expected text line %s on page %d to be clipped", internalId, page));
+        return this;
+    }
+
+    public PDFAssertions assertTextlineHasNoClipping(String internalId, int page) {
+        boolean clipped = findTextLineClippingState(internalId, page);
+        assertFalse(clipped, String.format("Expected text line %s on page %d to be unclipped", internalId, page));
+        return this;
+    }
+
     public PDFDancer getPdf() {
         return pdf;
     }
@@ -635,6 +647,54 @@ public class PDFAssertions {
                         String.format("Image with ID %s not found on page %d", internalId, page)));
     }
 
+    private boolean findTextLineClippingState(String internalId, int page) {
+        TextLineReference textLineRef = pdf.page(page).selectTextLines().stream()
+                .filter(line -> internalId.equals(line.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        String.format("Text line with ID %s not found on page %d", internalId, page)));
+
+        Double x = textLineRef.getPosition().getX();
+        Double y = textLineRef.getPosition().getY();
+        assertNotNull(x, "Text line " + internalId + " has no x position");
+        assertNotNull(y, "Text line " + internalId + " has no y position");
+
+        com.pdfdancer.common.model.BoundingRect bounds = textLineRef.getPosition().getBoundingRect();
+        List<DrawEvent> events = extractPageDrawEvents(page).textEvents();
+        assertFalse(events.isEmpty(),
+                String.format("No text draw events parsed for page %d while checking %s", page, internalId));
+
+        List<DrawEvent> matches = events.stream()
+                .filter(event -> {
+                    double[] eventBBox = event.bbox();
+                    double centerX = (eventBBox[0] + eventBBox[2]) / 2.0;
+                    double centerY = (eventBBox[1] + eventBBox[3]) / 2.0;
+
+                    if (bounds != null) {
+                        double[] targetBBox = new double[]{
+                                bounds.getX(),
+                                bounds.getY(),
+                                bounds.getX() + bounds.getWidth(),
+                                bounds.getY() + bounds.getHeight()
+                        };
+                        return bboxContainsPoint(targetBBox, centerX, centerY, 8.0);
+                    }
+
+                    return distanceToPoint(eventBBox, x, y) <= 8.0;
+                })
+                .collect(Collectors.toList());
+
+        assertFalse(matches.isEmpty(),
+                String.format(
+                        "No text draw event matched text line anchor (%f, %f) for %s. Available text event points: %s",
+                        x, y, internalId, events.stream().map(event -> bboxToString(event.bbox())).collect(Collectors.toList())));
+
+        DrawEvent best = matches.stream()
+                .min(Comparator.comparingDouble(event -> distanceToPoint(event.bbox(), x, y)))
+                .orElseThrow();
+        return best.clipped();
+    }
+
     private ParsedPageEvents extractPageDrawEvents(int page) {
         try (PDDocument document = Loader.loadPDF(savedPdfFile)) {
             assertTrue(page >= 1 && page <= document.getNumberOfPages(),
@@ -646,6 +706,7 @@ public class PDFAssertions {
 
             List<DrawEvent> pathEvents = new ArrayList<>();
             List<DrawEvent> imageEvents = new ArrayList<>();
+            List<DrawEvent> textEvents = new ArrayList<>();
             List<double[]> currentPathPoints = new ArrayList<>();
             List<Object> operands = new ArrayList<>();
             Deque<GraphicsState> stateStack = new ArrayDeque<>();
@@ -653,6 +714,10 @@ public class PDFAssertions {
             boolean hasClip = false;
             boolean pendingClip = false;
             double[] ctm = identityMatrix();
+            boolean inTextObject = false;
+            double[] textMatrix = identityMatrix();
+            double[] textLineMatrix = identityMatrix();
+            double textLeading = 0.0;
 
             for (Object token : tokens) {
                 if (!(token instanceof Operator)) {
@@ -754,6 +819,70 @@ public class PDFAssertions {
                         double[] p3 = applyMatrix(ctm, 1, 1);
                         imageEvents.add(new DrawEvent(pointsToBBox(List.of(p0, p1, p2, p3)), hasClip || pendingClip));
                         break;
+                    case "BT":
+                        inTextObject = true;
+                        textMatrix = identityMatrix();
+                        textLineMatrix = identityMatrix();
+                        break;
+                    case "ET":
+                        inTextObject = false;
+                        break;
+                    case "Tm":
+                        if (operands.size() >= 6) {
+                            textMatrix = new double[]{
+                                    operandAsDouble(operands, 0),
+                                    operandAsDouble(operands, 1),
+                                    operandAsDouble(operands, 2),
+                                    operandAsDouble(operands, 3),
+                                    operandAsDouble(operands, 4),
+                                    operandAsDouble(operands, 5)
+                            };
+                            textLineMatrix = textMatrix.clone();
+                        }
+                        break;
+                    case "Td":
+                        if (inTextObject && operands.size() >= 2) {
+                            double tx = operandAsDouble(operands, 0);
+                            double ty = operandAsDouble(operands, 1);
+                            textLineMatrix = matrixMultiply(textLineMatrix, translationMatrix(tx, ty));
+                            textMatrix = textLineMatrix.clone();
+                        }
+                        break;
+                    case "TD":
+                        if (inTextObject && operands.size() >= 2) {
+                            double tx = operandAsDouble(operands, 0);
+                            double ty = operandAsDouble(operands, 1);
+                            textLeading = -ty;
+                            textLineMatrix = matrixMultiply(textLineMatrix, translationMatrix(tx, ty));
+                            textMatrix = textLineMatrix.clone();
+                        }
+                        break;
+                    case "T*":
+                        if (inTextObject) {
+                            textLineMatrix = matrixMultiply(textLineMatrix, translationMatrix(0, -textLeading));
+                            textMatrix = textLineMatrix.clone();
+                        }
+                        break;
+                    case "Tj":
+                    case "TJ":
+                        if (inTextObject) {
+                            addTextDrawEvent(textEvents, ctm, textMatrix, hasClip || pendingClip);
+                        }
+                        break;
+                    case "'":
+                        if (inTextObject) {
+                            textLineMatrix = matrixMultiply(textLineMatrix, translationMatrix(0, -textLeading));
+                            textMatrix = textLineMatrix.clone();
+                            addTextDrawEvent(textEvents, ctm, textMatrix, hasClip || pendingClip);
+                        }
+                        break;
+                    case "\"":
+                        if (inTextObject) {
+                            textLineMatrix = matrixMultiply(textLineMatrix, translationMatrix(0, -textLeading));
+                            textMatrix = textLineMatrix.clone();
+                            addTextDrawEvent(textEvents, ctm, textMatrix, hasClip || pendingClip);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -761,10 +890,17 @@ public class PDFAssertions {
                 operands.clear();
             }
 
-            return new ParsedPageEvents(pathEvents, imageEvents);
+            return new ParsedPageEvents(pathEvents, imageEvents, textEvents);
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse rendered PDF for clipping assertions", e);
         }
+    }
+
+    private static void addTextDrawEvent(List<DrawEvent> textEvents, double[] ctm, double[] textMatrix, boolean clipped) {
+        double[] textRenderMatrix = matrixMultiply(ctm, textMatrix);
+        double[] origin = applyMatrix(textRenderMatrix, 0, 0);
+        double[] pointBBox = new double[]{origin[0], origin[1], origin[0], origin[1]};
+        textEvents.add(new DrawEvent(pointBBox, clipped));
     }
 
     private static void addPathPoint(List<double[]> pathPoints, double[] ctm, double x, double y) {
@@ -862,6 +998,18 @@ public class PDFAssertions {
             return 0;
         }
         return (right - left) * (top - bottom);
+    }
+
+    private static double distanceToPoint(double[] bbox, double x, double y) {
+        double centerX = (bbox[0] + bbox[2]) / 2.0;
+        double centerY = (bbox[1] + bbox[3]) / 2.0;
+        double dx = centerX - x;
+        double dy = centerY - y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    private static double[] translationMatrix(double tx, double ty) {
+        return new double[]{1, 0, 0, 1, tx, ty};
     }
 
     private static String bboxToString(double[] bbox) {
@@ -974,10 +1122,12 @@ public class PDFAssertions {
     private static final class ParsedPageEvents {
         private final List<DrawEvent> pathEvents;
         private final List<DrawEvent> imageEvents;
+        private final List<DrawEvent> textEvents;
 
-        private ParsedPageEvents(List<DrawEvent> pathEvents, List<DrawEvent> imageEvents) {
+        private ParsedPageEvents(List<DrawEvent> pathEvents, List<DrawEvent> imageEvents, List<DrawEvent> textEvents) {
             this.pathEvents = pathEvents;
             this.imageEvents = imageEvents;
+            this.textEvents = textEvents;
         }
 
         private List<DrawEvent> pathEvents() {
@@ -986,6 +1136,10 @@ public class PDFAssertions {
 
         private List<DrawEvent> imageEvents() {
             return imageEvents;
+        }
+
+        private List<DrawEvent> textEvents() {
+            return textEvents;
         }
     }
 }

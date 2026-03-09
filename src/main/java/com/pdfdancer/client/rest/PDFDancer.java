@@ -1068,9 +1068,9 @@ public class PDFDancer {
         return result;
     }
 
-    public boolean clearPathGroupClipping(int pageNumber, String groupId) {
+    public boolean clearPathGroupClipping(int pageIndex, String groupId) {
         boolean result = Boolean.TRUE.equals(modification.clearPathGroupClipping(
-                new ClearPathGroupClippingRequest(pageNumber, groupId)));
+                new ClearPathGroupClippingRequest(pageIndex, groupId)));
         invalidateSnapshotCaches();
         return result;
     }

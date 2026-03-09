@@ -1,17 +1,16 @@
 package com.pdfdancer.client.rest;
 
-
 import com.pdfdancer.common.model.ObjectRef;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ClippingTest extends BaseTest {
     private static final String CLIPPING_FIXTURE = "clipping/invisible-content-clipping-test.pdf";
+    private static final String TEXT_CLIPPING_FIXTURE = "clipping/basic-text-clipping-test.pdf";
     private static final String TARGET_PATH_ID = "PATH_0_000004";
     private static final String CONTROL_PATH_ID = "PATH_0_000003";
 
@@ -84,7 +83,7 @@ public class ClippingTest extends BaseTest {
 
         PathGroupReference group = pdf.page(1).groupPaths(List.of(TARGET_PATH_ID));
         assertNotNull(group.getGroupId());
-        assertTrue(pdf.clearPathGroupClipping(1, group.getGroupId()));
+        assertTrue(pdf.clearPathGroupClipping(0, group.getGroupId()));
 
         new PDFAssertions(pdf)
                 .assertPathHasNoClipping(TARGET_PATH_ID, 1)
@@ -113,15 +112,20 @@ public class ClippingTest extends BaseTest {
 
     @Test
     public void clearClippingViaTextLineReference() {
-        PDFDancer pdf = createClient("ObviouslyAwesome.pdf");
-        List<TextLineReference> lines = pdf.page(1).selectTextLines();
-        assertTrue(lines.size() > 0, "Expected at least one text line in fixture");
-        int before = lines.size();
+        PDFDancer pdf = createClient(TEXT_CLIPPING_FIXTURE);
+        TextLineReference targetLine = findTextLineByPrefix(pdf, "CLIPPED TEXT");
+        TextLineReference controlLine = findTextLineByPrefix(pdf, "Line 8:");
 
-        assertTrue(lines.get(0).clearClipping());
+        new PDFAssertions(pdf)
+                .assertTextlineHasClipping(targetLine.getInternalId(), 1)
+                .assertTextlineHasClipping(controlLine.getInternalId(), 1);
 
-        int after = pdf.page(1).selectTextLines().size();
-        assertEquals(before, after, "Clearing clipping should not remove text lines");
+        assertTrue(targetLine.clearClipping());
+
+        new PDFAssertions(pdf)
+                .assertTextlineHasNoClipping(targetLine.getInternalId(), 1)
+                .assertTextlineHasClipping(controlLine.getInternalId(), 1)
+                .assertTextlineExists("CLIPPED TEXT", 1);
     }
 
     private PathReference findPathById(PDFDancer pdf, String internalId) {
@@ -129,5 +133,12 @@ public class ClippingTest extends BaseTest {
                 .filter(path -> internalId.equals(path.getInternalId()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Path " + internalId + " not found"));
+    }
+
+    private TextLineReference findTextLineByPrefix(PDFDancer pdf, String prefix) {
+        return pdf.page(1).selectTextLines().stream()
+                .filter(line -> line.getText() != null && line.getText().startsWith(prefix))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Text line starting with '" + prefix + "' not found"));
     }
 }

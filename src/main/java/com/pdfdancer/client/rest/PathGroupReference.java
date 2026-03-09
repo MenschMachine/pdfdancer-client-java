@@ -42,7 +42,7 @@ public class PathGroupReference {
     }
 
     public boolean clearClipping() {
-        return client.clearPathGroupClipping(pageIndex + 1, info.getGroupId());
+        return client.clearPathGroupClipping(pageIndex, info.getGroupId());
     }
 
     @Override
