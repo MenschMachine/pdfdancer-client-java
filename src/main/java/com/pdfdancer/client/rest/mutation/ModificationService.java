@@ -37,6 +37,17 @@ public final class ModificationService {
         );
     }
 
+    public Boolean clearClipping(ObjectRef objectRef) {
+        String path = "/pdf/clipping/clear";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, new ClearClippingRequest(objectRef))
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
     public boolean addImage(Image image, Position position) {
         image.setPosition(position);
         return addImage(image);
@@ -218,6 +229,17 @@ public final class ModificationService {
         String path = "/pdf/path-group/remove";
         return blocking.retrieve(
                 HttpRequest.DELETE(path, request)
+                        .contentType(MediaType.APPLICATION_JSON_TYPE)
+                        .bearerAuth(token)
+                        .header("X-Session-Id", sessionId),
+                Boolean.class
+        );
+    }
+
+    public Boolean clearPathGroupClipping(ClearPathGroupClippingRequest request) {
+        String path = "/pdf/path-group/clipping/clear";
+        return blocking.retrieve(
+                HttpRequest.PUT(path, request)
                         .contentType(MediaType.APPLICATION_JSON_TYPE)
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),
