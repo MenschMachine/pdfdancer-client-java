@@ -75,10 +75,21 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      - name: Resolve API URL
+        id: api-url
+        shell: bash
+        run: |
+          if [ -f .api-url ]; then
+            URL=$(cat .api-url | tr -d '[:space:]')
+            if [ -n "$URL" ]; then
+              echo "base_url=$URL" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Run build
         run: ./gradlew build
         env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
+          PDFDANCER_BASE_URL: ${{ steps.api-url.outputs.base_url || 'https://api-staging.pdfdancer.com' }}
           PDFDANCER_TOKEN: 42
 
       - name: Upload build reports
@@ -160,11 +171,22 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
+      - name: Resolve API URL
+        id: api-url
+        shell: bash
+        run: |
+          if [ -f .api-url ]; then
+            URL=$(cat .api-url | tr -d '[:space:]')
+            if [ -n "$URL" ]; then
+              echo "base_url=$URL" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Run build
         if: runner.os != 'Windows'
         run: ./gradlew build
         env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
+          PDFDANCER_BASE_URL: ${{ steps.api-url.outputs.base_url || 'https://api-staging.pdfdancer.com' }}
           PDFDANCER_TOKEN: 42
 
       - name: Run build (Windows)
@@ -172,7 +194,7 @@ jobs:
         shell: cmd
         run: gradlew.bat build
         env:
-          PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
+          PDFDANCER_BASE_URL: ${{ steps.api-url.outputs.base_url || 'https://api-staging.pdfdancer.com' }}
           PDFDANCER_TOKEN: 42
 
       - name: Collect PDF artifacts
