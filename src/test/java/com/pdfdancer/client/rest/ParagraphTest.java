@@ -206,6 +206,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void addParagraphWithCustomFont1_1() {
         PDFDancer client = createClient();
+        client.registerFont(new File("src/test/resources/fixtures/Roboto-Regular.ttf"));
         assertTrue(
                 client.newParagraph()
                         .text("Awesomely\nObvious!")
@@ -222,6 +223,7 @@ public class ParagraphTest extends BaseTest {
     @Test
     public void addParagraphWithCustomFont1_2() {
         PDFDancer client = createClient();
+        client.registerFont(new File("src/test/resources/fixtures/Roboto-Regular.ttf"));
         List<Font> fonts = client.findFonts("Roboto", 14);
         assertFalse(fonts.isEmpty());
         Font roboto = fonts.get(0);
@@ -240,8 +242,8 @@ public class ParagraphTest extends BaseTest {
 
     @Test
     public void addParagraphWithCustomFont2() {
-        // why is this failing but 1_2 is not?
         PDFDancer client = createClient();
+        client.registerFont(new File("src/test/resources/fixtures/Asimovian-Regular.ttf"));
         List<Font> fonts = client.findFonts("Asimovian", 14);
         assertFalse(fonts.isEmpty());
         assertEquals("Asimovian-Regular", fonts.get(0).getName());
