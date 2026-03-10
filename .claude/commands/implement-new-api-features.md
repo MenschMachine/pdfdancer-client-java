@@ -1,4 +1,3 @@
-Check the updates in  docs/api-schemas.
 Analyze which new features are available in the api. Ignore anything backoffice related, like tenant management, api keys management or similar.
 We are interested in PDF features.
 For each change you encounter:
