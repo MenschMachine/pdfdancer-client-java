@@ -64,10 +64,6 @@ Additional test support:
 - `PDFAssertions` — snapshot-based fluent assertions (e.g., `assertTextlineExists`, `assertTextlineHasFont`)
 - `TestUtil` — assertion helpers like `assertBetween`
 
-### API Schema Updates
-
-New API features are tracked via OpenAPI schemas in `docs/api-schemas/` (v0.yml, v1.yml). The `/implement-new-api-features` command analyzes these for new PDF-related features to implement.
-
 ## Key Conventions
 
 - Fluent builders return `this`; terminal operations (`add()`, `apply()`, `delete()`) return `boolean`
