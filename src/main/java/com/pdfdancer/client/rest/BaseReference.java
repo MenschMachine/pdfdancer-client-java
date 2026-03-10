@@ -44,6 +44,10 @@ public abstract class BaseReference {
         return this.client.move(objectRef, newPosition);
     }
 
+    public boolean clearClipping() {
+        return client.clearClipping(objectRef);
+    }
+
     public ObjectType type() {
         return objectRef.getType();
     }
