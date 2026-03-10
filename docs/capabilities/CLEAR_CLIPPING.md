@@ -92,3 +92,4 @@ include
   - `ClippingTest` covers path, image, text-line, and path-group clipping removal flows (via both reference helpers and direct `PDFDancer` APIs).
   - `PDFAssertions` gained clipping-aware assertions by parsing saved PDF content streams with PDFBox to detect whether matched draw events were clipped.
 - Added `org.apache.pdfbox:pdfbox:3.0.4` as a test dependency in `build.gradle.kts` to support low-level clipping assertions.
+- Repo-specific request handling details: `ClearClippingRequest` serializes the target `objectRef`, and `PDFDancer.clearPathGroupClipping(int pageIndex, String groupId)` converts the client's 0-based `pageIndex` to the API's 1-based `pageNumber` before calling `PUT /pdf/path-group/clipping/clear`.
