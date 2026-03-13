@@ -41,6 +41,10 @@ public class PathGroupReference {
         return client.removePathGroup(pageIndex, info.getGroupId());
     }
 
+    public boolean clearClipping() {
+        return client.clearPathGroupClipping(pageIndex, info.getGroupId());
+    }
+
     @Override
     public String toString() {
         return "PathGroupReference{" +

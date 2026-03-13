@@ -470,6 +470,15 @@ public class PDFDancer {
         return result;
     }
 
+    public boolean clearClipping(ObjectRef objectRef) {
+        if (objectRef == null) {
+            throw new IllegalArgumentException("objectRef must not be null");
+        }
+        boolean result = Boolean.TRUE.equals(modification.clearClipping(new ClearClippingRequest(objectRef)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
     /**
      * Adds an image to the PDF document at the specified getPosition.
      * This convenience method sets the image getPosition and adds it to the document
@@ -1058,6 +1067,21 @@ public class PDFDancer {
     boolean removePathGroup(int pageIndex, String groupId) {
         boolean result = Boolean.TRUE.equals(modification.removePathGroup(
                 new RemovePathGroupRequest(pageIndex, groupId)));
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    public boolean clearPathGroupClipping(int pageIndex, String groupId) {
+        if (pageIndex < 0) {
+            throw new IllegalArgumentException("pageIndex must be >= 0");
+        }
+        if (groupId == null || groupId.isBlank()) {
+            throw new IllegalArgumentException("groupId must not be blank");
+        }
+        // Path-group APIs in this client use 0-based page indexes, but the latest
+        // clipping-clear endpoint expects a 1-based pageNumber payload.
+        boolean result = Boolean.TRUE.equals(modification.clearPathGroupClipping(
+                new ClearPathGroupClippingRequest(pageIndex + 1, groupId)));
         invalidateSnapshotCaches();
         return result;
     }
