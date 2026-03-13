@@ -24,6 +24,8 @@ public class PDFAssertions {
     private final PDFDancer pdf;
     private final String token;
     private final PdfDancerHttpClient httpClient;
+    private final File savedPdfFile;
+    private final PdfDrawInspector drawInspector;
 
     public PDFAssertions(PDFDancer pdfDancer) {
         this(pdfDancer, getValidToken(), pdfDancer.getHttpClient());
@@ -42,6 +44,8 @@ public class PDFAssertions {
             // Reload from the saved file
             byte[] pdfBytes = java.nio.file.Files.readAllBytes(tempFile.toPath());
             this.pdf = PDFDancer.createSession(token, pdfBytes, httpClient);
+            this.savedPdfFile = tempFile;
+            this.drawInspector = new PdfDrawInspector(this.pdf, tempFile);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create PDFAssertions", e);
         }
@@ -325,6 +329,26 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertPathHasClipping(String internalId) {
+        return assertPathHasClipping(internalId, 1);
+    }
+
+    public PDFAssertions assertPathHasClipping(String internalId, int page) {
+        assertTrue(drawInspector.pathHasClipping(internalId, page),
+                "Expected path " + internalId + " to still be clipped");
+        return this;
+    }
+
+    public PDFAssertions assertPathHasNoClipping(String internalId) {
+        return assertPathHasNoClipping(internalId, 1);
+    }
+
+    public PDFAssertions assertPathHasNoClipping(String internalId, int page) {
+        assertFalse(drawInspector.pathHasClipping(internalId, page),
+                "Expected path " + internalId + " to have clipping removed");
+        return this;
+    }
+
     public PDFAssertions assertNumberOfPaths(int pathCount, int page) {
         List<PathReference> paths = pdf.selectPaths();
         // Filter to specific page
@@ -434,6 +458,26 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertImageHasClipping(String internalId) {
+        return assertImageHasClipping(internalId, 1);
+    }
+
+    public PDFAssertions assertImageHasClipping(String internalId, int page) {
+        assertTrue(drawInspector.imageHasClipping(internalId, page),
+                "Expected image " + internalId + " to still be clipped");
+        return this;
+    }
+
+    public PDFAssertions assertImageHasNoClipping(String internalId) {
+        return assertImageHasNoClipping(internalId, 1);
+    }
+
+    public PDFAssertions assertImageHasNoClipping(String internalId, int page) {
+        assertFalse(drawInspector.imageHasClipping(internalId, page),
+                "Expected image " + internalId + " to have clipping removed");
+        return this;
+    }
+
     // ===========================
     // Element Count Assertions
     // ===========================
@@ -532,6 +576,54 @@ public class PDFAssertions {
         TextParagraphReference paragraph = pdf.page(pageNumber).selectParagraphsStartingWith(text).get(0);
         assertEquals(color, paragraph.getColor(),
                 String.format("%s != %s", color, paragraph.getColor()));
+    }
+
+    public PDFAssertions assertTextlineHasClipping(String text) {
+        return assertTextlineHasClipping(text, 1);
+    }
+
+    public PDFAssertions assertTextlineHasClipping(String text, int page) {
+        return withTextLineDump(page, () -> {
+            assertTrue(drawInspector.textLineHasClipping(text, page),
+                    "Expected text line starting with '" + text + "' to still be clipped");
+            return this;
+        });
+    }
+
+    public PDFAssertions assertTextlineHasNoClipping(String text) {
+        return assertTextlineHasNoClipping(text, 1);
+    }
+
+    public PDFAssertions assertTextlineHasNoClipping(String text, int page) {
+        return withTextLineDump(page, () -> {
+            assertFalse(drawInspector.textLineHasClipping(text, page),
+                    "Expected text line starting with '" + text + "' to have clipping removed");
+            return this;
+        });
+    }
+
+    public PDFAssertions assertParagraphHasClipping(String text) {
+        return assertParagraphHasClipping(text, 1);
+    }
+
+    public PDFAssertions assertParagraphHasClipping(String text, int page) {
+        return withParagraphDump(page, () -> {
+            assertTrue(drawInspector.paragraphHasClipping(text, page),
+                    "Expected paragraph starting with '" + text + "' to still be clipped");
+            return this;
+        });
+    }
+
+    public PDFAssertions assertParagraphHasNoClipping(String text) {
+        return assertParagraphHasNoClipping(text, 1);
+    }
+
+    public PDFAssertions assertParagraphHasNoClipping(String text, int page) {
+        return withParagraphDump(page, () -> {
+            assertFalse(drawInspector.paragraphHasClipping(text, page),
+                    "Expected paragraph starting with '" + text + "' to have clipping removed");
+            return this;
+        });
     }
 
     // ===========================
