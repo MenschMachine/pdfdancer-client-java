@@ -360,6 +360,58 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertPathHasStrokeColor(String internalId, Color expectedColor, int page) {
+        return assertPathHasStrokeColor(internalId, expectedColor, page, 1e-6);
+    }
+
+    public PDFAssertions assertPathHasStrokeColor(String internalId, Color expectedColor, int page, double epsilon) {
+        List<PathReference> paths = pdf.page(page).selectPaths();
+        PathReference ref = paths.stream()
+                .filter(p -> internalId.equals(p.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Path with ID " + internalId + " not found on page " + page));
+
+        Color actualColor = ref.getStrokeColor();
+        assertNotNull(actualColor, "Path " + internalId + " stroke color should not be null");
+        assertEquals(expectedColor.getRed(), actualColor.getRed(), epsilon,
+                String.format("Path %s stroke color red: expected %d but got %d", internalId, expectedColor.getRed(), actualColor.getRed()));
+        assertEquals(expectedColor.getGreen(), actualColor.getGreen(), epsilon,
+                String.format("Path %s stroke color green: expected %d but got %d", internalId, expectedColor.getGreen(), actualColor.getGreen()));
+        assertEquals(expectedColor.getBlue(), actualColor.getBlue(), epsilon,
+                String.format("Path %s stroke color blue: expected %d but got %d", internalId, expectedColor.getBlue(), actualColor.getBlue()));
+        assertEquals(expectedColor.getAlpha(), actualColor.getAlpha(), epsilon,
+                String.format("Path %s stroke color alpha: expected %d but got %d", internalId, expectedColor.getAlpha(), actualColor.getAlpha()));
+
+        return this;
+    }
+
+    public PDFAssertions assertPathHasFillColor(String internalId, Color expectedColor, int page) {
+        return assertPathHasFillColor(internalId, expectedColor, page, 1e-6);
+    }
+
+    public PDFAssertions assertPathHasFillColor(String internalId, Color expectedColor, int page, double epsilon) {
+        List<PathReference> paths = pdf.page(page).selectPaths();
+        PathReference ref = paths.stream()
+                .filter(p -> internalId.equals(p.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Path with ID " + internalId + " not found on page " + page));
+
+        Color actualColor = ref.getFillColor();
+        assertNotNull(actualColor, "Path " + internalId + " fill color should not be null");
+        assertEquals(expectedColor.getRed(), actualColor.getRed(), epsilon,
+                String.format("Path %s fill color red: expected %d but got %d", internalId, expectedColor.getRed(), actualColor.getRed()));
+        assertEquals(expectedColor.getGreen(), actualColor.getGreen(), epsilon,
+                String.format("Path %s fill color green: expected %d but got %d", internalId, expectedColor.getGreen(), actualColor.getGreen()));
+        assertEquals(expectedColor.getBlue(), actualColor.getBlue(), epsilon,
+                String.format("Path %s fill color blue: expected %d but got %d", internalId, expectedColor.getBlue(), actualColor.getBlue()));
+        assertEquals(expectedColor.getAlpha(), actualColor.getAlpha(), epsilon,
+                String.format("Path %s fill color alpha: expected %d but got %d", internalId, expectedColor.getAlpha(), actualColor.getAlpha()));
+
+        return this;
+    }
+
     // ===========================
     // Image Assertions
     // ===========================
