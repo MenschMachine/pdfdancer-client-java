@@ -1,0 +1,83 @@
+name: SDK Backward Compatibility Tests
+
+on:
+  repository_dispatch:
+    types: [api-preview-deployed]
+
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'API base URL to test against'
+        required: true
+        type: string
+      sdk_token:
+        description: 'API token for testing'
+        required: true
+        type: string
+        default: '42'
+
+jobs:
+  get-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.tags.outputs.tags }}
+    steps:
+      - name: Fetch tags
+        id: tags
+        run: |
+          TAGS=$(git ls-remote --tags https://github.com/MenschMachine/pdfdancer-client-java.git \
+            | grep -v '\^{}' \
+            | awk -F'/' '{print $NF}' \
+            | grep '^v' \
+            | sort -V \
+            | tail -3 \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          echo "Last 3 SDK tags: $TAGS"
+
+  test-compat:
+    needs: get-tags
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ${{ fromJSON(needs.get-tags.outputs.tags) }}
+
+    steps:
+      - name: Checkout SDK at ${{ matrix.tag }}
+        uses: actions/checkout@v4
+        with:
+          repository: MenschMachine/pdfdancer-client-java
+          ref: ${{ matrix.tag }}
+          path: sdk
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x sdk/gradlew
+
+      - name: Run tests
+        run: |
+          cd sdk
+          ./gradlew test
+        env:
+          PDFDANCER_BASE_URL: ${{ github.event.client_payload.api_url || inputs.api_url }}
+          PDFDANCER_TOKEN: ${{ github.event.client_payload.sdk_token || inputs.sdk_token }}
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.tag }}
+          path: |
+            sdk/build/reports/tests/
+            sdk/**/*.png
+            sdk/**/*.pdf
+          retention-days: 7
