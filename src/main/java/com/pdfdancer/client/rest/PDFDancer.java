@@ -762,6 +762,12 @@ public class PDFDancer {
         return Boolean.TRUE.equals(result);
     }
 
+    protected boolean modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
+        boolean success = modification.modifyPath(ref, strokeColor, fillColor);
+        invalidateSnapshotCaches();
+        return success;
+    }
+
     public List<TextParagraphReference> selectParagraphs() {
         TypedDocumentSnapshot<TextTypeObjectRef> snapshot = getTypedDocumentSnapshot(TextTypeObjectRef.class, TYPES_PARAGRAPH);
         List<TextTypeObjectRef> paragraphs = flattenTypedDocument(snapshot, TextTypeObjectRef.class);

@@ -147,6 +147,16 @@ public final class ModificationService {
         return blocking.retrieve(request, Boolean.class);
     }
 
+    public boolean modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
+        String path = "/pdf/modify/path";
+        MutableHttpRequest<ModifyPathRequest> request = HttpRequest.PUT(path, new ModifyPathRequest(ref, strokeColor, fillColor))
+                .contentType(MediaType.APPLICATION_JSON_TYPE)
+                .bearerAuth(token)
+                .header("X-Session-Id", sessionId);
+        CommandResult result = blocking.retrieve(request, CommandResult.class);
+        return result.success();
+    }
+
     public PageRef addPage(AddPageRequest request) {
         String path = "/pdf/page/add";
         return blocking.retrieve(
