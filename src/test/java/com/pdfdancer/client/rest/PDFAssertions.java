@@ -12,7 +12,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.pdfdancer.client.rest.BaseTest.getValidToken;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Fluent assertion helper for PDF validation.
@@ -737,5 +740,23 @@ public class PDFAssertions {
             dumpParagraphs(page);
             throw e;
         }
+    }
+
+    public TextLineReference findTextLine(String text, int page) {
+        for (TextLineReference line : pdf.page(page).selectTextLines()) {
+            if (line.getText().equals(text)) {
+                return line;
+            }
+        }
+        return null;
+    }
+
+    public TextLineReference findTextLineStartingWith(String text, int page) {
+        for (TextLineReference line : pdf.page(page).selectTextLines()) {
+            if (line.getText().startsWith(text)) {
+                return line;
+            }
+        }
+        return null;
     }
 }
