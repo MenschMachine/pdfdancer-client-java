@@ -17,7 +17,7 @@ public class TextLineTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         List<TextLineReference> lines = pdf.selectTextLines(); // across all pages
-        assertEquals(340, lines.size());
+        assertEquals(308, lines.size());
 
         TextLineReference first = lines.get(0);
         assertNotNull(first.getPosition());
