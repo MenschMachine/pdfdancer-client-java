@@ -58,6 +58,42 @@ public class TemplateReplaceWithReflowPresetsTest extends BaseTest {
         assertEquals("YABBA! stable edge, making the rhythm of", textLine.getText());
     }
 
+    @Test
+    public void testReflowWithOneMoreLineReflows() throws IOException {
+        PDFDancer client = loadFixture();
+
+        boolean success = client.applyReplacements(
+                TemplateReplaceRequest.builder()
+                        .reflowPreset(ReflowPreset.BEST_EFFORT)
+                        .replace("Left aligned text starts each measure with a", "YABBA!\nDABBA!\nDOOO!")
+                        .build()
+        );
+        assertTrue(success);
+        PDFAssertions pdfAssertions = new PDFAssertions(client);
+        pdfAssertions.assertTextlineExists("YABBA", 1);
+        TextLineReference textLine = pdfAssertions.findTextLineStartingWith("YABBA!", 1);
+        assertNotNull(textLine);
+        assertEquals("YABBA! DABBA! DOOO! stable edge,", textLine.getText());
+    }
+
+    @Test
+    public void testNoReflowWithMoreLinesKeepsTheLines() throws IOException {
+        PDFDancer client = loadFixture();
+
+        boolean success = client.applyReplacements(
+                TemplateReplaceRequest.builder()
+                        .reflowPreset(ReflowPreset.NONE)
+                        .replace("Left aligned text starts each measure with a", "YABBA!\nDABBA!\nDOOO!")
+                        .build()
+        );
+        assertTrue(success);
+        PDFAssertions pdfAssertions = new PDFAssertions(client);
+        pdfAssertions.assertTextlineExists("YABBA", 1);
+        TextLineReference textLine = pdfAssertions.findTextLineStartingWith("YABBA!", 1);
+        assertEquals("YABBA!", textLine.getText());
+        pdfAssertions.assertTextlineExists(".*DABBA.*", 1);
+        pdfAssertions.assertTextlineExists(".*DOOO.*", 1);
+    }
 
     @Test
     public void testReflowFailOrFitFails() throws IOException {
