@@ -134,9 +134,9 @@ public class TextLineTest extends BaseTest {
 
         assertTrue(client.page(1).selectTextLinesStartingWith("The Complete").isEmpty());
 
-        assertFalse(client.page(1).selectTextLinesStartingWith(" replaced ").isEmpty());
+        assertFalse(client.page(1).selectTextLinesStartingWith("replaced").isEmpty());
 
-        assertFalse(client.page(1).selectParagraphsStartingWith(" replaced ").isEmpty());
+        assertFalse(client.page(1).selectParagraphsStartingWith("replaced").isEmpty());
 
     }
 
