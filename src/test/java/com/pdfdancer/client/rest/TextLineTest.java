@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.pdfdancer.client.rest.TestUtil.assertBetween;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TextLineTest extends BaseTest {
 
@@ -134,7 +137,8 @@ public class TextLineTest extends BaseTest {
 
         assertTrue(client.page(1).selectTextLinesStartingWith("The Complete").isEmpty());
 
-        assertFalse(client.page(1).selectTextLinesStartingWith("replaced").isEmpty());
+        assertFalse(client.page(1).selectTextLineMatching(".*replaced.*").isEmpty());
+        assertEquals("replaced", client.page(1).selectTextLineMatching(".*replaced.*").get().getText().trim());
 
         assertFalse(client.page(1).selectParagraphsStartingWith("replaced").isEmpty());
 
