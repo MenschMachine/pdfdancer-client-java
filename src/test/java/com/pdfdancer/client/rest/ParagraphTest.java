@@ -295,7 +295,7 @@ public class ParagraphTest extends BaseTest {
         new PDFAssertions(client)
                 .assertTextlineHasFont("Awesomely", "Helvetica", 12, 1)
                 .assertTextlineHasFont("Obvious!", "Helvetica", 12, 1)
-                .assertParagraphIsAt("Awesomely", originalX, originalY, 1, 3);
+                .assertParagraphIsAt("Obvious!", originalX, originalY, 1, 3);
     }
 
     @Test
