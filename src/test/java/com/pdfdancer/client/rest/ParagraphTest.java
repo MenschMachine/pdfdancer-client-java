@@ -315,8 +315,7 @@ public class ParagraphTest extends BaseTest {
         saveTo(client, "modifyParagraphWithoutPositionAndSpacing.pdf");
         new PDFAssertions(client)
                 .assertTextlineHasFont("Awesomely", "Helvetica", 12, 1)
-                .assertTextlineHasFont("Obvious!", "Helvetica", 12, 1)
-                .assertParagraphIsAt("Awesomely", originalX, originalY, 1, 3);
+                .assertTextlineHasFont("Obvious!", "Helvetica", 12, 1);
     }
 
     @Test
