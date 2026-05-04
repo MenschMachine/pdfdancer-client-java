@@ -371,8 +371,8 @@ public class TemplateReplaceTest extends BaseTest {
                 .assertTextlineExists("Clearly", 1)
                 .assertTextlineDoesNotExist("The Complete", 1)
                 .assertNumberOfImages(3, 1)
-                .assertImageAt(146.75, 579.48, 1)
-                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+                .assertImageAt(147, 580, 1)
+                .assertImageSize(147, 580, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImageFluent.pdf");
     }
