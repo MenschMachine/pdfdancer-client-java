@@ -80,7 +80,7 @@ public class ClippingTest extends BaseTest {
                 .assertPathHasClipping(TARGET_PATH_ID)
                 .assertPathHasClipping(CONTROL_PATH_ID);
 
-        assertTrue(pdf.clearPathGroupClipping(group.getPageIndex(), group.getGroupId()));
+        assertTrue(pdf.clearPathGroupClipping(group.getPageNumber(), group.getGroupId()));
 
         new PDFAssertions(pdf)
                 .assertPathHasNoClipping(TARGET_PATH_ID)

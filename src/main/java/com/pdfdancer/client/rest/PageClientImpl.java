@@ -220,19 +220,18 @@ class PageClientImpl {
         int pageIndex = pageNumber - 1;
         CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, pathIds, null);
         PathGroupInfo info = root.createPathGroup(request);
-        return new PathGroupReference(root, info, pageIndex);
+        return new PathGroupReference(root, info, pageNumber);
     }
 
     public PathGroupReference groupPathsInRegion(BoundingRect region) {
         int pageIndex = pageNumber - 1;
         CreatePathGroupRequest request = new CreatePathGroupRequest(pageIndex, null, region);
         PathGroupInfo info = root.createPathGroup(request);
-        return new PathGroupReference(root, info, pageIndex);
+        return new PathGroupReference(root, info, pageNumber);
     }
 
     public List<PathGroupReference> getPathGroups() {
-        int pageIndex = pageNumber - 1;
-        return root.getPathGroups(pageIndex);
+        return root.getPathGroups(pageNumber);
     }
 
     public List<FormXObjectReference> selectFormsAt(double x, double y) { return selectFormsAt(x, y, PDFDancer.DEFAULT_EPSILON); }

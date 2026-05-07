@@ -1,7 +1,5 @@
 package com.pdfdancer.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -209,15 +207,6 @@ public class Position {
      */
     public Integer getPageNumber() {
         return pageNumber;
-    }
-
-    /**
-     * Use {@link #getPageNumber()} instead.
-     */
-    @Deprecated
-    @JsonIgnore
-    public Integer getPageIndex() {
-        return pageNumber != null ? pageNumber - 1 : null;
     }
 
     /**

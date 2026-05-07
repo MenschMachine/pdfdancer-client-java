@@ -37,14 +37,14 @@ include
   - `BaseReference.clearClipping()` for any object reference implementing clipping detach semantics via the API.
   - `PathGroupReference.clearClipping()` for grouped vector paths.
   - `PDFDancer.clearClipping(ObjectRef)` calling `PUT /pdf/clipping/clear`.
-  - `PDFDancer.clearPathGroupClipping(pageIndex, groupId)` calling `PUT /pdf/path-group/clipping/clear`.
+  - `PDFDancer.clearPathGroupClipping(pageNumber, groupId)` calling `PUT /pdf/path-group/clipping/clear`.
   - Both client calls invalidate local snapshot caches after mutation.
 - Added server endpoints in both controllers:
   - `PDFController` and `PDFControllerV1` expose `PUT /pdf/clipping/clear` and `PUT /pdf/path-group/clipping/clear`.
   - V1 uses `ClearClippingRequestV1` and `ClearPathGroupClippingRequestV1`, converting both to internal requests via `toInternal()`.
 - Added controller orchestration in `ControllerOps`:
   - `clearClipping(...)` validates `objectRef`, executes `ClearObjectClippingCommand`, and publishes `PDF_OBJECT_MODIFIED` metric with operation `clear_clipping`.
-  - `clearPathGroupClipping(...)` validates `groupId` and `pageIndex`, executes `ClearPathGroupClippingCommand`, and publishes `VECTOR_MANIPULATION` metric with operation `clear_path_group_clipping`.
+  - `clearPathGroupClipping(...)` validates `groupId` and `pageNumber`, executes `ClearPathGroupClippingCommand`, and publishes `VECTOR_MANIPULATION` metric with operation `clear_path_group_clipping`.
 - Wired session and replay support:
   - `Session.clearClipping(...)` and `Session.clearPathGroupClipping(...)` execute commands inside `SessionContext` and record commands for session history.
   - `CommandDeserializer` now reconstructs `ClearObjectClippingCommand` and `ClearPathGroupClippingCommand` for debug archive replay.
@@ -81,8 +81,8 @@ include
 
 - Added client API helpers to expose clipping removal directly on references and the top-level client:
   - `BaseReference.clearClipping()` delegates to `PDFDancer.clearClipping(ObjectRef)`.
-  - `PathGroupReference.clearClipping()` delegates to `PDFDancer.clearPathGroupClipping(pageIndex, groupId)`.
-  - `PDFDancer` now provides both `clearClipping(ObjectRef)` and `clearPathGroupClipping(int pageIndex, String groupId)`, and invalidates snapshot caches after each mutation.
+  - `PathGroupReference.clearClipping()` delegates to `PDFDancer.clearPathGroupClipping(pageNumber, groupId)`.
+  - `PDFDancer` now provides both `clearClipping(ObjectRef)` and `clearPathGroupClipping(int pageNumber, String groupId)`, and invalidates snapshot caches after each mutation.
 - Wired REST mutation calls in `ModificationService`:
   - `PUT /pdf/clipping/clear` with `ClearClippingRequest`.
   - `PUT /pdf/path-group/clipping/clear` with `ClearPathGroupClippingRequest`.
@@ -92,4 +92,4 @@ include
   - `ClippingTest` covers path, image, text-line, and path-group clipping removal flows (via both reference helpers and direct `PDFDancer` APIs).
   - `PDFAssertions` gained clipping-aware assertions by parsing saved PDF content streams with PDFBox to detect whether matched draw events were clipped.
 - Added `org.apache.pdfbox:pdfbox:3.0.4` as a test dependency in `build.gradle.kts` to support low-level clipping assertions.
-- Repo-specific request handling details: `ClearClippingRequest` serializes the target `objectRef`, and `PDFDancer.clearPathGroupClipping(int pageIndex, String groupId)` converts the client's 0-based `pageIndex` to the API's 1-based `pageNumber` before calling `PUT /pdf/path-group/clipping/clear`.
+- Repo-specific request handling details: `ClearClippingRequest` serializes the target `objectRef`, and `PDFDancer.clearPathGroupClipping(int pageNumber, String groupId)` sends the SDK's 1-based page number before calling `PUT /pdf/path-group/clipping/clear`.

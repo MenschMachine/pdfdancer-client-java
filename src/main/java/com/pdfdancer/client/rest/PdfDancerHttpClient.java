@@ -41,7 +41,8 @@ import static java.net.http.HttpResponse.BodyHandlers;
 public final class PdfDancerHttpClient {
 
     private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
-    private static final String DEFAULT_API_VERSION = "1";
+    private static final String DEFAULT_API_VERSION = "2";
+    private static final String DEFAULT_API_PATH_PREFIX = "/v2";
     private static final String CLIENT_VERSION = loadClientVersion();
 
     private static String loadClientVersion() {
@@ -269,7 +270,7 @@ public final class PdfDancerHttpClient {
     }
 
     private HttpRequest toJavaRequest(MutableHttpRequest<?> request) {
-        URI target = baseUrl.resolve(request.path());
+        URI target = baseUrl.resolve(versionedPath(request.path()));
         HttpRequest.Builder builder = HttpRequest.newBuilder(target)
                 .timeout(DEFAULT_TIMEOUT);
 
@@ -311,6 +312,33 @@ public final class PdfDancerHttpClient {
         builder.header("Content-Type", contentType);
         builder.method(request.method(), BodyPublishers.ofByteArray(json));
         return builder.build();
+    }
+
+    private static String versionedPath(String path) {
+        URI uri = URI.create(path);
+        if (uri.isAbsolute()) {
+            return path;
+        }
+
+        String rawPath = uri.getRawPath();
+        if (rawPath == null || rawPath.isEmpty()) {
+            rawPath = "/";
+        }
+        if (!rawPath.startsWith("/")) {
+            rawPath = "/" + rawPath;
+        }
+        if (!rawPath.equals(DEFAULT_API_PATH_PREFIX) && !rawPath.startsWith(DEFAULT_API_PATH_PREFIX + "/")) {
+            rawPath = DEFAULT_API_PATH_PREFIX + rawPath;
+        }
+
+        StringBuilder result = new StringBuilder(rawPath);
+        if (uri.getRawQuery() != null) {
+            result.append('?').append(uri.getRawQuery());
+        }
+        if (uri.getRawFragment() != null) {
+            result.append('#').append(uri.getRawFragment());
+        }
+        return result.toString();
     }
 
     private java.net.http.HttpRequest.BodyPublisher multipartPublisher(MultipartBody multipart) {

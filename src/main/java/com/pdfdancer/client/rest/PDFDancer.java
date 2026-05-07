@@ -1039,14 +1039,16 @@ public class PDFDancer {
         return result;
     }
 
-    boolean movePathGroup(int pageIndex, String groupId, double x, double y) {
+    boolean movePathGroup(int pageNumber, String groupId, double x, double y) {
+        int pageIndex = pageNumber - 1;
         boolean result = Boolean.TRUE.equals(modification.movePathGroup(
                 new MovePathGroupRequest(pageIndex, groupId, x, y)));
         invalidateSnapshotCaches();
         return result;
     }
 
-    boolean scalePathGroup(int pageIndex, String groupId, double scaleFactor) {
+    boolean scalePathGroup(int pageNumber, String groupId, double scaleFactor) {
+        int pageIndex = pageNumber - 1;
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.SCALE, scaleFactor, null, null, null)));
@@ -1054,7 +1056,8 @@ public class PDFDancer {
         return result;
     }
 
-    boolean rotatePathGroup(int pageIndex, String groupId, double degrees) {
+    boolean rotatePathGroup(int pageNumber, String groupId, double degrees) {
+        int pageIndex = pageNumber - 1;
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.ROTATE, null, degrees, null, null)));
@@ -1062,7 +1065,8 @@ public class PDFDancer {
         return result;
     }
 
-    boolean resizePathGroup(int pageIndex, String groupId, double width, double height) {
+    boolean resizePathGroup(int pageNumber, String groupId, double width, double height) {
+        int pageIndex = pageNumber - 1;
         boolean result = Boolean.TRUE.equals(modification.transformPathGroup(
                 new TransformPathGroupRequest(pageIndex, groupId,
                         TransformPathGroupRequest.TransformType.RESIZE, null, null, width, height)));
@@ -1070,37 +1074,39 @@ public class PDFDancer {
         return result;
     }
 
-    boolean removePathGroup(int pageIndex, String groupId) {
+    boolean removePathGroup(int pageNumber, String groupId) {
+        int pageIndex = pageNumber - 1;
         boolean result = Boolean.TRUE.equals(modification.removePathGroup(
                 new RemovePathGroupRequest(pageIndex, groupId)));
         invalidateSnapshotCaches();
         return result;
     }
 
-    public boolean clearPathGroupClipping(int pageIndex, String groupId) {
-        if (pageIndex < 0) {
-            throw new IllegalArgumentException("pageIndex must be >= 0");
+    public boolean clearPathGroupClipping(int pageNumber, String groupId) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
         }
         if (groupId == null || groupId.isBlank()) {
             throw new IllegalArgumentException("groupId must not be blank");
         }
-        // Path-group APIs in this client use 0-based page indexes, but the latest
-        // clipping-clear endpoint expects a 1-based pageNumber payload.
         boolean result = Boolean.TRUE.equals(modification.clearPathGroupClipping(
-                new ClearPathGroupClippingRequest(pageIndex + 1, groupId)));
+                new ClearPathGroupClippingRequest(pageNumber, groupId)));
         invalidateSnapshotCaches();
         return result;
     }
 
-    public List<PathGroupReference> getPathGroups(int pageIndex) {
+    public List<PathGroupReference> getPathGroups(int pageNumber) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        }
         List<PathGroupInfo> infos = blockingClient.retrieve(
-                HttpRequest.GET("/pdf/page/" + pageIndex + "/path-groups")
+                HttpRequest.GET("/pdf/page/" + pageNumber + "/path-groups")
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),
                 Argument.listOf(PathGroupInfo.class)
         );
         return infos.stream()
-                .map(info -> new PathGroupReference(this, info, pageIndex))
+                .map(info -> new PathGroupReference(this, info, pageNumber))
                 .collect(Collectors.toUnmodifiableList());
     }
 

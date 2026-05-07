@@ -114,12 +114,12 @@ public class PageTest extends BaseTest {
     }
 
     @Test
-    public void addPageWithBuilderAtIndex() throws IOException {
+    public void addPageWithBuilderAtPage() throws IOException {
         PDFDancer client = createClient();
         assertEquals(12, client.getPages().size());
 
         PageRef pageRef = client.page()
-                .atIndex(6)
+                .atPage(7)
                 .a5()
                 .landscape()
                 .add();
