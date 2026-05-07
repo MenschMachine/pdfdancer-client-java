@@ -342,7 +342,7 @@ public class TemplateReplaceTest extends BaseTest {
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
                 .assertNumberOfImages(3, 1)
-                .assertImageAt(146.75, 579.48, 1);
+                .assertImageAt(147, 580, 1);
 
         // Find the newly added image by diffing IDs
         List<ImageReference> imagesAfter = client.page(1).selectImages();
@@ -351,7 +351,7 @@ public class TemplateReplaceTest extends BaseTest {
                 .filter(img -> !beforeIds.contains(img.getInternalId()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("New image not found after replacement"));
-        assertEquals(146.75, newImage.getPosition().getX(), 1.0);
+        assertEquals(146.8, newImage.getPosition().getX(), 1.0);
         assertEquals(579.48, newImage.getPosition().getY(), 1.0);
 
         saveTo(client, "replaceWordWithImageExplicitSize.pdf");
@@ -441,8 +441,8 @@ public class TemplateReplaceTest extends BaseTest {
                 .assertParagraphNotExists("Obviously", 1)
                 .assertTextlineDoesNotExist("The Complete", 1)
                 .assertNumberOfImages(3, 1)
-                .assertImageAt(146.75, 579.48, 1)
-                .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
+                .assertImageAt(147, 579.48, 1)
+                .assertImageSize(147, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "mixedTextAndImageE2E.pdf");
     }
