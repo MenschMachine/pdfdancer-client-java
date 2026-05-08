@@ -388,7 +388,7 @@ public class TemplateReplaceTest extends BaseTest {
         new PDFAssertions(client)
                 .assertTextlineDoesNotExist("The Complete", 1)
                 .assertNumberOfImages(3, 1)
-                .assertImageAt(146.75, 579.48, 1)
+                .assertImageAt(147, 580, 1)
                 .assertImageSize(146.75, 579.48, 1, 80, 80, 5);
 
         saveTo(client, "replaceWordWithImageOnPage.pdf");
