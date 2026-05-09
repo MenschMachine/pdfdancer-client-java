@@ -67,9 +67,11 @@ public class AdamsKnightTest extends BaseTest {
                     .apply();
             assertTrue(apply, "Could not replace '" + s + "' with " + newText);
         }
+        replaceLogo(pdf);
         replaceQrCode(pdf);
 
         PDFAssertions pdfAssertions = new PDFAssertions(pdf);
+        pdfAssertions.assertTextlineDoesNotExist("{XYZlogo}", PAGE_NUMBER);
         for (String s : replacements.keySet()) {
             for (String line : replacements.get(s).split("\\R", -1)) {
                 if (!line.isEmpty()) {
@@ -87,6 +89,15 @@ public class AdamsKnightTest extends BaseTest {
         replacements.put("{XYZurlpath}", "NTEU");
         replacements.put("{XYZConvenientCustomized}", "Convenient Payroll Deduction / Customized Coverage Options");
         return replacements;
+    }
+
+    private void replaceLogo(PDFDancer pdf) throws IOException {
+        int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
+        File logo = new File(ADAMS_KNIGHT_FIXTURE_DIR + "x1NTEUlogoweb.jpg");
+
+        boolean replaced = pdf.replaceWithImage("{XYZlogo}", logo, 100, 100 * 174 / 450).apply();
+        assertTrue(replaced, "Could not replace '{XYZlogo}' with logo image");
+        assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
     }
 
     private void replaceQrCode(PDFDancer pdf) throws IOException {
