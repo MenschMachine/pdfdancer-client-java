@@ -129,14 +129,18 @@ public class AdamsKnightTest extends BaseTest {
         boolean replaced = pdf.replaceWithImage("{{sponsorqrcode}}", qrCode, 50, 50).apply();
         assertTrue(replaced, "Could not replace '{{sponsorqrcode}}' with QR code image");
         List<ImageReference> imagesAfter = pdf.page(PAGE_NUMBER).selectImages();
-        List<String> imageIdsBefore = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
-        ImageReference qrImage = imagesAfter.stream()
-                .filter(image -> !imageIdsBefore.contains(image.getInternalId()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Could not locate inserted QR code image"));
+        ImageReference qrImage = locateInsertedQrCodeImage(imagesBefore, imagesAfter);
 
         moveInsertedQrCode(qrImage);
         assertEquals(imagesBefore.size() + 1, imagesAfter.size());
+    }
+
+    private ImageReference locateInsertedQrCodeImage(List<ImageReference> imagesBefore, List<ImageReference> imagesAfter) {
+        List<String> imageIdsBefore = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
+        return imagesAfter.stream()
+                .filter(image -> !imageIdsBefore.contains(image.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Could not locate inserted QR code image"));
     }
 
     private void moveInsertedQrCode(ImageReference qrImage) {
@@ -145,6 +149,6 @@ public class AdamsKnightTest extends BaseTest {
         assertNotNull(qrImageX, "QR code image has no x coordinate");
         assertNotNull(qrImageY, "QR code image has no y coordinate");
 
-        assertTrue(qrImage.moveTo(qrImageX + 30, qrImageY - 50), "Could not move QR code image");
+        assertTrue(qrImage.moveTo(qrImageX + 12, qrImageY - 31), "Could not move QR code image");
     }
 }
