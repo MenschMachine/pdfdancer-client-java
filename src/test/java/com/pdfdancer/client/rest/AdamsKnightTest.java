@@ -95,7 +95,7 @@ public class AdamsKnightTest extends BaseTest {
         int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
         File logo = new File(ADAMS_KNIGHT_FIXTURE_DIR + "x1NTEUlogoweb.jpg");
 
-        boolean replaced = pdf.replaceWithImage("{XYZlogo}", logo, 100, 100 * 174 / 450).apply();
+        boolean replaced = pdf.replaceWithImage("{XYZlogo}", logo, 77.5, 30).apply();
         assertTrue(replaced, "Could not replace '{XYZlogo}' with logo image");
         assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
     }
