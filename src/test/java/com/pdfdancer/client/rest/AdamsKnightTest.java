@@ -1,10 +1,5 @@
 package com.pdfdancer.client.rest;
 
-import com.pdfdancer.common.model.BoundingRect;
-import com.pdfdancer.common.model.Image;
-import com.pdfdancer.common.model.PositionBuilder;
-import com.pdfdancer.common.model.Size;
-
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -57,6 +52,7 @@ public class AdamsKnightTest extends BaseTest {
 
         PDFAssertions pdfAssertions = new PDFAssertions(pdf);
         pdfAssertions.assertTextlineDoesNotExist("{{logo_url}}", PAGE_NUMBER);
+        pdfAssertions.assertTextlineDoesNotExist("{{sponsorqrcode}}", PAGE_NUMBER);
         for (String s : replacements.keySet()) {
             for (String line : replacements.get(s).split("\\R", -1)) {
                 if (!line.isEmpty()) {
@@ -85,39 +81,10 @@ public class AdamsKnightTest extends BaseTest {
     }
 
     private void replaceQrCode(PDFDancer pdf) throws IOException {
-        BoundingRect qrBounds = findExistingQrCodeBounds(pdf);
         int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
-
-        PathGroupReference qrCode = pdf.page(PAGE_NUMBER).groupPathsInRegion(qrBounds);
-        assertNotNull(qrCode, "Could not find the existing QR code paths");
-        assertTrue(qrCode.getPathCount() > 100, "QR code path group should include the QR path cluster");
-        assertTrue(qrCode.remove(), "Could not remove the existing QR code");
-
-        Image replacementQrCode = Image.fromFile(new File(ADAMS_KNIGHT_FIXTURE_DIR + "new_qr.png"));
-        replacementQrCode.setSize(new Size(qrBounds.getWidth(), qrBounds.getHeight()));
-
-        boolean added = pdf.addImage(replacementQrCode,
-                new PositionBuilder()
-                        .onPage(PAGE_NUMBER)
-                        .atCoordinates(qrBounds.getX(), qrBounds.getY())
-                        .build());
-        assertTrue(added, "Could not add replacement QR code");
+        File qrCode = new File(ADAMS_KNIGHT_FIXTURE_DIR + "new_qr.png");
+        boolean replaced = pdf.replaceWithImage("{{sponsorqrcode}}", qrCode, 50, 50).apply();
+        assertTrue(replaced, "Could not replace '{{sponsorqrcode}}' with QR code image");
         assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
-    }
-
-    private BoundingRect findExistingQrCodeBounds(PDFDancer pdf) {
-        return pdf.page(PAGE_NUMBER).selectPaths().stream()
-                .map(path -> path.getPosition().getBoundingRect())
-                .filter(this::isQrCodeBoundary)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Could not find existing QR code bounds"));
-    }
-
-    private boolean isQrCodeBoundary(BoundingRect rect) {
-        return rect != null
-                && rect.getX() > 280 && rect.getX() < 290
-                && rect.getY() > 125 && rect.getY() < 135
-                && rect.getWidth() > 40 && rect.getWidth() < 50
-                && rect.getHeight() > 40 && rect.getHeight() < 50;
     }
 }
