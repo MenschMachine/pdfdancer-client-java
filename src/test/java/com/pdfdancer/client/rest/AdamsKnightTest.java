@@ -1,5 +1,8 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.Image;
+import com.pdfdancer.common.model.PositionBuilder;
+import com.pdfdancer.common.model.Size;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -7,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,19 +76,75 @@ public class AdamsKnightTest extends BaseTest {
     }
 
     private void replaceLogo(PDFDancer pdf) throws IOException {
-        int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
+        List<ImageReference> imagesBefore = pdf.page(PAGE_NUMBER).selectImages();
         File logo = new File(ADAMS_KNIGHT_FIXTURE_DIR + "x1NTEUlogoweb.jpg");
+        File pipeLogo = new File(ADAMS_KNIGHT_FIXTURE_DIR + "Travelers_PipeLogo.png");
 
         boolean replaced = pdf.replaceWithImage("{{logo_url}}", logo, 77.5, 30).apply();
         assertTrue(replaced, "Could not replace '{{logo_url}}' with logo image");
-        assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
+
+        List<ImageReference> imagesAfter = pdf.page(PAGE_NUMBER).selectImages();
+        List<String> imageIdsBefore = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
+        ImageReference logoReplacement = imagesAfter.stream()
+                .filter(image -> !imageIdsBefore.contains(image.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Could not locate replaced logo image"));
+
+        assertEquals(imagesBefore.size() + 1, imagesAfter.size());
+
+        if (pipeLogo.exists()) {
+            Image overlay = Image.fromFile(pipeLogo);
+            Size originalSize = overlay.getSize();
+            double width = originalSize != null && originalSize.getHeight() > 0
+                    ? originalSize.getWidth() * 30 / originalSize.getHeight()
+                    : 77.5;
+            overlay.setSize(new Size(width, 30));
+
+            Double logoX = logoReplacement.getPosition().getX();
+            Double logoY = logoReplacement.getPosition().getY();
+            Double logoWidth = logoReplacement.getWidth();
+            assertNotNull(logoX, "Logo replacement has no x coordinate");
+            assertNotNull(logoY, "Logo replacement has no y coordinate");
+            assertNotNull(logoWidth, "Logo replacement has no width");
+
+            boolean pipeLogoAdded = pdf.addImage(
+                    overlay,
+                    new PositionBuilder()
+                            .onPage(PAGE_NUMBER)
+                            .atCoordinates(logoX + logoWidth + 15.0, logoY)
+                            .build()
+            );
+            assertTrue(pipeLogoAdded, "Could not add Travelers_PipeLogo.png");
+        }
+
+        if (pipeLogo.exists()) {
+            assertEquals(imagesBefore.size() + 2, pdf.page(PAGE_NUMBER).selectImages().size());
+        }
     }
 
     private void replaceQrCode(PDFDancer pdf) throws IOException {
-        int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
+        List<ImageReference> imagesBefore = pdf.page(PAGE_NUMBER).selectImages();
         File qrCode = new File(ADAMS_KNIGHT_FIXTURE_DIR + "new_qr.png");
+
         boolean replaced = pdf.replaceWithImage("{{sponsorqrcode}}", qrCode, 50, 50).apply();
         assertTrue(replaced, "Could not replace '{{sponsorqrcode}}' with QR code image");
-        assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
+        List<ImageReference> imagesAfter = pdf.page(PAGE_NUMBER).selectImages();
+        List<String> imageIdsBefore = imagesBefore.stream().map(ImageReference::getInternalId).collect(Collectors.toList());
+        ImageReference qrImage = imagesAfter.stream()
+                .filter(image -> !imageIdsBefore.contains(image.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Could not locate inserted QR code image"));
+
+        moveInsertedQrCode(qrImage);
+        assertEquals(imagesBefore.size() + 1, imagesAfter.size());
+    }
+
+    private void moveInsertedQrCode(ImageReference qrImage) {
+        Double qrImageX = qrImage.getPosition().getX();
+        Double qrImageY = qrImage.getPosition().getY();
+        assertNotNull(qrImageX, "QR code image has no x coordinate");
+        assertNotNull(qrImageY, "QR code image has no y coordinate");
+
+        assertTrue(qrImage.moveTo(qrImageX + 30, qrImageY - 50), "Could not move QR code image");
     }
 }
