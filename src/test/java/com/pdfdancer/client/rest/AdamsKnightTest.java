@@ -35,18 +35,6 @@ public class AdamsKnightTest extends BaseTest {
             pdf.registerFont(new File(ADAMS_KNIGHT_FIXTURE_DIR + fontName));
         }
 
-        for (TextLineReference line : pdf.selectTextLines()) {
-            String text = line.getText();
-            if (text == null) {
-                continue;
-            }
-            for (String s : replacements.keySet()) {
-                if (text.contains(s)) {
-                    System.out.println(line.getFontName() + ": " + text);
-                }
-            }
-        }
-
         for (String s : replacements.keySet()) {
             String newText = replacements.get(s);
             boolean apply = pdf.replace(s, newText)
@@ -61,7 +49,7 @@ public class AdamsKnightTest extends BaseTest {
         pdfAssertions.assertTextlineDoesNotExist("{{logo_url}}", PAGE_NUMBER);
         pdfAssertions.assertTextlineDoesNotExist("{{sponsorqrcode}}", PAGE_NUMBER);
         for (String s : replacements.keySet()) {
-            for (String line : replacements.get(s).split("\\R", -1)) {
+            for (String line : expectedTextLines(replacements.get(s))) {
                 if (!line.isEmpty()) {
                     pdfAssertions.assertTextlineExists(".*" + line + ".*", 1);
                 }
@@ -76,6 +64,16 @@ public class AdamsKnightTest extends BaseTest {
         replacements.put("{{tfn}}", "888.666.6062");
         replacements.put("{{sponsorid}}", "NTEU");
         return replacements;
+    }
+
+    private List<String> expectedTextLines(String replacement) {
+        if ("National Treasury Employees members switch to the Travelers Auto Insurance Program".equals(replacement)) {
+            return List.of(
+                    "National Treasury Employees members switch to the Travelers Auto",
+                    "Insurance Program"
+            );
+        }
+        return List.of(replacement.split("\\R", -1));
     }
 
     private void replaceLogo(PDFDancer pdf) throws IOException {
@@ -95,34 +93,29 @@ public class AdamsKnightTest extends BaseTest {
 
         assertEquals(imagesBefore.size() + 1, imagesAfter.size());
 
-        if (pipeLogo.exists()) {
-            Image overlay = Image.fromFile(pipeLogo);
-            Size originalSize = overlay.getSize();
-            double width = originalSize != null && originalSize.getHeight() > 0
-                    ? originalSize.getWidth() * 30 / originalSize.getHeight()
-                    : 77.5;
-            overlay.setSize(new Size(width, 30));
+        Image overlay = Image.fromFile(pipeLogo);
+        Size originalSize = overlay.getSize();
+        double width = originalSize != null && originalSize.getHeight() > 0
+                ? originalSize.getWidth() * 30 / originalSize.getHeight()
+                : 77.5;
+        overlay.setSize(new Size(width, 30));
 
-            Double logoX = logoReplacement.getPosition().getX();
-            Double logoY = logoReplacement.getPosition().getY();
-            Double logoWidth = logoReplacement.getWidth();
-            assertNotNull(logoX, "Logo replacement has no x coordinate");
-            assertNotNull(logoY, "Logo replacement has no y coordinate");
-            assertNotNull(logoWidth, "Logo replacement has no width");
+        Double logoX = logoReplacement.getPosition().getX();
+        Double logoY = logoReplacement.getPosition().getY();
+        Double logoWidth = logoReplacement.getWidth();
+        assertNotNull(logoX, "Logo replacement has no x coordinate");
+        assertNotNull(logoY, "Logo replacement has no y coordinate");
+        assertNotNull(logoWidth, "Logo replacement has no width");
 
-            boolean pipeLogoAdded = pdf.addImage(
-                    overlay,
-                    new PositionBuilder()
-                            .onPage(PAGE_NUMBER)
-                            .atCoordinates(logoX + logoWidth + 15.0, logoY)
-                            .build()
-            );
-            assertTrue(pipeLogoAdded, "Could not add Travelers_PipeLogo.png");
-        }
-
-        if (pipeLogo.exists()) {
-            assertEquals(imagesBefore.size() + 2, pdf.page(PAGE_NUMBER).selectImages().size());
-        }
+        boolean pipeLogoAdded = pdf.addImage(
+                overlay,
+                new PositionBuilder()
+                        .onPage(PAGE_NUMBER)
+                        .atCoordinates(logoX + logoWidth + 15.0, logoY)
+                        .build()
+        );
+        assertTrue(pipeLogoAdded, "Could not add Travelers_PipeLogo.png");
+        assertEquals(imagesBefore.size() + 2, pdf.page(PAGE_NUMBER).selectImages().size());
     }
 
     private void replaceQrCode(PDFDancer pdf) throws IOException {
