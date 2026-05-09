@@ -40,7 +40,7 @@ public class AdamsKnightTest extends BaseTest {
         assertNotNull(pdf);
 
         for (String fontName : List.of("BattersonSans-Black.ttf", "BattersonSans-Regular.ttf", "BattersonSlab-Light.ttf", "BattersonSlab-Black.ttf")) {
-            pdf.registerFont(new File("src/test/resources/fixtures/fonts/" + fontName));
+            pdf.registerFont(new File("src/test/resources/fixtures/adamsknight/" + fontName));
         }
 
         for (TextLineReference line : pdf.selectTextLines()) {
