@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class AdamsKnightTest extends BaseTest {
 
     private static final String ADAMS_KNIGHT_FIXTURE_DIR = "src/test/resources/fixtures/adamsknight/";
     private static final int PAGE_NUMBER = 1;
+    private static final double PAGE_WIDTH = 612.0;
 
     @Test
     public void replaceMemberWithFont() throws IOException {
@@ -50,6 +52,7 @@ public class AdamsKnightTest extends BaseTest {
             boolean apply = pdf.replace(s, newText)
                     .apply();
             assertTrue(apply, "Could not replace '" + s + "' with " + newText);
+            handleOverflowingLines(pdf, newText);
         }
         replaceLogo(pdf);
         replaceQrCode(pdf);
@@ -69,7 +72,7 @@ public class AdamsKnightTest extends BaseTest {
     private static Map<String, String> getReplacements() {
         Map<String, String> replacements = new HashMap<>();
         replacements.put("{{partner_name}} employee", "National Treasury Employees employee");
-        replacements.put("{{partner_name}} members switch to the Travelers Auto Insurance Program", "National Treasury Employees members switch to the Travelers Auto\nInsurance Program");
+        replacements.put("{{partner_name}} members switch to the Travelers Auto Insurance Program", "National Treasury Employees members switch to the Travelers Auto Insurance Program");
         replacements.put("{{tfn}}", "888.666.6062");
         replacements.put("{{sponsorid}}", "NTEU");
         return replacements;
@@ -150,5 +153,120 @@ public class AdamsKnightTest extends BaseTest {
         assertNotNull(qrImageY, "QR code image has no y coordinate");
 
         assertTrue(qrImage.moveTo(qrImageX + 12, qrImageY - 31), "Could not move QR code image");
+    }
+
+    private void handleOverflowingLines(PDFDancer pdf, String replacementText) {
+        List<TextLineReference> overflowingLines = pdf.page(PAGE_NUMBER).selectTextLines().stream()
+                .filter(line -> line.getText() != null && line.getText().contains(replacementText))
+                .filter(this::isOverflowing)
+                .collect(Collectors.toList());
+        for (TextLineReference line : overflowingLines) {
+            splitOverflowingLine(pdf, line);
+        }
+    }
+
+    private boolean isOverflowing(TextLineReference line) {
+        if (line.getPosition() == null || line.getPosition().getBoundingRect() == null) {
+            return false;
+        }
+        return line.getPosition().getBoundingRect().getX() + line.getPosition().getBoundingRect().getWidth() > PAGE_WIDTH;
+    }
+
+    private void splitOverflowingLine(PDFDancer pdf, TextLineReference line) {
+        String text = line.getText();
+        if (text == null || text.contains("\n")) {
+            return;
+        }
+        List<String> splitLines = splitOverflowingText(line, text);
+        if (splitLines.size() <= 1) {
+            return;
+        }
+
+        assertTrue(line.edit().replace(String.join("\n", splitLines)).apply(), "Could not split overflowed line");
+        moveOverflowContinuationLine(pdf, line, splitLines.get(1));
+    }
+
+    private List<String> splitOverflowingText(TextLineReference line, String text) {
+        Double fontSizeObj = line.getFontSize();
+        double fontSize = fontSizeObj == null ? 12.0 : Math.abs(fontSizeObj);
+
+        if (line.getPosition() == null || line.getPosition().getBoundingRect() == null || text == null) {
+            return List.of(text == null ? "" : text);
+        }
+        if (line.getPosition().getBoundingRect().getX() >= PAGE_WIDTH) {
+            return List.of(text);
+        }
+
+        double availableWidth = PAGE_WIDTH - line.getPosition().getBoundingRect().getX();
+        double avgCharWidth = Math.max(fontSize * 0.52, 1.0);
+        int maxChars = Math.max(10, (int) Math.floor(availableWidth / avgCharWidth));
+        if (text.length() <= maxChars) {
+            return List.of(text);
+        }
+
+        String[] words = text.split(" ");
+        if (words.length == 0 || words.length == 1) {
+            return fallbackSplit(text);
+        }
+
+        List<String> lines = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
+        for (String word : words) {
+            if (currentLine.length() == 0) {
+                currentLine.append(word);
+                continue;
+            }
+            if (currentLine.length() + 1 + word.length() > maxChars) {
+                lines.add(currentLine.toString());
+                currentLine = new StringBuilder(word);
+            } else {
+                currentLine.append(" ").append(word);
+            }
+        }
+        if (currentLine.length() != 0) {
+            lines.add(currentLine.toString());
+        }
+        if (lines.size() <= 1) {
+            return fallbackSplit(text);
+        }
+        return lines;
+    }
+
+    private List<String> fallbackSplit(String text) {
+        if (text == null || text.isBlank()) {
+            return List.of(text);
+        }
+        int mid = text.length() / 2;
+        int left = text.lastIndexOf(" ", mid);
+        int right = text.indexOf(" ", mid);
+        int splitAt = right != -1 && left != -1 ? (right - mid) < (mid - left) ? right : left : right != -1 ? right : left;
+        if (splitAt == -1 || splitAt <= 0 || splitAt >= text.length() - 1) {
+            return List.of(text);
+        }
+        String first = text.substring(0, splitAt).trim();
+        String second = text.substring(splitAt + 1).trim();
+        if (first.isBlank() || second.isBlank()) {
+            return List.of(text);
+        }
+        return List.of(first, second);
+    }
+
+    private void moveOverflowContinuationLine(PDFDancer pdf, TextLineReference originalLine, String continuationText) {
+        Double baseY = originalLine.getPosition() != null ? originalLine.getPosition().getY() : null;
+        if (baseY == null || continuationText == null || continuationText.isBlank()) {
+            return;
+        }
+        double fontSize = Math.abs(originalLine.getFontSize() == null ? 12.0 : originalLine.getFontSize());
+        pdf.page(PAGE_NUMBER).selectTextLinesMatching(java.util.regex.Pattern.quote(continuationText)).stream()
+                .findFirst()
+                .ifPresent(continuationLine -> {
+                    Double continuationX = continuationLine.getPosition().getX();
+                    Double continuationY = continuationLine.getPosition().getY();
+                    if (continuationX != null && continuationY != null) {
+                        assertTrue(continuationLine.edit()
+                                .moveTo(continuationX, continuationY + (fontSize / 2))
+                                .apply(), "Could not move overflow continuation line");
+                    }
+                });
     }
 }
