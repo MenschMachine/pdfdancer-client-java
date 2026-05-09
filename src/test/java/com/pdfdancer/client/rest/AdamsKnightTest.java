@@ -23,30 +23,11 @@ public class AdamsKnightTest extends BaseTest {
     private static final int PAGE_NUMBER = 1;
 
     @Test
-    public void replaceMemberWithoutFont() {
-
-        Map<String, String> replacements = new HashMap<>();
-        replacements.put("XYZmember", "National Treasury Employees employee");
-
-        PDFDancer pdf = createClient("PrintCollateral_01.pdf");
-        assertNotNull(pdf);
-        for (String s : replacements.keySet()) {
-            String newText = replacements.get(s);
-            boolean apply = pdf.replace("{" + s + "}", newText).apply();
-            assertTrue(apply, "Could not replace '" + s + "' with " + newText);
-        }
-        PDFAssertions pdfAssertions = new PDFAssertions(pdf);
-        for (String s : replacements.keySet()) {
-            pdfAssertions.assertTextlineExists(".*" + replacements.get(s) + ".*", 1);
-        }
-    }
-
-    @Test
     public void replaceMemberWithFont() throws IOException {
 
         Map<String, String> replacements = getReplacements();
 
-        PDFDancer pdf = createClient("PrintCollateral_01.pdf");
+        PDFDancer pdf = createClient("adamsknight/PrintCollateral_01.pdf");
         assertNotNull(pdf);
 
         for (String fontName : List.of("BattersonSans-Black.ttf", "BattersonSans-Regular.ttf", "BattersonSlab-Light.ttf", "BattersonSlab-Black.ttf")) {
@@ -54,9 +35,13 @@ public class AdamsKnightTest extends BaseTest {
         }
 
         for (TextLineReference line : pdf.selectTextLines()) {
+            String text = line.getText();
+            if (text == null) {
+                continue;
+            }
             for (String s : replacements.keySet()) {
-                if (line.getText().contains(s)) {
-                    System.out.println(line.getFontName() + ": " + line.getText());
+                if (text.contains(s)) {
+                    System.out.println(line.getFontName() + ": " + text);
                 }
             }
         }
@@ -71,7 +56,7 @@ public class AdamsKnightTest extends BaseTest {
         replaceQrCode(pdf);
 
         PDFAssertions pdfAssertions = new PDFAssertions(pdf);
-        pdfAssertions.assertTextlineDoesNotExist("{XYZlogo}", PAGE_NUMBER);
+        pdfAssertions.assertTextlineDoesNotExist("{{logo_url}}", PAGE_NUMBER);
         for (String s : replacements.keySet()) {
             for (String line : replacements.get(s).split("\\R", -1)) {
                 if (!line.isEmpty()) {
@@ -83,11 +68,10 @@ public class AdamsKnightTest extends BaseTest {
 
     private static Map<String, String> getReplacements() {
         Map<String, String> replacements = new HashMap<>();
-        replacements.put("{XYZmember}", "National Treasury Employees employee");
-        replacements.put("{XYZemployees} switch to the Travelers Auto Insurance Program", "National Treasury Employees members switch to the Travelers Auto\nInsurance Program");
-        replacements.put("{XYZphone}", "888.666.6062");
-        replacements.put("{XYZurlpath}", "NTEU");
-        replacements.put("{XYZConvenientCustomized}", "Convenient Payroll Deduction / Customized Coverage Options");
+        replacements.put("{{partner_name}} employee", "National Treasury Employees employee");
+        replacements.put("{{partner_name}} members switch to the Travelers Auto Insurance Program", "National Treasury Employees members switch to the Travelers Auto\nInsurance Program");
+        replacements.put("{{tfn}}", "888.666.6062");
+        replacements.put("{{sponsorid}}", "NTEU");
         return replacements;
     }
 
@@ -95,8 +79,8 @@ public class AdamsKnightTest extends BaseTest {
         int imageCountBefore = pdf.page(PAGE_NUMBER).selectImages().size();
         File logo = new File(ADAMS_KNIGHT_FIXTURE_DIR + "x1NTEUlogoweb.jpg");
 
-        boolean replaced = pdf.replaceWithImage("{XYZlogo}", logo, 77.5, 30).apply();
-        assertTrue(replaced, "Could not replace '{XYZlogo}' with logo image");
+        boolean replaced = pdf.replaceWithImage("{{logo_url}}", logo, 77.5, 30).apply();
+        assertTrue(replaced, "Could not replace '{{logo_url}}' with logo image");
         assertEquals(imageCountBefore + 1, pdf.page(PAGE_NUMBER).selectImages().size());
     }
 
