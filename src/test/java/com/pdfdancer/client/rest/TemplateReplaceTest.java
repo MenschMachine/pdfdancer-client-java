@@ -7,8 +7,6 @@ import com.pdfdancer.common.model.ReflowPreset;
 import com.pdfdancer.common.request.TemplateReplaceRequest;
 import com.pdfdancer.common.request.TemplateReplacement;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for template replacement functionality.
  */
 public class TemplateReplaceTest extends BaseTest {
-    private static final Logger log = LoggerFactory.getLogger(TemplateReplaceTest.class);
 
     @Test
     public void templateReplacementBuilderWorks() {
