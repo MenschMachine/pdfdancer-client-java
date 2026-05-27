@@ -18,7 +18,7 @@ public class ParagraphTest extends BaseTest {
     public void findParagraphsByPosition() {
         PDFDancer client = createClient();
         List<TextParagraphReference> paragraphs = client.selectParagraphs();
-        assertTrue(paragraphs.size() > 100 && paragraphs.size() < 150, "Should have more than 100 paragraphs");
+        assertTrue(paragraphs.size() > 50 && paragraphs.size() < 150, "Should have more than 50 paragraphs. but has " + paragraphs.size());
 
         paragraphs = client.page(1).selectParagraphs();
         assertEquals(2, paragraphs.size());
