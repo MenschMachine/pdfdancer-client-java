@@ -10,10 +10,9 @@ on:
       java_version:
         description: 'Java version'
         required: false
-        default: '11'
+        default: '17'
         type: choice
         options:
-          - '11'
           - '17'
           - '21'
           - '25'
@@ -60,9 +59,7 @@ jobs:
         id: gradle-version
         shell: bash
         run: |
-          if [ "${{ inputs.java_version }}" = "11" ]; then
-            echo "version=8.5" >> $GITHUB_OUTPUT
-          elif [ "${{ inputs.java_version }}" = "25" ]; then
+          if [ "${{ inputs.java_version }}" = "25" ]; then
             echo "version=9.2.1" >> $GITHUB_OUTPUT
           else
             echo "version=8.10.2" >> $GITHUB_OUTPUT

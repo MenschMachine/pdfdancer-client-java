@@ -23,7 +23,7 @@ languages when you need it.
 - Programmatically control third-party PDFs—modify invoices, contracts, and reports you did not author.
 - Add fresh content with precise XY positioning, custom fonts (including runtime TTF uploads), and color helpers.
 - Export results as bytes for downstream processing or save directly to disk with one call.
-- Works anywhere you can run Java 11+: server-side apps, CLI tools, build steps, or desktop utilities.
+- Works anywhere you can run Java 17+: server-side apps, CLI tools, build steps, or desktop utilities.
 
 ## What Makes PDFDancer Different
 
@@ -56,7 +56,7 @@ implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.5")
 
 ### Requirements
 
-- Java 11 or newer (toolchains configured in `build.gradle.kts`).
+- Java 17 or newer (toolchains configured in `build.gradle.kts`).
 - A PDFDancer API token. Set `PDFDANCER_API_TOKEN` (or `PDFDANCER_TOKEN`) or pass the token explicitly.
 - Access to the PDFDancer API host (defaults to `https://api.pdfdancer.com`; override via `PdfDancerHttpClient`).
 

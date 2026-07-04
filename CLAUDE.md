@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-PDFDancer Java Client — a Java 11+ SDK for programmatically editing PDF documents through the PDFDancer REST API. Published to Maven Central as `com.pdfdancer.client:pdfdancer-client-java`.
+PDFDancer Java Client — a Java 17+ SDK for programmatically editing PDF documents through the PDFDancer REST API. Published to Maven Central as `com.pdfdancer.client:pdfdancer-client-java`.
 
 ## Build & Test Commands
 

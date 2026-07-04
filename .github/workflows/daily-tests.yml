@@ -17,7 +17,7 @@ jobs:
       max-parallel: 2
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        java: [ 11, 17, 21, 25 ]
+        java: [ 17, 21, 25 ]
 
     steps:
       - name: Checkout code
@@ -53,9 +53,7 @@ jobs:
         id: gradle-version
         shell: bash
         run: |
-          if [ "${{ matrix.java }}" = "11" ]; then
-            echo "version=8.5" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.java }}" = "25" ]; then
+          if [ "${{ matrix.java }}" = "25" ]; then
             echo "version=9.2.1" >> $GITHUB_OUTPUT
           else
             echo "version=8.10.2" >> $GITHUB_OUTPUT
