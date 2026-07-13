@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * Represents a complete snapshot of a single PDF page including its metadata and all elements.
- * This response aggregates page information and all contained objects (paragraphs, images, etc.)
- * into a single response, reducing the number of API calls needed to retrieve page content.
+ * This response aggregates page information and contained objects into a single response,
+ * reducing the number of API calls needed to retrieve page content.
  */
 public class PageSnapshot {
 

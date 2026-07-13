@@ -1,6 +1,6 @@
 # Clear Clipping Capability
 
-Most of the PDF model classes including container classes like PDFParagraph/PDFTextLine/PDFPathGroup now implement ClippingDetachable with the method clearClipping().
+Most of the PDF model classes including container classes like PDFPathGroup now implement ClippingDetachable with the method clearClipping().
 This removes any clipping path which was active for this element.
 
 This is useful in case clients want to move an element but the new position is hidden by the clipping path. clearing it makes the element visible again.
@@ -49,7 +49,7 @@ include
   - `Session.clearClipping(...)` and `Session.clearPathGroupClipping(...)` execute commands inside `SessionContext` and record commands for session history.
   - `CommandDeserializer` now reconstructs `ClearObjectClippingCommand` and `ClearPathGroupClippingCommand` for debug archive replay.
 - Added tests and assertions:
-  - `ClippingTest` verifies clearing clipping on `PathReference`, `PathGroupReference`, and `TextLineReference`.
+  - `ClippingTest` verifies clearing clipping on `PathReference`, `PathGroupReference`, and `ImageReference`.
   - `DirectPDFAssertions`/`PDFAssertions` gained helpers to detect clipped paths and assert clipping present/removed.
 
 
@@ -57,9 +57,9 @@ include
 
 - Added top-level client methods in `src/pdfdancer/pdfdancer_v1.py`: `PDFDancer.clear_clipping(object_ref)` calls `PUT /pdf/clipping/clear`, and `PDFDancer.clear_path_group_clipping(page_number, group_id)` calls `PUT /pdf/path-group/clipping/clear`.
 - The Python client validates required inputs before sending the request: `object_ref` must be present, `page_number` is a 1-based integer for path groups, and `group_id` must be non-empty. Both methods coerce the API response to `bool` and invalidate cached snapshots after a successful mutation.
-- Added object-level convenience methods in `src/pdfdancer/types.py`. `PDFObjectBase.clear_clipping()` makes the capability available on typed selections that expose `object_ref()` such as paths, images, and text lines, while `PathGroupObject.clear_clipping()` forwards to the path-group API using `self._page_index + 1` to convert the internal 0-based index to the public 1-based page number.
+- Added object-level convenience methods in `src/pdfdancer/types.py`. `PDFObjectBase.clear_clipping()` makes the capability available on typed selections that expose `object_ref()` such as paths and images, while `PathGroupObject.clear_clipping()` forwards to the path-group API using `self._page_index + 1` to convert the internal 0-based index to the public 1-based page number.
 - Updated `README.md` to list `clear_clipping()` alongside other typed-object helper methods so the feature is discoverable from the main usage guide.
-- Added end-to-end coverage in `tests/e2e/test_clipping.py` for direct object calls and top-level client calls on paths, grouped paths, images, and clipped text lines, including a case where clipping spans multiple content streams. `tests/e2e/pdf_assertions.py` was extended with PDF draw-event inspection helpers that assert whether clipping is present or removed.
+- Added end-to-end coverage in `tests/e2e/test_clipping.py` for direct object calls and top-level client calls on paths, grouped paths, and images. `tests/e2e/pdf_assertions.py` was extended with PDF draw-event inspection helpers that assert whether clipping is present or removed.
 
 ## Implementation in pdfdancer-client-typescript
 
@@ -89,7 +89,7 @@ include
   - Both calls use JSON payloads, bearer auth, and `X-Session-Id` headers like other mutation endpoints.
 - Updated docs and tests for this repo:
   - `README.md` selector helpers now mention `clearClipping()`.
-  - `ClippingTest` covers path, image, text-line, and path-group clipping removal flows (via both reference helpers and direct `PDFDancer` APIs).
+  - `ClippingTest` covers path, image, and path-group clipping removal flows (via both reference helpers and direct `PDFDancer` APIs).
   - `PDFAssertions` gained clipping-aware assertions by parsing saved PDF content streams with PDFBox to detect whether matched draw events were clipped.
 - Added `org.apache.pdfbox:pdfbox:3.0.4` as a test dependency in `build.gradle.kts` to support low-level clipping assertions.
 - Repo-specific request handling details: `ClearClippingRequest` serializes the target `objectRef`, and `PDFDancer.clearPathGroupClipping(int pageNumber, String groupId)` sends the SDK's 1-based page number before calling `PUT /pdf/path-group/clipping/clear`.

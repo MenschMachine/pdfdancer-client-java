@@ -12,8 +12,8 @@ PDFDancer Java Client — a Java 17+ SDK for programmatically editing PDF docume
 ./gradlew build                          # compile + test
 ./gradlew compileJava                    # compile only
 ./gradlew test                           # run all tests
-./gradlew test --tests "*TextLineTest"   # run a single test class
-./gradlew test --tests "*TextLineTest.modifyLine"  # run a single test method
+./gradlew test --tests "*ImageTest"      # run a single test class
+./gradlew test --tests "*ImageTest.addImage"  # run a single test method
 ./gradlew printVersion                   # show current version
 ./gradlew bumpPatch                      # increment patch version in version.properties
 ```
@@ -31,8 +31,8 @@ The client follows a **facade + reference + builder** pattern:
 
 1. **`PDFDancer`** — main entry point. Creates sessions (uploading a PDF or creating blank), returns the facade for all operations. Delegates to service layer.
 2. **Service layer** (`SessionService`, `SelectionService`, `ModificationService`) — handles HTTP calls for session management, querying PDF objects, and applying mutations.
-3. **Reference objects** (`TextParagraphReference`, `TextLineReference`, `ImageReference`, `FormFieldReference`, `PathReference`) — represent live PDF objects returned by selection queries. Each provides `edit()`, `delete()`, `moveTo()`, etc.
-4. **Builders** (`ParagraphBuilder`, `ImageBuilder`, `LineBuilder`, `BezierBuilder`, `PathBuilder`, `ReplaceBuilder`) — fluent APIs for creating new content or performing template replacements. Terminal operations: `.add()` or `.apply()` returning boolean.
+3. **Reference objects** (`ImageReference`, `FormFieldReference`, `PathReference`) — represent live PDF objects returned by selection queries. They expose mutation helpers (`delete()`, `moveTo()`, etc.) where supported by object type.
+4. **Builders** (`ImageBuilder`, `LineBuilder`, `BezierBuilder`, `PathBuilder`) — fluent APIs for creating new content. Terminal operations: `.add()` or `.apply()` returning boolean.
 5. **`PdfDancerHttpClient`** — custom HTTP abstraction over Java's `HttpClient` with Jackson serialization, retry logic (exponential backoff for 408/429/5xx), and version header injection.
 6. **`SnapshotCache`** — caches `DocumentSnapshot`/`PageSnapshot` to avoid repeated network calls when inspecting server state.
 
@@ -43,12 +43,11 @@ The client follows a **facade + reference + builder** pattern:
 - `com.pdfdancer.client.mutation` — ModificationService
 - `com.pdfdancer.client.selection` — SelectionService
 - `com.pdfdancer.client.session` — SessionService
-- `com.pdfdancer.common.model` — DTOs: Paragraph, TextLine, Word, Position, BoundingRect, Color, Font, Path, Form, Image, Page
-- `com.pdfdancer.common.model.text` — text hierarchy (Paragraph → TextLine → Word)
+- `com.pdfdancer.common.model` — DTOs: Position, BoundingRect, Color, Font, Path, Form, Image, Page
 - `com.pdfdancer.common.model.path` — vector geometry (Path, Line, Bezier)
-- `com.pdfdancer.common.request` — request DTOs (ModifyTextRequest, TemplateReplacement, etc.)
+- `com.pdfdancer.common.request` — request DTOs (AddRequest, MoveRequest, etc.)
 - `com.pdfdancer.common.response` — response DTOs (DocumentSnapshot, PageSnapshot, ErrorResponse)
-- `com.pdfdancer.common.util` — helpers (StandardFonts, TextMeasurementUtil, FileUtils)
+- `com.pdfdancer.common.util` — helpers (StandardFonts, FileUtils)
 
 ### Test Infrastructure
 
@@ -61,7 +60,7 @@ All test classes extend `BaseTest`, which provides:
 
 Additional test support:
 - `TestPDFDancer` — static factory for test session creation
-- `PDFAssertions` — snapshot-based fluent assertions (e.g., `assertTextlineExists`, `assertTextlineHasFont`)
+- `PDFAssertions` — snapshot-based fluent assertions for pages, paths, images, forms, and clipping
 - `TestUtil` — assertion helpers like `assertBetween`
 
 ## Key Conventions

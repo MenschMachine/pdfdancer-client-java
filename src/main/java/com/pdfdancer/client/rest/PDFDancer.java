@@ -4,12 +4,12 @@ import com.pdfdancer.client.http.*;
 import com.pdfdancer.client.rest.mutation.ModificationService;
 import com.pdfdancer.client.rest.selection.SelectionService;
 import com.pdfdancer.client.rest.session.SessionService;
+import com.pdfdancer.client.rest.text.TextEditingService;
 import com.pdfdancer.common.model.*;
-import com.pdfdancer.common.model.text.Paragraph;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.PageSnapshot;
-import com.pdfdancer.common.response.RedactResponse;
+import com.pdfdancer.common.response.TextEditResponse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,8 +36,6 @@ import static com.pdfdancer.common.util.FileUtils.writeBytesToFile;
 public class PDFDancer {
     public static final double DEFAULT_EPSILON = 0.01;
     private static final URI DEFAULT_BASE_URI = URI.create("https://api.pdfdancer.com");
-    public static final String TYPES_PARAGRAPH = "PARAGRAPH";
-    public static final String TYPES_TEXT_LINE = "TEXT_LINE";
     /**
      * Authentication token for API access.
      */
@@ -55,6 +52,7 @@ public class PDFDancer {
     private final SnapshotCache snapshotCache;
     private final SelectionService selection;
     private final ModificationService modification;
+    private final TextEditingService textEditing;
 
     /**
      * Private constructor for factory methods.
@@ -72,6 +70,7 @@ public class PDFDancer {
         this.snapshotCache = new SnapshotCache(token, sessionId, this.blockingClient);
         this.selection = new SelectionService();
         this.modification = new ModificationService(token, sessionId, this.blockingClient);
+        this.textEditing = new TextEditingService(token, sessionId, this.blockingClient);
     }
 
     /**
@@ -500,8 +499,32 @@ public class PDFDancer {
         return result;
     }
 
-    private void invalidateSnapshotCaches() {
+    void invalidateSnapshotCaches() {
         snapshotCache.invalidate();
+    }
+
+    TextEditResponse replaceText(TextReplaceRequest request) {
+        TextEditResponse result = textEditing.replace(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    TextEditResponse deleteText(TextDeleteRequest request) {
+        TextEditResponse result = textEditing.delete(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    TextEditResponse insertText(TextInsertRequest request) {
+        TextEditResponse result = textEditing.insert(request);
+        invalidateSnapshotCaches();
+        return result;
+    }
+
+    TextEditResponse styleText(TextStyleRequest request) {
+        TextEditResponse result = textEditing.style(request);
+        invalidateSnapshotCaches();
+        return result;
     }
 
 
@@ -528,64 +551,12 @@ public class PDFDancer {
         return selection.getTypedElements(page, elementClass);
     }
 
-    private <T extends ObjectRef> List<T> flattenTypedDocument(TypedDocumentSnapshot<T> snapshot, Class<T> elementClass) {
-        return selection.flattenTypedDocument(snapshot, elementClass);
-    }
-
     private List<FormFieldRef> collectFormFieldRefsFromDocument() {
         return selection.collectFormFieldRefsFromDocument(this);
     }
 
     List<FormFieldRef> collectFormFieldRefsFromPage(int pageNumber) {
         return selection.collectFormFieldRefsFromPage(this, pageNumber);
-    }
-
-    private TextTypeObjectRef ensureTextType(TextTypeObjectRef ref, ObjectType desiredType) {
-        if (ref == null) {
-            return null;
-        }
-        if (desiredType == null || desiredType == ref.getType()) {
-            return ref;
-        }
-        List<TextTypeObjectRef> children = ref.getChildren();
-        List<TextTypeObjectRef> childCopies = (children == null || children.isEmpty()) ? null : new ArrayList<>(children);
-        List<Double> lineSpacings = ref.getLineSpacings();
-        List<Double> lineSpacingCopy = (lineSpacings == null || lineSpacings.isEmpty()) ? null : new ArrayList<>(lineSpacings);
-        return new TextTypeObjectRef(
-                ref.getInternalId(),
-                ref.getPosition(),
-                desiredType,
-                ref.getObjectRefType(),
-                ref.getFontName(),
-                ref.getFontSize(),
-                ref.getText(),
-                lineSpacingCopy,
-                ref.getColor(),
-                ref.getStatus(),
-                childCopies
-        );
-    }
-
-    private List<TextTypeObjectRef> findParagraphs(Position position) {
-        String path = "/pdf/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(ObjectType.PARAGRAPH, position, null))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(TextTypeObjectRef.class)
-        );
-    }
-
-    private List<TextTypeObjectRef> findTextLines(Position position) {
-        String path = "/pdf/find";
-        return blockingClient.retrieve(
-                HttpRequest.POST(path, new FindRequest(ObjectType.TEXT_LINE, position, null))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Argument.listOf(TextTypeObjectRef.class)
-        );
     }
 
     private List<FormFieldRef> findFormFields(Position position) {
@@ -624,43 +595,6 @@ public class PDFDancer {
         return selection.startsWithIgnoreCase(value, prefix);
     }
 
-    protected boolean modifyParagraph(ObjectRef ref, Paragraph newParagraph) {
-        boolean success = modification.modifyParagraph(ref, newParagraph);
-        invalidateSnapshotCaches();
-        return success;
-    }
-
-    protected boolean modifyTextLine(ObjectRef ref, String newTextLine) {
-        boolean success = modification.modifyTextLine(ref, newTextLine);
-        invalidateSnapshotCaches();
-        return success;
-    }
-
-    protected boolean modifyTextLine(ObjectRef ref, com.pdfdancer.common.model.text.TextLine newTextLine) {
-        boolean success = modification.modifyTextLine(ref, newTextLine);
-        invalidateSnapshotCaches();
-        return success;
-    }
-
-    protected boolean modifyParagraph(ObjectRef ref, String newText) {
-        boolean success = modification.modifyParagraph(ref, newText);
-        invalidateSnapshotCaches();
-        return success;
-    }
-
-    protected boolean addParagaph(Paragraph newParagraph) {
-        if (newParagraph.getPosition() == null) {
-            throw new IllegalArgumentException("Paragraph getPosition is null");
-        }
-        if (newParagraph.getPosition().getPageNumber() == null) {
-            throw new IllegalArgumentException("Paragraph getPosition page number is null");
-        }
-        if (newParagraph.getPosition().getPageNumber() < 0) {
-            throw new IllegalArgumentException("Paragraph getPosition page number is less than 0");
-        }
-        return addObject(newParagraph);
-    }
-
     public List<Font> findFonts(String fontName, int fontSize) {
         String path = "/font/find?fontName=" + fontName;
         List<String> fonts = blockingClient.retrieve(
@@ -685,10 +619,6 @@ public class PDFDancer {
                         .header("X-Session-Id", sessionId),
                 String.class
         );
-    }
-
-    public ParagraphBuilder newParagraph() {
-        return new ParagraphBuilder(this);
     }
 
     public ImageBuilder newImage() {
@@ -718,7 +648,7 @@ public class PDFDancer {
      * Retrieves a complete snapshot of the entire PDF document with type filtering.
      * Only elements matching the specified types will be included in the snapshot.
      *
-     * @param types comma-separated list of object types to include (e.g., "PARAGRAPH,IMAGE")
+     * @param types comma-separated list of object types to include (e.g., "IMAGE,PATH")
      * @return document snapshot containing filtered pages and metadata
      */
     public DocumentSnapshot getDocumentSnapshot(String types) {
@@ -745,7 +675,7 @@ public class PDFDancer {
      * Only elements matching the specified types will be included in the snapshot.
      *
      * @param pageNumber the page number to retrieve (1-based indexing, page 1 is first page)
-     * @param types      comma-separated list of object types to include (e.g., "PARAGRAPH,IMAGE")
+     * @param types      comma-separated list of object types to include (e.g., "IMAGE,PATH")
      * @return page snapshot containing page reference and filtered elements
      * @throws IllegalArgumentException if pageNumber is less than 1
      */
@@ -768,24 +698,6 @@ public class PDFDancer {
         return success;
     }
 
-    public List<TextParagraphReference> selectParagraphs() {
-        TypedDocumentSnapshot<TextTypeObjectRef> snapshot = getTypedDocumentSnapshot(TextTypeObjectRef.class, TYPES_PARAGRAPH);
-        List<TextTypeObjectRef> paragraphs = flattenTypedDocument(snapshot, TextTypeObjectRef.class);
-        if (paragraphs.isEmpty() || paragraphs.stream().anyMatch(ref -> ref.getText() == null)) {
-            paragraphs = findParagraphs(null);
-        }
-        return toTextObject(paragraphs);
-    }
-
-    public List<TextLineReference> selectTextLines() {
-        TypedDocumentSnapshot<TextTypeObjectRef> snapshot = getTypedDocumentSnapshot(TextTypeObjectRef.class, TYPES_TEXT_LINE);
-        List<TextTypeObjectRef> textLines = flattenTypedDocument(snapshot, TextTypeObjectRef.class);
-        if (textLines.isEmpty() || textLines.stream().anyMatch(ref -> ref.getText() == null)) {
-            textLines = findTextLines(null);
-        }
-        return toTextLineObject(textLines);
-    }
-
     public List<PathReference> selectPaths() {
         DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
         return toPathObject(collectObjectsByType(snapshot, Set.of(ObjectType.PATH)));
@@ -803,22 +715,6 @@ public class PDFDancer {
             throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
         }
         return new PageClient(this, pageNumber);
-    }
-
-    List<TextParagraphReference> toTextObject(List<TextTypeObjectRef> objectRefs) {
-        return objectRefs.stream()
-                .map(ref -> ensureTextType(ref, ObjectType.PARAGRAPH))
-                .filter(Objects::nonNull)
-                .map(ref -> new TextParagraphReference(ref, this))
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    List<TextLineReference> toTextLineObject(List<TextTypeObjectRef> objectRefs) {
-        return objectRefs.stream()
-                .map(ref -> ensureTextType(ref, ObjectType.TEXT_LINE))
-                .filter(Objects::nonNull)
-                .map(ref -> new TextLineReference(this, ref))
-                .collect(Collectors.toUnmodifiableList());
     }
 
     List<PathReference> toPathObject(List<ObjectRef> objectRefs) {
@@ -920,6 +816,10 @@ public class PDFDancer {
         return new PageBuilder(this);
     }
 
+    public TextClient text() {
+        return new TextClient(this);
+    }
+
     /**
      * @deprecated Use {@link #newPage()} instead. This method will be removed in a future release.
      */
@@ -946,79 +846,6 @@ public class PDFDancer {
         Boolean result = modification.movePage(fromPage, toPage);
         invalidateSnapshotCaches();
         return Boolean.TRUE.equals(result);
-    }
-
-    /**
-     * Redacts multiple objects from the PDF document using default replacement text.
-     *
-     * @param objects the objects to redact
-     * @return response containing the count of redacted items and any warnings
-     * @throws IllegalArgumentException if objects is null or empty
-     */
-    public RedactResponse redact(List<? extends BaseReference> objects) {
-        return redact(objects, "[REDACTED]", Color.BLACK);
-    }
-
-    /**
-     * Redacts multiple objects from the PDF document with custom replacement text.
-     *
-     * @param objects     the objects to redact
-     * @param replacement the replacement text for text content
-     * @return response containing the count of redacted items and any warnings
-     * @throws IllegalArgumentException if objects is null or empty
-     */
-    public RedactResponse redact(List<? extends BaseReference> objects, String replacement) {
-        return redact(objects, replacement, Color.BLACK);
-    }
-
-    /**
-     * Redacts multiple objects from the PDF document with custom placeholder color.
-     *
-     * @param objects          the objects to redact
-     * @param placeholderColor the color for image/path placeholders
-     * @return response containing the count of redacted items and any warnings
-     * @throws IllegalArgumentException if objects is null or empty
-     */
-    public RedactResponse redact(List<? extends BaseReference> objects, Color placeholderColor) {
-        return redact(objects, "[REDACTED]", placeholderColor);
-    }
-
-    /**
-     * Redacts multiple objects from the PDF document.
-     * Text content is replaced with the replacement string, while images and paths
-     * are replaced with solid color placeholder rectangles.
-     *
-     * @param objects          the objects to redact
-     * @param replacement      the replacement text for text content
-     * @param placeholderColor the color for image/path placeholders
-     * @return response containing the count of redacted items and any warnings
-     * @throws IllegalArgumentException if objects is null or empty
-     */
-    public RedactResponse redact(List<? extends BaseReference> objects, String replacement, Color placeholderColor) {
-        if (objects == null || objects.isEmpty()) {
-            throw new IllegalArgumentException("At least one object is required");
-        }
-        RedactRequest.Builder builder = RedactRequest.builder()
-                .defaultReplacement(replacement)
-                .placeholderColor(placeholderColor);
-        for (BaseReference obj : objects) {
-            builder.addTargetById(obj.getInternalId());
-        }
-        return redact(builder.build());
-    }
-
-    /**
-     * Redacts content from the PDF document based on the provided request.
-     * Text content is replaced with a replacement string, while images and paths
-     * are replaced with solid color placeholder rectangles.
-     *
-     * @param request the redaction request containing targets and options
-     * @return response containing the count of redacted items and any warnings
-     */
-    RedactResponse redact(RedactRequest request) {
-        RedactResponse result = modification.redact(request);
-        invalidateSnapshotCaches();
-        return result;
     }
 
     /**
@@ -1111,73 +938,6 @@ public class PDFDancer {
     }
 
     /**
-     * Replaces template placeholders in the PDF document.
-     * Finds exact text matches for placeholders and replaces them with specified content.
-     * All placeholders must be found or the operation fails atomically.
-     *
-     * @param request the template replacement request
-     * @return true if all replacements were successful
-     */
-    public boolean applyReplacements(TemplateReplaceRequest request) {
-        boolean result = modification.replaceTemplates(request);
-        invalidateSnapshotCaches();
-        return result;
-    }
-
-    /**
-     * Starts a fluent template replacement operation.
-     * <p>Example usage:
-     * <pre>{@code
-     * // Simple replacement
-     * client.replace("{{name}}", "John").apply();
-     *
-     * // With formatting
-     * client.replace("{{name}}", "John")
-     *     .withFont("Helvetica-Bold", 14)
-     *     .withColor(255, 0, 0)
-     *     .apply();
-     *
-     * // Multiple replacements
-     * client.replace("{{name}}", "John")
-     *     .replace("{{title}}", "Manager")
-     *     .apply();
-     * }</pre>
-     *
-     * @param placeholder the placeholder text to find
-     * @param text the replacement text
-     * @return a ReplaceBuilder for chaining options
-     */
-    public ReplaceBuilder replace(String placeholder, String text) {
-        return new ReplaceBuilder(this, placeholder, text);
-    }
-
-    /**
-     * Replaces a template placeholder with an image.
-     *
-     * @param placeholder the placeholder text to find
-     * @param imageFile the image file to use as replacement
-     * @return a ReplaceBuilder for chaining options
-     * @throws IOException if the image file cannot be read
-     */
-    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile) throws IOException {
-        return new ReplaceBuilder(this).replaceWithImage(placeholder, imageFile);
-    }
-
-    /**
-     * Replaces a template placeholder with an image at a specific size.
-     *
-     * @param placeholder the placeholder text to find
-     * @param imageFile the image file to use as replacement
-     * @param width the desired width
-     * @param height the desired height
-     * @return a ReplaceBuilder for chaining options
-     * @throws IOException if the image file cannot be read
-     */
-    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile, double width, double height) throws IOException {
-        return new ReplaceBuilder(this).replaceWithImage(placeholder, imageFile, width, height);
-    }
-
-    /**
      * Gets the HTTP client used by this PDFDancer instance.
      * Useful for testing and creating new instances with the same client.
      *
@@ -1190,7 +950,7 @@ public class PDFDancer {
 
     /**
      * Represents operations scoped to a single page of a PDF document.
-     * Provides type-safe selection methods for text, images, and paths.
+     * Provides type-safe selection methods for images, form fields, and paths.
      */
     public static class PageClient extends PageClientImpl {
         PageClient(PDFDancer root, int pageNumber) {

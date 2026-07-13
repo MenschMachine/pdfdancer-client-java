@@ -20,7 +20,7 @@ public class PDFTest extends BaseTest {
     public void selectElements() {
         PDFDancer pdf = createClient();
         List<ObjectRef> objectRefs = pdf.selectElements();
-        assertTrue(objectRefs.size() > 500);
+        assertFalse(objectRefs.isEmpty());
     }
 
     @Test
@@ -67,55 +67,4 @@ public class PDFTest extends BaseTest {
         new PDFAssertions(pdf).assertPageCount(2);
     }
 
-    @Test
-    public void testCreateBlankPdfAddContent() {
-        PDFDancer pdf = TestPDFDancer.newPdf(getValidToken(), httpClient);
-        pdf.newParagraph()
-                .text("Hello from blank PDF")
-                .font("Courier-BoldOblique", 9)
-                .color(new Color(0, 255, 0))
-                .at(1, 100, 201.5)
-                .add();
-
-        List<TextParagraphReference> paragraphs = pdf.selectParagraphs();
-        assertEquals(1, paragraphs.size(), "Should have one paragraph");
-
-        new PDFAssertions(pdf).assertParagraphIsAt("Hello from blank PDF", 100, 201.5, 1);
-    }
-
-    @Test
-    public void testCreateBlankPdfAddAndModifyContent() {
-        PDFDancer pdf = TestPDFDancer.newPdf(getValidToken(), httpClient);
-        pdf.newParagraph()
-                .text("Hello from blank PDF")
-                .font("Courier-BoldOblique", 9)
-                .color(new Color(128, 56, 127))
-                .at(1, 100, 201.5)
-                .add();
-
-        List<TextLineReference> selectedLines = pdf.page(1).selectTextLinesAt(100, 201.5, 3d); // needs high tolerance, because y of line != y of paragraph
-        assertEquals(1, selectedLines.size());
-        assertNotNull(selectedLines.get(0).getInternalId());
-        pdf.save("/tmp/test_create_blank_pdf_add_and_modify_content.pdf");
-
-        try {
-            PDFDancer pdf2 = PDFDancer.createSession(
-                    getValidToken(),
-                    java.nio.file.Files.readAllBytes(
-                            java.nio.file.Paths.get("/tmp/test_create_blank_pdf_add_and_modify_content.pdf")
-                    ),
-                    httpClient
-            );
-            for (int i = 0; i < 10; i++) {
-                List<TextLineReference> selectedLines2 = pdf2.page(1).selectTextLinesAt(100, 201.5, 3);
-                assertEquals(1, selectedLines2.size());
-                TextLineReference line = selectedLines2.get(0);
-                boolean success = line.edit().replace("hello " + i).apply();
-                assertTrue(success);
-            }
-            pdf2.save("/tmp/test_create_blank_pdf_add_and_modify_content2.pdf");
-        } catch (Exception e) {
-            fail("Should not throw exception: " + e.getMessage());
-        }
-    }
 }

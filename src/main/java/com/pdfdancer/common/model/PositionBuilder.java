@@ -12,18 +12,8 @@ public class PositionBuilder {
         return position;
     }
 
-    public PositionBuilder textStartsWith(String start) {
-        position.setTextStartsWith(start);
-        return this;
-    }
-
     public PositionBuilder atCoordinates(double x, double y) {
         position.atPosition(new Point(x, y));
-        return this;
-    }
-
-    public PositionBuilder textMatches(String pattern) {
-        position.setTextPattern(pattern);
         return this;
     }
 }

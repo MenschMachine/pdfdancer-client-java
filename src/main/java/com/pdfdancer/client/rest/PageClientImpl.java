@@ -5,13 +5,10 @@ import com.pdfdancer.common.model.PathGroupInfo;
 import com.pdfdancer.common.request.CreatePathGroupRequest;
 import com.pdfdancer.common.response.PageSnapshot;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -27,63 +24,7 @@ class PageClientImpl {
         this.pageNumber = pageNumber;
     }
 
-    public List<TextParagraphReference> selectParagraphs() {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextObject(typed);
-    }
-
     public int getPageNumber() { return pageNumber; }
-
-    public List<TextParagraphReference> selectParagraphsStartingWith(String text) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextObject(
-                typed.stream()
-                        .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    public List<TextParagraphReference> selectParagraphsAt(double x, double y) { return selectParagraphsAt(x, y, PDFDancer.DEFAULT_EPSILON); }
-
-    public List<TextParagraphReference> selectParagraphsAt(double x, double y, double epsilon) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextObject(
-                typed.stream()
-                        .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    /**
-     * Selects a single paragraph at the specified coordinates with default epsilon.
-     * @return Optional containing the first paragraph found at the position, or empty if none found
-     */
-    public Optional<TextParagraphReference> selectParagraphAt(double x, double y) {
-        return selectParagraphAt(x, y, PDFDancer.DEFAULT_EPSILON);
-    }
-
-    /**
-     * Selects a single paragraph at the specified coordinates with custom epsilon tolerance.
-     * @return Optional containing the first paragraph found at the position, or empty if none found
-     */
-    public Optional<TextParagraphReference> selectParagraphAt(double x, double y, double epsilon) {
-        List<TextParagraphReference> paragraphs = selectParagraphsAt(x, y, epsilon);
-        return paragraphs.isEmpty() ? Optional.empty() : Optional.of(paragraphs.get(0));
-    }
-
-    public List<TextParagraphReference> selectParagraphsMatching(String pattern) {
-        Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_PARAGRAPH);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextObject(
-                typed.stream()
-                        .filter(ref -> ref.getText() != null && compiled.matcher(ref.getText()).matches())
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
 
     public List<PathReference> selectPathsAt(double x, double y) {
         Position position = new PositionBuilder().onPage(pageNumber).atCoordinates(x, y).build();
@@ -97,77 +38,6 @@ class PageClientImpl {
     public Optional<PathReference> selectPathAt(double x, double y) {
         List<PathReference> paths = selectPathsAt(x, y);
         return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
-    }
-
-    public List<TextLineReference> selectTextLinesStartingWith(String text) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextLineObject(
-                typed.stream()
-                        .filter(ref -> root.startsWithIgnoreCase(ref.getText(), text))
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    public List<TextLineReference> selectTextLinesAt(double x, double y) { return selectTextLinesAt(x, y, PDFDancer.DEFAULT_EPSILON); }
-
-    public List<TextLineReference> selectTextLines() {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextLineObject(typed);
-    }
-
-    public List<TextLineReference> selectTextLinesAt(double x, double y, double epsilon) {
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextLineObject(
-                typed.stream()
-                        .filter(ref -> root.containsPoint(ref, x, y, epsilon))
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    /**
-     * Selects a single text line at the specified coordinates with default epsilon.
-     * @return Optional containing the first text line found at the position, or empty if none found
-     */
-    public Optional<TextLineReference> selectTextLineAt(double x, double y) {
-        return selectTextLineAt(x, y, PDFDancer.DEFAULT_EPSILON);
-    }
-
-    /**
-     * Selects a single text line at the specified coordinates with custom epsilon tolerance.
-     * @return Optional containing the first text line found at the position, or empty if none found
-     */
-    public Optional<TextLineReference> selectTextLineAt(double x, double y, double epsilon) {
-        List<TextLineReference> textLines = selectTextLinesAt(x, y, epsilon);
-        return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
-    }
-
-    /**
-     * Selects all text lines on this page that match the given regex pattern.
-     * @param pattern Regular expression pattern to match against text line content
-     * @return List of text lines whose content matches the pattern
-     */
-    public List<TextLineReference> selectTextLinesMatching(String pattern) {
-        Pattern compiled = Pattern.compile(pattern, Pattern.DOTALL);
-        TypedPageSnapshot<TextTypeObjectRef> snapshot = root.getTypedPageSnapshot(pageNumber, TextTypeObjectRef.class, PDFDancer.TYPES_TEXT_LINE);
-        List<TextTypeObjectRef> typed = root.getTypedElements(snapshot, TextTypeObjectRef.class);
-        return root.toTextLineObject(
-                typed.stream()
-                        .filter(ref -> ref.getText() != null && compiled.matcher(ref.getText()).matches())
-                        .collect(Collectors.toUnmodifiableList())
-        );
-    }
-
-    /**
-     * Selects a single text line on this page that matches the given regex pattern.
-     * @param pattern Regular expression pattern to match against text line content
-     * @return Optional containing the first text line whose content matches the pattern, or empty if none found
-     */
-    public Optional<TextLineReference> selectTextLineMatching(String pattern) {
-        List<TextLineReference> textLines = selectTextLinesMatching(pattern);
-        return textLines.isEmpty() ? Optional.empty() : Optional.of(textLines.get(0));
     }
 
     public List<ImageReference> selectImages() {
@@ -319,43 +189,14 @@ class PageClientImpl {
         return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
     }
 
-    public List<TextParagraphReference> selectTextStartingWith(String text) { return this.selectParagraphsStartingWith(text); }
-
     public BezierBuilder newBezier() { return new BezierBuilder(root, pageNumber); }
 
     public PathBuilder newPath() { return new PathBuilder(root, pageNumber); }
 
     public LineBuilder newLine() { return new LineBuilder(root, pageNumber); }
 
-    /**
-     * Starts a fluent template replacement operation scoped to this page.
-     * <p>Example:
-     * <pre>{@code
-     * client.page(1).replace("{{header}}", "Page 1 Title")
-     *     .withFont("Helvetica-Bold", 18)
-     *     .apply();
-     * }</pre>
-     *
-     * @param placeholder the placeholder text to find
-     * @param text the replacement text
-     * @return a ReplaceBuilder for chaining options
-     */
-    public ReplaceBuilder replace(String placeholder, String text) {
-        return new ReplaceBuilder(root, pageNumber, placeholder, text);
-    }
-
-    /**
-     * Replaces a template placeholder with an image on this page.
-     */
-    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile) throws IOException {
-        return new ReplaceBuilder(root, pageNumber).replaceWithImage(placeholder, imageFile);
-    }
-
-    /**
-     * Replaces a template placeholder with an image at a specific size on this page.
-     */
-    public ReplaceBuilder replaceWithImage(String placeholder, File imageFile, double width, double height) throws IOException {
-        return new ReplaceBuilder(root, pageNumber).replaceWithImage(placeholder, imageFile, width, height);
+    public PageTextClient text() {
+        return new PageTextClient(root, pageNumber);
     }
 
     /**

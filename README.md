@@ -4,12 +4,12 @@
 
 # PDFDancer Java Client
 
-## PDF used to be read-only. We fixed that.
+## PDF used to be hard to automate. We fixed that.
 
-> Edit text in any real-world PDF. Even ones you didn't create.
+> Programmatically update real-world PDFs. Even ones you didn't create.
 
 PDFDancer gives you pixel-perfect programmatic control over real-world PDF documents from Java. Locate existing elements
-by coordinates or text, adjust them precisely, add brand-new content, and ship the modified PDF in memory or on disk.
+by coordinates or selectors, adjust them precisely, add brand-new content, and ship the modified PDF in memory or on disk.
 The same API surface is also available for TypeScript and Python so you can work with the same editing model from other
 languages when you need it.
 
@@ -18,8 +18,8 @@ languages when you need it.
 
 ## Highlights
 
-- Locate paragraphs, text lines, images, vector paths, form fields, and pages by index, coordinates, text prefixes, or selectors.
-- Edit existing content in place with fluent builders (`TextParagraphReference#edit`, `ParagraphBuilder`, `ImageBuilder`, `PathBuilder`).
+- Locate images, vector paths, form fields, and pages by index, coordinates, or selectors.
+- Edit existing content in place with fluent builders (`ImageBuilder`, `PathBuilder`, `LineBuilder`, `BezierBuilder`).
 - Programmatically control third-party PDFs—modify invoices, contracts, and reports you did not author.
 - Add fresh content with precise XY positioning, custom fonts (including runtime TTF uploads), and color helpers.
 - Export results as bytes for downstream processing or save directly to disk with one call.
@@ -27,11 +27,9 @@ languages when you need it.
 
 ## What Makes PDFDancer Different
 
-- **Edit text in real-world PDFs**: Work with documents from customers, governments, or vendors—not just ones you generated.
 - **Pixel-perfect positioning**: Move or add elements at exact coordinates and keep the original layout intact.
-- **Surgical text replacement**: Swap, rewrite, or restyle paragraphs without losing the rest of the page.
 - **Form manipulation**: Inspect, fill, and update AcroForm fields programmatically.
-- **Coordinate-based selection**: Select objects by position, bounding box, or text patterns.
+- **Coordinate-based selection**: Select objects by position or bounding box.
 - **Real PDF editing**: Modify the underlying PDF structure instead of merely stamping overlays.
 
 ## Installation
@@ -64,32 +62,18 @@ implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.5")
 
 ```java
 import com.pdfdancer.client.rest.PDFDancer;
-import com.pdfdancer.client.rest.TextParagraphReference;
 import com.pdfdancer.common.model.Color;
-import com.pdfdancer.common.util.StandardFonts;
 
 public class EditPdfExample {
     public static void main(String[] args) throws Exception {
 
         PDFDancer pdf = PDFDancer.createSession("input.pdf");
 
-        TextParagraphReference heading = pdf.page(0)
-                .selectParagraphsStartingWith("Executive Summary")
-                .get(0);
-
-        heading.moveTo(72, 680);
-        heading.edit()
-                .replace("Overview")
-                .font(StandardFonts.HELVETICA.getFontName(), 14)
-                .lineSpacing(1.3)
-                .color(new Color(40, 40, 40))
-                .apply();
-
-        pdf.newParagraph()
-                .text("Generated with PDFDancer")
-                .font(StandardFonts.HELVETICA.getFontName(), 12)
+        pdf.page(1).newLine()
+                .from(72, 520)
+                .to(260, 520)
                 .color(new Color(70, 70, 70))
-                .at(0, 72, 520)
+                .lineWidth(1.0)
                 .add();
 
         pdf.save("output.pdf");
@@ -101,10 +85,8 @@ public class EditPdfExample {
 
 ```java
 import com.pdfdancer.client.rest.PDFDancer;
-import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.Orientation;
 import com.pdfdancer.common.model.PageSize;
-import com.pdfdancer.common.util.StandardFonts;
 
 import java.io.File;
 import java.io.IOException;
@@ -117,22 +99,54 @@ public class CreatePdfExample {
                 Orientation.PORTRAIT,
                 1);
 
-        pdf.newParagraph()
-                .text("Quarterly Summary")
-                .font(StandardFonts.TIMES_BOLD.getFontName(), 18)
-                .color(new Color(10, 10, 80))
-                .at(0, 72, 730)
-                .add();
-
         pdf.newImage()
                 .fromFile(new File("logo.png"))
-                .at(0, 420, 710)
+                .at(1, 420, 710)
                 .add();
 
         pdf.save("summary.pdf");
     }
 }
 ```
+
+## Replace Text with an Image
+
+Image replacement uses a PDF affine transformation relative to the matched text range's visually left-most boundary
+caret. The transform maps the image's normalized unit square into PDF user-space coordinates.
+
+```java
+import com.pdfdancer.client.rest.PDFDancer;
+import com.pdfdancer.common.model.PdfAffineTransform;
+import com.pdfdancer.common.request.TextReplaceRequest;
+
+import java.io.File;
+
+PDFDancer pdf = PDFDancer.createSession(new File("input.pdf"));
+
+PdfAffineTransform placement = PdfAffineTransform.builder()
+        .scale(20, 10)
+        .translate(3, -2)
+        .build();
+
+pdf.text().replace(TextReplaceRequest.builder()
+        .literal("{{logo}}")
+        .replaceWithImage(new File("logo.png"), placement)
+        .build());
+
+pdf.save("output.pdf");
+```
+
+Builder operations affect points in invocation order. The example first maps the unit square to 20 by 10 PDF units,
+then offsets it by `(3, -2)` from the caret. The builder also supports `rotateDegrees(...)` and `shear(...)`. For exact
+coefficient-level control, use the standard PDF order:
+
+```java
+PdfAffineTransform exact = PdfAffineTransform.fromPdfMatrix(
+        new double[]{20, 0, 5, 10, 3, -2});
+```
+
+For `[a, b, c, d, e, f]`, points are mapped as `x' = a*x + c*y + e` and `y' = b*x + d*y + f`. This supplied transform
+is caret-relative; it is not the page's current transformation matrix.
 
 ## Work with Forms, Layout, and Geometry
 
@@ -165,9 +179,9 @@ public class FormExample {
 }
 ```
 
-Selectors return typed objects (`TextParagraphReference`, `TextLineReference`, `ImageReference`, `FormFieldReference`,
-`PathReference`, `PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `clearClipping()`, `edit()`, or `setValue()` depending on
-what you grabbed.
+Selectors return typed objects (`ImageReference`, `FormFieldReference`,
+`PathReference`, `PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `clearClipping()`, `setValue()`, and
+`edit()` where supported by the selected object type.
 
 ## Configuration
 
@@ -285,7 +299,7 @@ pdfdancer-client-java/
 
 - **SSL / Network errors** — confirm your `HttpClient` trusts the API endpoint or supply a custom client with the needed SSLContext.
 - **Font issues** — use `PDFDancer.findFonts("Helvetica", 12)` or upload a TTF via `pdf.registerFont(new File("MyFont.ttf"))`.
-- **Empty selections** — call `pdf.getDocumentSnapshot("PARAGRAPH")` to inspect what the server sees and validate coordinates.
+- **Empty selections** — call `pdf.getDocumentSnapshot("IMAGE,PATH")` to inspect what the server sees and validate coordinates.
 - **Large PDFs** — prefer snapshot APIs to reduce repeated network calls while iterating.
 
 ## Helpful links

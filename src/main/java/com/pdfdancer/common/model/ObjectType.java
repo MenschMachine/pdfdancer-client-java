@@ -21,10 +21,6 @@ public enum ObjectType {
      */
     TEXT_ELEMENT,
     /**
-     * Text paragraph or block element
-     */
-    PARAGRAPH,
-    /**
      * Embedded image or graphics element
      */
     IMAGE,

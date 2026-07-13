@@ -28,9 +28,9 @@ class PdfDancerHttpClientTest {
         CapturingHttpClient delegate = new CapturingHttpClient();
         PdfDancerHttpClient client = PdfDancerHttpClient.create(delegate, URI.create("https://example.test"));
 
-        client.toBlocking().retrieve(HttpRequest.GET("/pdf/find?types=TEXT_LINE"), String.class);
+        client.toBlocking().retrieve(HttpRequest.GET("/pdf/find?types=IMAGE"), String.class);
 
-        assertEquals(URI.create("https://example.test/v2/pdf/find?types=TEXT_LINE"), delegate.lastRequest.uri());
+        assertEquals(URI.create("https://example.test/v2/pdf/find?types=IMAGE"), delegate.lastRequest.uri());
         assertEquals(Optional.of("2"), delegate.lastRequest.headers().firstValue("X-API-VERSION"));
     }
 
