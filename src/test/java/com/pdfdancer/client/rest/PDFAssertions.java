@@ -7,10 +7,13 @@ import com.pdfdancer.common.model.PageRef;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.TextPosition;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -273,6 +276,57 @@ public class PDFAssertions {
         assertEquals(expectedCount, countOccurrences(extractPdfText(page, page), text),
                 String.format("Expected saved PDF page %d text to contain '%s' %d times", page, text, expectedCount));
         return this;
+    }
+
+    public PDFAssertions assertPdfTextUsesFont(String text, String expectedFontName, int page) {
+        try (PDDocument document = Loader.loadPDF(savedPdfFile)) {
+            TextFontCollector collector = new TextFontCollector();
+            collector.setStartPage(page);
+            collector.setEndPage(page);
+            collector.getText(document);
+
+            int occurrence = collector.text.indexOf(text);
+            assertTrue(occurrence >= 0,
+                    String.format("Expected saved PDF page %d to contain '%s'", page, text));
+
+            Set<String> actualFontNames = new LinkedHashSet<>();
+            for (int i = occurrence; i < occurrence + text.length(); i++) {
+                if (!Character.isWhitespace(collector.text.charAt(i))) {
+                    actualFontNames.add(removeSubsetPrefix(collector.fontNames.get(i)));
+                }
+            }
+            assertEquals(Set.of(expectedFontName), actualFontNames,
+                    String.format("Fonts used by '%s' on saved PDF page %d", text, page));
+            return this;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to inspect text fonts in saved PDF", e);
+        }
+    }
+
+    private static String removeSubsetPrefix(String fontName) {
+        return fontName != null && fontName.matches("^[A-Z]{6}\\+.+")
+                ? fontName.substring(7)
+                : fontName;
+    }
+
+    private static final class TextFontCollector extends PDFTextStripper {
+        private final StringBuilder text = new StringBuilder();
+        private final List<String> fontNames = new java.util.ArrayList<>();
+
+        private TextFontCollector() throws IOException {
+        }
+
+        @Override
+        protected void writeString(String value, List<TextPosition> positions) {
+            for (TextPosition position : positions) {
+                String unicode = position.getUnicode();
+                String fontName = position.getFont().getName();
+                text.append(unicode);
+                for (int i = 0; i < unicode.length(); i++) {
+                    fontNames.add(fontName);
+                }
+            }
+        }
     }
 
     private String extractPdfText() {
