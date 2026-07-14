@@ -21,6 +21,8 @@ public final class TextReplaceRequest {
     private final String replaceWith;
     @JsonProperty("replaceWithImage")
     private final TextReplacementImageRequest replaceWithImage;
+    @JsonProperty("style")
+    private final TextStyleSetRequest style;
     @JsonProperty("layout")
     private final TextLayoutRequest layout;
 
@@ -29,19 +31,29 @@ public final class TextReplaceRequest {
                               @JsonProperty("select") TextSelectorRequest select,
                               @JsonProperty("replaceWith") String replaceWith,
                               @JsonProperty("replaceWithImage") TextReplacementImageRequest replaceWithImage,
+                              @JsonProperty("style") TextStyleSetRequest style,
                               @JsonProperty("layout") TextLayoutRequest layout) {
         this.pages = pages == null ? null : List.copyOf(pages);
         this.select = select;
         this.replaceWith = replaceWith;
         this.replaceWithImage = replaceWithImage;
+        this.style = style;
         this.layout = layout;
     }
 
     public TextReplaceRequest(List<Integer> pages,
                               TextSelectorRequest select,
                               String replaceWith,
+                              TextReplacementImageRequest replaceWithImage,
                               TextLayoutRequest layout) {
-        this(pages, select, replaceWith, null, layout);
+        this(pages, select, replaceWith, replaceWithImage, null, layout);
+    }
+
+    public TextReplaceRequest(List<Integer> pages,
+                              TextSelectorRequest select,
+                              String replaceWith,
+                              TextLayoutRequest layout) {
+        this(pages, select, replaceWith, null, null, layout);
     }
 
     public static Builder literal(String text, String replaceWith) {
@@ -60,10 +72,11 @@ public final class TextReplaceRequest {
     public TextSelectorRequest select() { return select; }
     public String replaceWith() { return replaceWith; }
     public TextReplacementImageRequest replaceWithImage() { return replaceWithImage; }
+    public TextStyleSetRequest style() { return style; }
     public TextLayoutRequest layout() { return layout; }
 
     public TextReplaceRequest withPages(List<Integer> pages) {
-        return new TextReplaceRequest(pages, select, replaceWith, replaceWithImage, layout);
+        return new TextReplaceRequest(pages, select, replaceWith, replaceWithImage, style, layout);
     }
 
     public TextReplaceRequest validated() {
@@ -73,6 +86,9 @@ public final class TextReplaceRequest {
             throw new IllegalArgumentException("Exactly one of replaceWith or replaceWithImage is required");
         }
         if (replaceWithImage != null) {
+            if (style != null) {
+                throw new IllegalArgumentException("style is not valid with replaceWithImage");
+            }
             byte[] data = replaceWithImage.data();
             if (data == null || data.length == 0) {
                 throw new IllegalArgumentException("replaceWithImage image data is required and must not be empty");
@@ -84,6 +100,9 @@ public final class TextReplaceRequest {
                     && layout.mode() != TextLayoutRequest.Mode.sourceAnchored) {
                 throw new IllegalArgumentException("replaceWithImage supports only sourceAnchored layout");
             }
+        }
+        if (style != null) {
+            style.validated();
         }
         validateLayout(layout);
         return this;
@@ -144,12 +163,13 @@ public final class TextReplaceRequest {
                 Objects.equals(select, that.select) &&
                 Objects.equals(replaceWith, that.replaceWith) &&
                 Objects.equals(replaceWithImage, that.replaceWithImage) &&
+                Objects.equals(style, that.style) &&
                 Objects.equals(layout, that.layout);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pages, select, replaceWith, replaceWithImage, layout);
+        return Objects.hash(pages, select, replaceWith, replaceWithImage, style, layout);
     }
 
     @Override
@@ -159,6 +179,7 @@ public final class TextReplaceRequest {
                 "select=" + select + ", " +
                 "replaceWith=" + replaceWith + ", " +
                 "replaceWithImage=" + replaceWithImage + ", " +
+                "style=" + style + ", " +
                 "layout=" + layout + ']';
     }
 
@@ -171,6 +192,8 @@ public final class TextReplaceRequest {
         private Integer maxMatches;
         private String replaceWith;
         private TextReplacementImageRequest replaceWithImage;
+        private TextStyleSetRequest style;
+        private TextStyleSetRequest.Builder styleBuilder;
         private TextLayoutRequest layout;
 
         private Builder() {
@@ -216,6 +239,47 @@ public final class TextReplaceRequest {
             return replaceWithImage(Image.fromFile(imageFile), transformation);
         }
 
+        public Builder style(TextStyleSetRequest style) {
+            this.style = style;
+            this.styleBuilder = null;
+            return this;
+        }
+
+        public Builder font(String font) {
+            styleBuilder().font(font);
+            return this;
+        }
+
+        public Builder size(double size) {
+            styleBuilder().size(size);
+            return this;
+        }
+
+        public Builder fillColor(PdfColorRequest fillColor) {
+            styleBuilder().fillColor(fillColor);
+            return this;
+        }
+
+        public Builder strokeColor(PdfColorRequest strokeColor) {
+            styleBuilder().strokeColor(strokeColor);
+            return this;
+        }
+
+        public Builder characterSpacing(double characterSpacing) {
+            styleBuilder().characterSpacing(characterSpacing);
+            return this;
+        }
+
+        public Builder wordSpacing(double wordSpacing) {
+            styleBuilder().wordSpacing(wordSpacing);
+            return this;
+        }
+
+        public Builder resetSpacingOverrides() {
+            styleBuilder().resetSpacingOverrides();
+            return this;
+        }
+
         public Builder caseSensitive(boolean caseSensitive) {
             this.caseSensitive = caseSensitive;
             return this;
@@ -253,7 +317,16 @@ public final class TextReplaceRequest {
 
         public TextReplaceRequest build() {
             TextSelectorRequest selector = new TextSelectorRequest(literal, regex, caseSensitive, wholeWords, maxMatches);
-            return new TextReplaceRequest(pages, selector, replaceWith, replaceWithImage, layout).validated();
+            TextStyleSetRequest replacementStyle = styleBuilder == null ? style : styleBuilder.build();
+            return new TextReplaceRequest(
+                    pages, selector, replaceWith, replaceWithImage, replacementStyle, layout).validated();
+        }
+
+        private TextStyleSetRequest.Builder styleBuilder() {
+            if (styleBuilder == null) {
+                styleBuilder = TextStyleSetRequest.Builder.from(style);
+            }
+            return styleBuilder;
         }
     }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TextReplaceRequestTest {
@@ -59,6 +60,71 @@ class TextReplaceRequestTest {
 
         assertEquals("requireReflow", json.at("/layout/mode").asText());
         assertEquals("bodyText", json.at("/layout/profile").asText());
+    }
+
+    @Test
+    void serializesAndDeserializesEveryAtomicStyleOverride() throws Exception {
+        TextReplaceRequest request = TextReplaceRequest.literal("token", "replacement")
+                .font("Helvetica-Bold")
+                .size(17)
+                .fillColor(PdfColorRequest.rgb(0.1, 0.2, 0.3))
+                .strokeColor(PdfColorRequest.gray(0.4))
+                .characterSpacing(0.25)
+                .wordSpacing(1.5)
+                .build();
+
+        JsonNode json = mapper.valueToTree(request);
+
+        assertEquals("Helvetica-Bold", json.at("/style/font").asText());
+        assertEquals(17.0, json.at("/style/size").asDouble());
+        assertEquals("rgb", json.at("/style/fillColor/space").asText());
+        assertEquals(0.2, json.at("/style/fillColor/components/1").asDouble());
+        assertEquals("gray", json.at("/style/strokeColor/space").asText());
+        assertEquals(0.25, json.at("/style/characterSpacing").asDouble());
+        assertEquals(1.5, json.at("/style/wordSpacing").asDouble());
+
+        TextReplaceRequest decoded = mapper.treeToValue(json, TextReplaceRequest.class).validated();
+        assertEquals(request, decoded);
+    }
+
+    @Test
+    void serializesResetSpacingOverrides() {
+        TextReplaceRequest request = TextReplaceRequest.literal("token", "replacement")
+                .resetSpacingOverrides()
+                .build();
+
+        JsonNode json = mapper.valueToTree(request);
+
+        assertEquals(true, json.at("/style/resetSpacingOverrides").asBoolean());
+    }
+
+    @Test
+    void fluentStyleMethodsMergeAndLaterStyleReplacesAccumulatedStyle() {
+        TextStyleSetRequest supplied = TextStyleSetRequest.builder()
+                .font("Helvetica")
+                .size(11)
+                .build();
+
+        TextReplaceRequest merged = TextReplaceRequest.literal("token", "replacement")
+                .style(supplied)
+                .font("Helvetica-Bold")
+                .build();
+        assertEquals("Helvetica-Bold", merged.style().font());
+        assertEquals(11.0, merged.style().size());
+
+        TextReplaceRequest replaced = TextReplaceRequest.literal("token", "replacement")
+                .font("Courier")
+                .style(supplied)
+                .build();
+        assertEquals(supplied, replaced.style());
+    }
+
+    @Test
+    void unstyledReplacementOmitsStyle() {
+        TextReplaceRequest request = TextReplaceRequest.literal("token", "replacement").build();
+
+        assertNull(request.style());
+        assertEquals(true, mapper.valueToTree(request).at("/style").isMissingNode());
     }
 
     @Test
@@ -132,6 +198,34 @@ class TextReplaceRequestTest {
                 .literal("token")
                 .replaceWithImage(image, identity)
                 .reflowWhenSupported(TextLayoutRequest.Profile.DEFAULT)
+                .build());
+        assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
+                .literal("token")
+                .replaceWithImage(image, identity)
+                .font("Helvetica")
+                .build());
+    }
+
+    @Test
+    void validatesAtomicStyleOverrides() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new TextStyleSetRequest(null, null, null, null, null, null, null).validated());
+        assertThrows(IllegalArgumentException.class, () ->
+                new TextStyleSetRequest(null, null, null, null, null, null, false).validated());
+        assertThrows(IllegalArgumentException.class, () -> TextStyleSetRequest.builder().font(" ").build());
+        assertThrows(IllegalArgumentException.class, () -> TextStyleSetRequest.builder().size(0).build());
+        assertThrows(IllegalArgumentException.class, () -> TextStyleSetRequest.builder().size(Double.NaN).build());
+        assertThrows(IllegalArgumentException.class, () ->
+                TextStyleSetRequest.builder().characterSpacing(Double.POSITIVE_INFINITY).build());
+        assertThrows(IllegalArgumentException.class, () ->
+                TextStyleSetRequest.builder().wordSpacing(Double.NEGATIVE_INFINITY).build());
+        assertThrows(IllegalArgumentException.class, () -> TextStyleSetRequest.builder()
+                .characterSpacing(0.25)
+                .resetSpacingOverrides()
+                .build());
+        assertThrows(IllegalArgumentException.class, () -> TextStyleSetRequest.builder()
+                .wordSpacing(1.5)
+                .resetSpacingOverrides()
                 .build());
     }
 

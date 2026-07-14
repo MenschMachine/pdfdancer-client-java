@@ -45,6 +45,14 @@ tasks.test {
     failFast = true
 }
 
+tasks.register<JavaExec>("generateSyntheticTextReplacementFixture") {
+    group = "verification"
+    description = "Regenerates the committed synthetic text-replacement PDF fixture"
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("com.pdfdancer.client.rest.fixtures.SyntheticTextReplacementFixtureGenerator")
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(17)

@@ -109,6 +109,27 @@ public class CreatePdfExample {
 }
 ```
 
+## Replace Text with Atomic Style Overrides
+
+Replacement text can override selected style properties in the same operation. Omitted style properties continue to
+use the corresponding source-text style.
+
+```java
+import com.pdfdancer.common.request.PdfColorRequest;
+import com.pdfdancer.common.request.TextReplaceRequest;
+
+pdf.text().replace(TextReplaceRequest.literal("{{company_name}}", "Globex Ltd")
+        .font("Helvetica-Bold")
+        .size(17)
+        .fillColor(PdfColorRequest.rgb(0.1, 0.2, 0.3))
+        .sourceAnchored()
+        .build());
+```
+
+The replacement builder also supports `strokeColor(...)`, `characterSpacing(...)`, `wordSpacing(...)`, and
+`resetSpacingOverrides()`. Atomic style overrides apply only to text replacements and cannot be combined with
+`replaceWithImage(...)`.
+
 ## Replace Text with an Image
 
 Image replacement uses a PDF affine transformation relative to the matched text range's visually left-most boundary

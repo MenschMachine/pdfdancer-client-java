@@ -1,6 +1,6 @@
 # PDFDancer Java SDK vs Local Swagger Capabilities
 
-Generated: 2026-07-09  
+Generated: 2026-07-14<br>
 Swagger UI: `http://localhost:8080/swagger-ui`  
 Primary OpenAPI document: `http://localhost:8080/swagger/pdfdancer-api-0.1.3-2.yml`  
 Secondary OpenAPI document inspected: `http://localhost:8080/swagger/pdfdancer-api-0.1.3-internal-2.yml`  
@@ -8,7 +8,7 @@ SDK version source: `version.properties` currently reports `DEV`
 
 ## Summary
 
-The Java SDK covers the main session lifecycle, object selection, snapshots, page add/delete/move, images, paths, path groups, form-field value changes, clipping, text replace/delete, font lookup by name, font registration, and anonymous token creation.
+The Java SDK covers the main session lifecycle, object selection, snapshots, page add/delete/move, images, paths, path groups, form-field value changes, clipping, text replace/delete/insert/style, atomic replacement-style overrides, font lookup by name, font registration, and anonymous token creation.
 
 The largest public API gaps are:
 
@@ -83,7 +83,7 @@ Coverage labels:
 
 | Swagger operation | SDK status | SDK surface |
 |---|---:|---|
-| `POST /pdf/text/replace` | Covered | `PDFDancer.text().replace(...)`, `PDFDancer.page(n).text().replace(...)`; supports text and caret-relative bitmap replacement with `PdfAffineTransform` |
+| `POST /pdf/text/replace` | Covered | `PDFDancer.text().replace(...)`, `PDFDancer.page(n).text().replace(...)`; supports text replacement, caret-relative bitmap replacement with `PdfAffineTransform`, and atomic replacement-text `style` overrides through `TextStyleSetRequest` or fluent builder methods |
 | `POST /pdf/text/delete` | Covered | `PDFDancer.text().delete(...)`, `PDFDancer.page(n).text().delete(...)` |
 | `POST /pdf/text/insert` | Covered | `PDFDancer.text().insert(...)`, `PDFDancer.page(n).text().insert(...)`; supports anchor insertion with optional `style.patch` overrides and coordinate insertion with complete style patch |
 | `POST /pdf/text/style` | Partial | `PDFDancer.text().style(...)`, `PDFDancer.page(n).text().style(...)`; supports literal/regex selectors, `runs.where` non-id filters, and all style patch fields, but not `range`, `lineRange`, `runs.all`, or hidden-id run filters |
@@ -158,6 +158,7 @@ Missing public OpenAPI DTO families in the Java SDK:
 
 Current alignment:
 
+- `TextReplaceRequest` matches the public replacement contract, including `style.font`, `size`, fill/stroke colors, character/word spacing, and `resetSpacingOverrides`; styled bitmap replacement is rejected as required by the API.
 - The SDK still uses Java-specific convenience objects and builders rather than generated OpenAPI types for several covered operations.
 
 ## SDK-Only Convenience Surface

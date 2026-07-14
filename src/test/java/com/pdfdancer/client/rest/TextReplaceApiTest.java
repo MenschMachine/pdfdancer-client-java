@@ -70,6 +70,30 @@ class TextReplaceApiTest {
     }
 
     @Test
+    void documentReplacePostsAtomicStyleOverrides() throws Exception {
+        CapturingHttpClient delegate = new CapturingHttpClient();
+        PdfDancerHttpClient client = PdfDancerHttpClient.create(delegate, URI.create("https://example.test"));
+        PDFDancer pdf = PDFDancer.createSession("token", new byte[]{1, 2, 3}, client);
+
+        pdf.text().replace(TextReplaceRequest.literal("Acme", "Globex")
+                .font("Helvetica-Bold")
+                .size(17)
+                .fillColor(PdfColorRequest.rgb(0.1, 0.2, 0.3))
+                .strokeColor(PdfColorRequest.gray(0.4))
+                .characterSpacing(0.25)
+                .wordSpacing(1.5)
+                .build());
+
+        JsonNode json = mapper.readTree(delegate.lastBody);
+        assertEquals("Helvetica-Bold", json.at("/style/font").asText());
+        assertEquals(17.0, json.at("/style/size").asDouble());
+        assertEquals("rgb", json.at("/style/fillColor/space").asText());
+        assertEquals("gray", json.at("/style/strokeColor/space").asText());
+        assertEquals(0.25, json.at("/style/characterSpacing").asDouble());
+        assertEquals(1.5, json.at("/style/wordSpacing").asDouble());
+    }
+
+    @Test
     void documentImageReplacePostsCaretRelativePdfMatrix() throws Exception {
         CapturingHttpClient delegate = new CapturingHttpClient();
         PdfDancerHttpClient client = PdfDancerHttpClient.create(delegate, URI.create("https://example.test"));

@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -199,9 +200,18 @@ class TextReplaceE2ETest extends BaseTest {
                 .size(12)
                 .build());
 
-        PdfDancerClientException ex = assertThrows(PdfDancerClientException.class, () ->
-                pdf.text().replace(TextReplaceRequest.literal("Before we begin", "\uF020").build()));
-        assertTrue(ex.getMessage().contains("No glyph for U+F020"));
+        TextEditResponse response = pdf.text().replace(
+                TextReplaceRequest.literal("Before we begin", "\uF020").build());
+
+        assertEquals(1, response.matched());
+        assertEquals(0, response.changed());
+        assertEquals(1, response.errors().size());
+        assertEquals("TEXT_REPLACE_FAILED", response.errors().get(0).code());
+        assertTrue(response.errors().get(0).message()
+                .startsWith("No decoded replacement font can roundtrip text:"));
+        new PDFAssertions(pdf)
+                .assertPdfTextContains("Before we begin")
+                .assertPdfTextDoesNotContain("\uF020");
     }
 
     @Test
@@ -235,8 +245,21 @@ class TextReplaceE2ETest extends BaseTest {
 
         assertEquals(2, response.matched());
         assertEquals(2, response.changed());
-        assertTrue(response.warnings().isEmpty(), response.warnings().toString());
-        assertTrue(response.errors().isEmpty(), response.warnings().toString());
+        assertEquals(2, response.warnings().size());
+        assertTrue(response.warnings().stream()
+                .allMatch(warning -> "TEXT_EDIT_WARNING".equals(warning.code())));
+        assertEquals(Set.of(
+                        "Replacement font Asimovian-Regular used for replacement text 'Context'; " +
+                                "source font was Poppins-ExtraLight",
+                        "Replacement font Asimovian-Regular used for replacement text 'Context'; " +
+                                "source font was Poppins-SemiBold"),
+                response.warnings().stream()
+                        .map(warning -> warning.message()
+                                .replaceFirst("source font was [A-Z]{6}\\+", "source font was "))
+                        .collect(java.util.stream.Collectors.toSet()));
+        assertTrue(response.errors().isEmpty(), response.errors().stream()
+                .map(error -> error.code() + ": " + error.message())
+                .toList().toString());
         // Visually, both "Assumptions" headings should read "Context" and the surrounding body layout should remain readable.
         new PDFAssertions(pdf)
                 .assertPdfTextOccurrenceCount("Assumptions", 0)
