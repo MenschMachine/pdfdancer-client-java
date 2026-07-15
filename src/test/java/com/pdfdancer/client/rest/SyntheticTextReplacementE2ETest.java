@@ -53,6 +53,9 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
                             ? null
                             : replacement.layout().profile().value(),
                     response.change().get(0).requestedLayoutProfile());
+            assertEquals(
+                    replacement.expectedEffectiveHyphenationEnabled(),
+                    response.change().get(0).effectiveHyphenationEnabled());
             if (replacement.layout().mode() == TextLayoutRequest.Mode.requireReflow) {
                 assertEquals("REFLOWED", response.change().get(0).appliedLayoutMode());
                 assertTrue(response.errors().isEmpty(),
@@ -181,25 +184,31 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
                         "Blue River Analytics employee",
                         "Blue River Analytics employee",
                         "Roboto-Regular",
-                        TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)),
+                        TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                                .withHyphenationEnabled(true),
+                        true),
                 new ReplacementCase(
                         "{{organization_name}} members use the synthetic program",
                         "Blue River Analytics members use the expanded synthetic benefits and support program",
                         "expanded",
                         "SourceSans3-Regular",
-                        TextLayoutRequest.requireReflow(TextLayoutRequest.Profile.BODY_TEXT)),
+                        TextLayoutRequest.requireReflow(TextLayoutRequest.Profile.BODY_TEXT)
+                                .withHyphenationEnabled(false),
+                        false),
                 new ReplacementCase(
                         "{{support_phone}}",
                         "+1 202 555 0147",
                         "+1 202 555 0147",
                         "JetBrainsMono-Regular",
-                        TextLayoutRequest.sourceAnchored()),
+                        TextLayoutRequest.sourceAnchored(),
+                        false),
                 new ReplacementCase(
                         "{{campaign_code}}",
                         "ORBIT-7",
                         "ORBIT-7",
                         "DancingScript-Regular",
-                        TextLayoutRequest.sourceAnchored()));
+                        TextLayoutRequest.sourceAnchored(),
+                        false));
     }
 
     private record ReplacementCase(
@@ -207,6 +216,7 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
             String replacementText,
             String fontAssertionText,
             String expectedFontName,
-            TextLayoutRequest layout) {
+            TextLayoutRequest layout,
+            boolean expectedEffectiveHyphenationEnabled) {
     }
 }

@@ -21,6 +21,8 @@ public final class TextEditChangeDiagnostic {
     private final String requestedLayoutMode;
     @JsonProperty("requestedLayoutProfile")
     private final String requestedLayoutProfile;
+    @JsonProperty("effectiveHyphenationEnabled")
+    private final boolean effectiveHyphenationEnabled;
     @JsonProperty("appliedLayoutMode")
     private final String appliedLayoutMode;
     @JsonProperty("elementIds")
@@ -37,6 +39,7 @@ public final class TextEditChangeDiagnostic {
                                     @JsonProperty("resultText") String resultText,
                                     @JsonProperty("requestedLayoutMode") String requestedLayoutMode,
                                     @JsonProperty("requestedLayoutProfile") String requestedLayoutProfile,
+                                    @JsonProperty("effectiveHyphenationEnabled") Boolean effectiveHyphenationEnabled,
                                     @JsonProperty("appliedLayoutMode") String appliedLayoutMode,
                                     @JsonProperty("elementIds") List<String> elementIds,
                                     @JsonProperty("generatedElementIds") List<String> generatedElementIds,
@@ -47,10 +50,25 @@ public final class TextEditChangeDiagnostic {
         this.resultText = resultText;
         this.requestedLayoutMode = requestedLayoutMode;
         this.requestedLayoutProfile = requestedLayoutProfile;
+        this.effectiveHyphenationEnabled = Boolean.TRUE.equals(effectiveHyphenationEnabled);
         this.appliedLayoutMode = appliedLayoutMode;
         this.elementIds = elementIds == null ? null : List.copyOf(elementIds);
         this.generatedElementIds = generatedElementIds == null ? null : List.copyOf(generatedElementIds);
         this.reflowUnitIds = reflowUnitIds == null ? null : List.copyOf(reflowUnitIds);
+    }
+
+    public TextEditChangeDiagnostic(Integer page,
+                                    String operation,
+                                    String sourceText,
+                                    String resultText,
+                                    String requestedLayoutMode,
+                                    String requestedLayoutProfile,
+                                    String appliedLayoutMode,
+                                    List<String> elementIds,
+                                    List<String> generatedElementIds,
+                                    List<String> reflowUnitIds) {
+        this(page, operation, sourceText, resultText, requestedLayoutMode, requestedLayoutProfile,
+                false, appliedLayoutMode, elementIds, generatedElementIds, reflowUnitIds);
     }
 
     public TextEditChangeDiagnostic(Integer page,
@@ -72,6 +90,7 @@ public final class TextEditChangeDiagnostic {
     public String resultText() { return resultText; }
     public String requestedLayoutMode() { return requestedLayoutMode; }
     public String requestedLayoutProfile() { return requestedLayoutProfile; }
+    public boolean effectiveHyphenationEnabled() { return effectiveHyphenationEnabled; }
     public String appliedLayoutMode() { return appliedLayoutMode; }
     public List<String> elementIds() { return elementIds; }
     public List<String> generatedElementIds() { return generatedElementIds; }
@@ -88,6 +107,7 @@ public final class TextEditChangeDiagnostic {
                 Objects.equals(resultText, that.resultText) &&
                 Objects.equals(requestedLayoutMode, that.requestedLayoutMode) &&
                 Objects.equals(requestedLayoutProfile, that.requestedLayoutProfile) &&
+                effectiveHyphenationEnabled == that.effectiveHyphenationEnabled &&
                 Objects.equals(appliedLayoutMode, that.appliedLayoutMode) &&
                 Objects.equals(elementIds, that.elementIds) &&
                 Objects.equals(generatedElementIds, that.generatedElementIds) &&
@@ -97,6 +117,7 @@ public final class TextEditChangeDiagnostic {
     @Override
     public int hashCode() {
         return Objects.hash(page, operation, sourceText, resultText, requestedLayoutMode,
-                requestedLayoutProfile, appliedLayoutMode, elementIds, generatedElementIds, reflowUnitIds);
+                requestedLayoutProfile, effectiveHyphenationEnabled, appliedLayoutMode,
+                elementIds, generatedElementIds, reflowUnitIds);
     }
 }

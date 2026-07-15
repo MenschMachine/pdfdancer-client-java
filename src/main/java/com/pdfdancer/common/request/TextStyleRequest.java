@@ -220,6 +220,7 @@ public final class TextStyleRequest {
         private Double wordSpacing;
         private Boolean resetSpacingOverrides;
         private TextLayoutRequest layout;
+        private Boolean hyphenationEnabled;
 
         private Builder() {
         }
@@ -373,6 +374,7 @@ public final class TextStyleRequest {
 
         public Builder sourceAnchored() {
             this.layout = TextLayoutRequest.sourceAnchored();
+            this.hyphenationEnabled = null;
             return this;
         }
 
@@ -386,8 +388,14 @@ public final class TextStyleRequest {
             return this;
         }
 
+        public Builder hyphenationEnabled(boolean enabled) {
+            this.hyphenationEnabled = enabled;
+            return this;
+        }
+
         public Builder layout(TextLayoutRequest layout) {
             this.layout = layout;
+            this.hyphenationEnabled = layout == null ? null : layout.hyphenationEnabled();
             return this;
         }
 
@@ -407,7 +415,16 @@ public final class TextStyleRequest {
                             maxMatches))
                     : new TextStyleSelectorRequest(literal, regex, caseSensitive, wholeWords, maxMatches, null);
             Style style = new Style(font, size, fillColor, strokeColor, characterSpacing, wordSpacing, resetSpacingOverrides);
-            return new TextStyleRequest(pages, selector, style, layout).validated();
+            return new TextStyleRequest(pages, selector, style, resolvedLayout()).validated();
+        }
+
+        private TextLayoutRequest resolvedLayout() {
+            if (layout == null) {
+                return hyphenationEnabled == null
+                        ? null
+                        : new TextLayoutRequest(null, null, hyphenationEnabled);
+            }
+            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
         }
     }
 }

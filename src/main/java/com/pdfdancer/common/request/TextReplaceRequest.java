@@ -140,17 +140,24 @@ public final class TextReplaceRequest {
     }
 
     static void validateLayout(TextLayoutRequest layout) {
-        if (layout == null || layout.mode() == null) {
+        if (layout == null) {
             return;
         }
-        if (layout.mode() == TextLayoutRequest.Mode.sourceAnchored && layout.profile() != null) {
+        TextLayoutRequest.Mode mode = layout.mode() == null
+                ? TextLayoutRequest.Mode.sourceAnchored
+                : layout.mode();
+        if (mode == TextLayoutRequest.Mode.sourceAnchored && layout.profile() != null) {
             throw new IllegalArgumentException("sourceAnchored layout must not specify profile");
         }
-        if ((layout.mode() == TextLayoutRequest.Mode.reflowWhenSupported
-                || layout.mode() == TextLayoutRequest.Mode.requireReflow)
+        if (mode == TextLayoutRequest.Mode.sourceAnchored && layout.hyphenationEnabled() != null) {
+            throw new IllegalArgumentException(
+                    "layout.hyphenationEnabled is not valid when layout.mode is sourceAnchored");
+        }
+        if ((mode == TextLayoutRequest.Mode.reflowWhenSupported
+                || mode == TextLayoutRequest.Mode.requireReflow)
                 && layout.profile() == null) {
             throw new IllegalArgumentException(
-                    layout.mode() + " profile must be one of default, bodyText, noReflow");
+                    mode + " profile must be one of default, bodyText, noReflow");
         }
     }
 
@@ -195,6 +202,7 @@ public final class TextReplaceRequest {
         private TextStyleSetRequest style;
         private TextStyleSetRequest.Builder styleBuilder;
         private TextLayoutRequest layout;
+        private Boolean hyphenationEnabled;
 
         private Builder() {
         }
@@ -297,6 +305,7 @@ public final class TextReplaceRequest {
 
         public Builder sourceAnchored() {
             this.layout = TextLayoutRequest.sourceAnchored();
+            this.hyphenationEnabled = null;
             return this;
         }
 
@@ -310,8 +319,14 @@ public final class TextReplaceRequest {
             return this;
         }
 
+        public Builder hyphenationEnabled(boolean enabled) {
+            this.hyphenationEnabled = enabled;
+            return this;
+        }
+
         public Builder layout(TextLayoutRequest layout) {
             this.layout = layout;
+            this.hyphenationEnabled = layout == null ? null : layout.hyphenationEnabled();
             return this;
         }
 
@@ -319,7 +334,16 @@ public final class TextReplaceRequest {
             TextSelectorRequest selector = new TextSelectorRequest(literal, regex, caseSensitive, wholeWords, maxMatches);
             TextStyleSetRequest replacementStyle = styleBuilder == null ? style : styleBuilder.build();
             return new TextReplaceRequest(
-                    pages, selector, replaceWith, replaceWithImage, replacementStyle, layout).validated();
+                    pages, selector, replaceWith, replaceWithImage, replacementStyle, resolvedLayout()).validated();
+        }
+
+        private TextLayoutRequest resolvedLayout() {
+            if (layout == null) {
+                return hyphenationEnabled == null
+                        ? null
+                        : new TextLayoutRequest(null, null, hyphenationEnabled);
+            }
+            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
         }
 
         private TextStyleSetRequest.Builder styleBuilder() {

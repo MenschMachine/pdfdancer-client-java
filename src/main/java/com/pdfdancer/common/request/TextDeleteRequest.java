@@ -83,6 +83,7 @@ public final class TextDeleteRequest {
         private Boolean wholeWords;
         private Integer maxMatches;
         private TextLayoutRequest layout;
+        private Boolean hyphenationEnabled;
 
         private Builder() {
         }
@@ -126,6 +127,7 @@ public final class TextDeleteRequest {
 
         public Builder sourceAnchored() {
             this.layout = TextLayoutRequest.sourceAnchored();
+            this.hyphenationEnabled = null;
             return this;
         }
 
@@ -139,14 +141,29 @@ public final class TextDeleteRequest {
             return this;
         }
 
+        public Builder hyphenationEnabled(boolean enabled) {
+            this.hyphenationEnabled = enabled;
+            return this;
+        }
+
         public Builder layout(TextLayoutRequest layout) {
             this.layout = layout;
+            this.hyphenationEnabled = layout == null ? null : layout.hyphenationEnabled();
             return this;
         }
 
         public TextDeleteRequest build() {
             TextSelectorRequest selector = new TextSelectorRequest(literal, regex, caseSensitive, wholeWords, maxMatches);
-            return new TextDeleteRequest(pages, selector, layout).validated();
+            return new TextDeleteRequest(pages, selector, resolvedLayout()).validated();
+        }
+
+        private TextLayoutRequest resolvedLayout() {
+            if (layout == null) {
+                return hyphenationEnabled == null
+                        ? null
+                        : new TextLayoutRequest(null, null, hyphenationEnabled);
+            }
+            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
         }
     }
 }

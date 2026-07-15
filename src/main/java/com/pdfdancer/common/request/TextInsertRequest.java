@@ -403,6 +403,7 @@ public final class TextInsertRequest {
         private TextStylePatchRequest stylePatch;
         private TextStylePatchRequest.Builder stylePatchBuilder;
         private TextLayoutRequest layout;
+        private Boolean hyphenationEnabled;
 
         private Builder() {
         }
@@ -527,6 +528,7 @@ public final class TextInsertRequest {
 
         public Builder sourceAnchored() {
             this.layout = TextLayoutRequest.sourceAnchored();
+            this.hyphenationEnabled = null;
             return this;
         }
 
@@ -540,8 +542,14 @@ public final class TextInsertRequest {
             return this;
         }
 
+        public Builder hyphenationEnabled(boolean enabled) {
+            this.hyphenationEnabled = enabled;
+            return this;
+        }
+
         public Builder layout(TextLayoutRequest layout) {
             this.layout = layout;
+            this.hyphenationEnabled = layout == null ? null : layout.hyphenationEnabled();
             return this;
         }
 
@@ -558,7 +566,17 @@ public final class TextInsertRequest {
                 target = new Target(anchor);
                 insertStyle = Style.anchor(patch);
             }
-            return new TextInsertRequest(target, insert, insertStyle, layout).validated(coordinateTarget && coordinatePage == null);
+            return new TextInsertRequest(target, insert, insertStyle, resolvedLayout())
+                    .validated(coordinateTarget && coordinatePage == null);
+        }
+
+        private TextLayoutRequest resolvedLayout() {
+            if (layout == null) {
+                return hyphenationEnabled == null
+                        ? null
+                        : new TextLayoutRequest(null, null, hyphenationEnabled);
+            }
+            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
         }
 
         private TextStylePatchRequest.Builder stylePatchBuilder() {

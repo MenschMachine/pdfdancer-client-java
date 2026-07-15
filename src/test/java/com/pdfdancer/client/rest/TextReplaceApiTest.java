@@ -47,6 +47,7 @@ class TextReplaceApiTest {
 
         assertEquals(2, response.matched());
         assertEquals(1, response.changed());
+        assertEquals(false, response.change().get(0).effectiveHyphenationEnabled());
         assertEquals(URI.create("https://example.test/v2/pdf/text/replace"), delegate.lastRequest.uri());
         assertEquals(Optional.of("token"), delegate.lastRequest.headers().firstValue("Authorization").map(v -> v.replace("Bearer ", "")));
         assertEquals(Optional.of("session-123"), delegate.lastRequest.headers().firstValue("X-Session-Id"));
@@ -432,6 +433,7 @@ class TextReplaceApiTest {
                           "sourceText": "Acme",
                           "resultText": "Globex",
                           "requestedLayoutMode": "sourceAnchored",
+                          "effectiveHyphenationEnabled": false,
                           "appliedLayoutMode": "SOURCE_ANCHORED",
                           "elementIds": ["txt_123"],
                           "generatedElementIds": ["img_456"]

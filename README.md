@@ -130,6 +130,24 @@ The replacement builder also supports `strokeColor(...)`, `characterSpacing(...)
 `resetSpacingOverrides()`. Atomic style overrides apply only to text replacements and cannot be combined with
 `replaceWithImage(...)`.
 
+## Control Reflow Hyphenation
+
+Reflowing text edits can override dictionary-generated discretionary hyphenation for one operation. Omit the override
+to inherit the selected layout profile. The override is available on replace, insert, delete, and style builders.
+
+```java
+import com.pdfdancer.common.request.TextLayoutRequest;
+import com.pdfdancer.common.request.TextReplaceRequest;
+
+pdf.text().replace(TextReplaceRequest.literal("Benefits", "International membership benefits")
+        .requireReflow(TextLayoutRequest.Profile.BODY_TEXT)
+        .hyphenationEnabled(false)
+        .build());
+```
+
+`hyphenationEnabled(...)` is valid only with `reflowWhenSupported(...)` or `requireReflow(...)`; lexical hyphens in
+the supplied text are unaffected.
+
 ## Replace Text with an Image
 
 Image replacement uses a PDF affine transformation relative to the matched text range's visually left-most boundary
