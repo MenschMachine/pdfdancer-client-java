@@ -1,0 +1,727 @@
+{
+  "schemaVersion": 1,
+  "release": "2.0.0",
+  "sourceRef": "release/v2",
+  "types": [
+    {
+      "name": "com.pdfdancer.client.http.Argument",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.HttpRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.MediaType",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.MultipartBody",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.MultipartBody$Builder",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.MultipartBody$Part",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.http.MutableHttpRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.AnonTokenResponse",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.AnonTokenResponse$ApiTokenMetadata",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.BaseReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.BezierBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.EnvironmentInfo",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.FontNotFoundException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.FormFieldReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.FormFieldReference$FormFieldEdit",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.FormXObjectReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.FormXObjectReference$FormEdit",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.HttpClientException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.ImageBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.ImageReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.LineBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.mutation.ModificationService",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PageApi",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PageBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PageTextClient",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PathBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PathGroupReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PathReference",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PathReference$PathEdit",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PDFDancer",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PDFDancer$PageClient",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PdfDancerClientException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PdfDancerException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PdfDancerHttpClient",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.PdfDancerHttpClient$Blocking",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.RateLimitException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.RectangleBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.RetryConfig",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.RetryConfig$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.selection.SelectionService",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.session.SessionService",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.SessionException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.SessionNotFoundException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.text.TextEditingService",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.TextClient",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.TypedDocumentSnapshot",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.TypedPageSnapshot",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.client.rest.ValidationException",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.BoundingRect",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Clipping",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Color",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.DocumentFontInfoDto",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.ErrorResponse",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Font",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.FontRecommendationDto",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.FontType",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Form",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Form$FormType",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.FormFieldRef",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Image",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.ObjectRef",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.ObjectType",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Orientation",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Page",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PageRef",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PageSize",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.path.Bezier",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.path.Line",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.path.Path",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.path.PathSegment",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PathGroupInfo",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PathObjectRef",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PdfAffineTransform",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PdfAffineTransform$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PDFObject",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Point",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Position",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Position$PositionMode",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Position$ShapeType",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.PositionBuilder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.model.Size",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.AddPageRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.AddRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ChangeFormFieldRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ClearClippingRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ClearPathGroupClippingRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.CreateBlankPdfRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.CreatePathGroupRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.DeleteRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.FindRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ImageTransformRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ImageTransformRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ImageTransformRequest$FlipDirection",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ImageTransformRequest$TransformType",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ModifyPathRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.ModifyRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.MovePathGroupRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.MoveRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.PageMoveRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.PdfColorRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.PdfColorRequest$Space",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.RemovePathGroupRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextDeleteRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextDeleteRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$AnchorTarget",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$Caret",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$CoordinateTarget",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$Style",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$StyleFrom",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextInsertRequest$Target",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextLayoutRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextLayoutRequest$Mode",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextLayoutRequest$Profile",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextReplacementImageRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextReplaceRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextReplaceRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextSelectorRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleNumericFilterRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStylePatchRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStylePatchRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleRequest$Style",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleRunFilterRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleRunsSelectorRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleSelectorRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleSetRequest",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TextStyleSetRequest$Builder",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TransformPathGroupRequest",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.request.TransformPathGroupRequest$TransformType",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.response.CommandResult",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.response.DocumentSnapshot",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.response.PageSnapshot",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.response.TextEditChangeDiagnostic",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.response.TextEditResponse",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.response.TextOperationDiagnostic",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.util.ExceptionUtils",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.util.FileUtils",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.util.FileVersioner",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    },
+    {
+      "name": "com.pdfdancer.common.util.ImageInfo",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.util.StandardFonts",
+      "status": "supported",
+      "reason": "Supported user-facing API type."
+    },
+    {
+      "name": "com.pdfdancer.common.util.UrlUtils",
+      "status": "internal",
+      "reason": "Transport or implementation-support type; not part of the supported user-facing SDK contract."
+    }
+  ]
+}
