@@ -193,11 +193,6 @@ class PageClientImpl {
         return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
     }
 
-    public Optional<FormFieldReference> selectFormField() {
-        List<FormFieldReference> fields = selectFormFields();
-        return fields.isEmpty() ? Optional.empty() : Optional.of(fields.get(0));
-    }
-
     /**
      * Selects all form fields on this page with the specified name.
      * @param name the name of the form fields to find

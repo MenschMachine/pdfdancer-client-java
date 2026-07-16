@@ -31,7 +31,7 @@ public class Font {
      */
     public Font(String name, double size, boolean isEmbedded) {
         this.name = name;
-        this.size = size;
+        setSize(size);
         this.isEmbedded = isEmbedded;
     }
 
@@ -52,6 +52,9 @@ public class Font {
     }
 
     public void setSize(double size) {
+        if (!Double.isFinite(size) || size <= 0) {
+            throw new IllegalArgumentException("Font size must be finite and positive");
+        }
         this.size = size;
     }
 

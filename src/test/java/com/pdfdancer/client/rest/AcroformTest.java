@@ -11,6 +11,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AcroformTest extends BaseTest {
 
+    @Test
+    void singularFormFieldSelectionRequiresACriterion() {
+        assertThrows(NoSuchMethodException.class,
+                () -> PDFDancer.class.getMethod("selectFormField"));
+        assertThrows(NoSuchMethodException.class,
+                () -> PageApi.class.getMethod("selectFormField"));
+        assertThrows(NoSuchMethodException.class,
+                () -> PageClientImpl.class.getMethod("selectFormField"));
+    }
+
     @Override
     protected String getPdfFile() {
         return "mixed-form-types.pdf";

@@ -160,6 +160,18 @@ public class ImageTest extends BaseTest {
                 .assertImageAt(300, 300, 1);
     }
 
+    @Test
+    public void addImageWithPageScopedBuilder() throws IOException {
+        PDFDancer client = createClient();
+        File file = new File("src/test/resources/fixtures/logo-80.png");
+
+        assertTrue(client.page(1).newImage().fromFile(file).at(300, 300).add());
+
+        new PDFAssertions(client)
+                .assertNumberOfImages(4, 1)
+                .assertImageAt(300, 300, 1);
+    }
+
     // ===========================
     // Image Transform Tests
     // ===========================
@@ -267,6 +279,58 @@ public class ImageTest extends BaseTest {
     }
 
     @Test
+    public void rotateImage180DegreesPreservesDimensions() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(400, 600, 1).get(0);
+
+        assertTrue(image.rotate(180).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 100, 150, 1, 5);
+    }
+
+    @Test
+    public void rotateImage270DegreesSwapsDimensions() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(200, 600, 1).get(0);
+
+        assertTrue(image.rotate(270).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 100, 150, 1, 5);
+    }
+
+    @Test
+    public void repeatedQuarterTurnsRestoreDimensions() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(200, 600, 1).get(0);
+
+        assertTrue(image.rotate(90).success());
+        ImageReference rotated = client.page(1).selectImages().stream()
+                .filter(candidate -> candidate.getInternalId().equals(image.getInternalId()))
+                .findFirst().orElseThrow();
+        assertTrue(rotated.rotate(90).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 150, 100, 1, 5);
+    }
+
+    @Test
+    public void chainedScaleAndRotationPersist() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(200, 600, 1).get(0);
+
+        assertTrue(image.scale(0.5).success());
+        ImageReference scaled = client.page(1).selectImages().stream()
+                .filter(candidate -> candidate.getInternalId().equals(image.getInternalId()))
+                .findFirst().orElseThrow();
+        assertTrue(scaled.rotate(90).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 50, 75, 1, 5);
+    }
+
+    @Test
     public void cropImage() {
         PDFDancer client = createClient();
 
@@ -282,6 +346,17 @@ public class ImageTest extends BaseTest {
     }
 
     @Test
+    public void cropImageAsymmetrically() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(200, 600, 1).get(0);
+
+        assertTrue(image.crop(50, 0, 0, 0).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 100, 100, 1, 5);
+    }
+
+    @Test
     public void setImageOpacity() {
         PDFDancer client = createClient();
 
@@ -292,6 +367,47 @@ public class ImageTest extends BaseTest {
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
                 .assertImageSize(50, 600, 1, 100, 100, 5);
+    }
+
+    @Test
+    public void opacityAcceptsBoundaryValues() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+        assertTrue(image.opacity(0).success());
+
+        ImageReference refreshed = client.page(1).selectImages().stream()
+                .filter(candidate -> candidate.getInternalId().equals(image.getInternalId()))
+                .findFirst().orElseThrow();
+        assertTrue(refreshed.opacity(1).success());
+
+        new PDFAssertions(client)
+                .assertImageSize(image.getInternalId(), 100, 100, 1, 5);
+    }
+
+    @Test
+    public void opacityRejectsNegativeValues() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () -> image.opacity(-0.01));
+    }
+
+    @Test
+    public void opacityRejectsValuesAboveOne() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () -> image.opacity(1.01));
+    }
+
+    @Test
+    public void opacityRejectsNonfiniteValues() {
+        PDFDancer client = createClient();
+        ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
+
+        assertThrows(IllegalArgumentException.class, () -> image.opacity(Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> image.opacity(Double.POSITIVE_INFINITY));
+        assertThrows(IllegalArgumentException.class, () -> image.opacity(Double.NEGATIVE_INFINITY));
     }
 
     @Test

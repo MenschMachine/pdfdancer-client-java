@@ -409,6 +409,20 @@ public class PDFAssertions {
         return assertImageSize(x, y, page, expectedWidth, expectedHeight, 1.0);
     }
 
+    public PDFAssertions assertImageSize(String internalId, double expectedWidth, double expectedHeight,
+                                         int page, double epsilon) {
+        ImageReference image = pdf.page(page).selectImages().stream()
+                .filter(candidate -> internalId.equals(candidate.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Image with ID " + internalId + " not found on page " + page));
+        assertEquals(expectedWidth, image.getWidth(), epsilon,
+                String.format("Image %s width: expected %f but got %f", internalId, expectedWidth, image.getWidth()));
+        assertEquals(expectedHeight, image.getHeight(), epsilon,
+                String.format("Image %s height: expected %f but got %f", internalId, expectedHeight, image.getHeight()));
+        return this;
+    }
+
     public PDFAssertions assertImageWidthChanged(double x, double y, int page, double originalWidth, double epsilon) {
         List<ImageReference> images = pdf.page(page).selectImagesAt(x, y, epsilon);
         assertEquals(1, images.size(),

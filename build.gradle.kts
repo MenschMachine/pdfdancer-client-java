@@ -42,7 +42,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    failFast = true
+    failFast = false
 }
 
 tasks.register<JavaExec>("generateSyntheticTextReplacementFixture") {

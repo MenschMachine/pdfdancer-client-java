@@ -62,6 +62,9 @@ public class BezierBuilder {
     }
 
     public BezierBuilder lineWidth(double width) {
+        if (!Double.isFinite(width) || width < 0) {
+            throw new IllegalArgumentException("Line width must be finite and nonnegative");
+        }
         this.strokeWidth = width;
         return this;
     }
@@ -110,4 +113,3 @@ public class BezierBuilder {
         return client.addObject(path);
     }
 }
-
