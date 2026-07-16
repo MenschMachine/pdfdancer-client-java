@@ -171,7 +171,7 @@ public class ImageTest extends BaseTest {
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
         File replacementFile = new File("src/test/resources/fixtures/logo-80.png");
-        assertTrue(image.replace(replacementFile));
+        assertTrue(image.replace(replacementFile).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -187,7 +187,7 @@ public class ImageTest extends BaseTest {
         File replacementFile = new File("src/test/resources/fixtures/logo-80.png");
         Image newImage = Image.fromFile(replacementFile);
 
-        assertTrue(image.replace(newImage));
+        assertTrue(image.replace(newImage).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1);
@@ -201,7 +201,7 @@ public class ImageTest extends BaseTest {
         assertEquals(100, image.getWidth(), 0.01);
         assertEquals(100, image.getHeight(), 0.01);
 
-        assertTrue(image.scale(0.5));
+        assertTrue(image.scale(0.5).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -215,7 +215,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.scaleTo(200, 150));
+        assertTrue(image.scaleTo(200, 150).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -230,7 +230,7 @@ public class ImageTest extends BaseTest {
         double originalAspectRatio = image.getAspectRatio();
         assertEquals(1.5, originalAspectRatio, 0.01);
 
-        assertTrue(image.scaleTo(new Size(300, 300), true));
+        assertTrue(image.scaleTo(new Size(300, 300), true).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -243,7 +243,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.rotate(45));
+        assertTrue(image.rotate(45).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -259,7 +259,7 @@ public class ImageTest extends BaseTest {
         assertEquals(150, image.getWidth(), 0.01);
         assertEquals(100, image.getHeight(), 0.01);
 
-        assertTrue(image.rotate(90));
+        assertTrue(image.rotate(90).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -274,7 +274,7 @@ public class ImageTest extends BaseTest {
         assertEquals(100, image.getWidth(), 0.01);
         assertEquals(100, image.getHeight(), 0.01);
 
-        assertTrue(image.crop(10, 10, 10, 10));
+        assertTrue(image.crop(10, 10, 10, 10).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -287,7 +287,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.opacity(0.5));
+        assertTrue(image.opacity(0.5).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -300,7 +300,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.flipHorizontal());
+        assertTrue(image.flipHorizontal().success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -313,7 +313,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.flipVertical());
+        assertTrue(image.flipVertical().success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -326,7 +326,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.flip(FlipDirection.BOTH));
+        assertTrue(image.flip(FlipDirection.BOTH).success());
 
         new PDFAssertions(client)
                 .assertNumberOfImages(3, 1)
@@ -343,7 +343,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.fillRegion(10, 10, 50, 30, Color.BLACK));
+        assertTrue(image.fillRegion(10, 10, 50, 30, Color.BLACK).success());
     }
 
     @Test
@@ -352,7 +352,7 @@ public class ImageTest extends BaseTest {
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
 
-        assertTrue(image.fillRegion(0, 0, 5, 5, Color.RED));
+        assertTrue(image.fillRegion(0, 0, 5, 5, Color.RED).success());
     }
 
     @Test
@@ -360,11 +360,11 @@ public class ImageTest extends BaseTest {
         PDFDancer client = createClient();
 
         ImageReference image = client.page(1).selectImagesAt(50, 600, 1).get(0);
-        assertTrue(image.fillRegion(0, 0, 10, 10, Color.WHITE));
+        assertTrue(image.fillRegion(0, 0, 10, 10, Color.WHITE).success());
 
         // Re-select to get fresh reference
         ImageReference image2 = client.page(1).selectImagesAt(50, 600, 1).get(0);
-        assertTrue(image2.fillRegion(20, 20, 10, 10, new Color(0, 0, 255)));
+        assertTrue(image2.fillRegion(20, 20, 10, 10, new Color(0, 0, 255)).success());
     }
 
     @Test

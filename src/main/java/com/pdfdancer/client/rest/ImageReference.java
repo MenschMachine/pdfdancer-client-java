@@ -6,6 +6,7 @@ import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Size;
 import com.pdfdancer.common.request.ImageTransformRequest;
 import com.pdfdancer.common.request.ImageTransformRequest.FlipDirection;
+import com.pdfdancer.common.response.CommandResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class ImageReference extends BaseReference {
      * @return true if the replacement was successful
      * @throws IOException if the file cannot be read
      */
-    public boolean replace(File imageFile) throws IOException {
+    public CommandResult replace(File imageFile) throws IOException {
         Image newImage = Image.fromFile(imageFile);
         return replace(newImage);
     }
@@ -75,7 +76,7 @@ public class ImageReference extends BaseReference {
      * @param newImage the new image
      * @return true if the replacement was successful
      */
-    public boolean replace(Image newImage) {
+    public CommandResult replace(Image newImage) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .replace(newImage)
                 .build();
@@ -88,7 +89,7 @@ public class ImageReference extends BaseReference {
      * @param scaleFactor the scale factor (e.g., 0.5 for half size, 2.0 for double size)
      * @return true if the scaling was successful
      */
-    public boolean scale(double scaleFactor) {
+    public CommandResult scale(double scaleFactor) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .scale(scaleFactor)
                 .build();
@@ -101,7 +102,7 @@ public class ImageReference extends BaseReference {
      * @param targetSize the target size
      * @return true if the scaling was successful
      */
-    public boolean scaleTo(Size targetSize) {
+    public CommandResult scaleTo(Size targetSize) {
         return scaleTo(targetSize, true);
     }
 
@@ -112,7 +113,7 @@ public class ImageReference extends BaseReference {
      * @param preserveAspectRatio whether to preserve aspect ratio
      * @return true if the scaling was successful
      */
-    public boolean scaleTo(Size targetSize, boolean preserveAspectRatio) {
+    public CommandResult scaleTo(Size targetSize, boolean preserveAspectRatio) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .scaleTo(targetSize, preserveAspectRatio)
                 .build();
@@ -126,7 +127,7 @@ public class ImageReference extends BaseReference {
      * @param height the target height
      * @return true if the scaling was successful
      */
-    public boolean scaleTo(double width, double height) {
+    public CommandResult scaleTo(double width, double height) {
         return scaleTo(new Size(width, height), false);
     }
 
@@ -138,7 +139,7 @@ public class ImageReference extends BaseReference {
      * @param preserveAspectRatio whether to preserve aspect ratio
      * @return true if the scaling was successful
      */
-    public boolean scaleTo(double width, double height, boolean preserveAspectRatio) {
+    public CommandResult scaleTo(double width, double height, boolean preserveAspectRatio) {
         return scaleTo(new Size(width, height), preserveAspectRatio);
     }
 
@@ -148,7 +149,7 @@ public class ImageReference extends BaseReference {
      * @param angle the rotation angle in degrees (positive = clockwise)
      * @return true if the rotation was successful
      */
-    public boolean rotate(double angle) {
+    public CommandResult rotate(double angle) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .rotate(angle)
                 .build();
@@ -164,7 +165,7 @@ public class ImageReference extends BaseReference {
      * @param bottom pixels to trim from bottom edge
      * @return true if the cropping was successful
      */
-    public boolean crop(int left, int top, int right, int bottom) {
+    public CommandResult crop(int left, int top, int right, int bottom) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .crop(left, top, right, bottom)
                 .build();
@@ -177,7 +178,7 @@ public class ImageReference extends BaseReference {
      * @param opacity the opacity value (0.0 = fully transparent, 1.0 = fully opaque)
      * @return true if the operation was successful
      */
-    public boolean opacity(double opacity) {
+    public CommandResult opacity(double opacity) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .opacity(opacity)
                 .build();
@@ -190,7 +191,7 @@ public class ImageReference extends BaseReference {
      * @param direction the flip direction
      * @return true if the flip was successful
      */
-    public boolean flip(FlipDirection direction) {
+    public CommandResult flip(FlipDirection direction) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .flip(direction)
                 .build();
@@ -202,7 +203,7 @@ public class ImageReference extends BaseReference {
      *
      * @return true if the flip was successful
      */
-    public boolean flipHorizontal() {
+    public CommandResult flipHorizontal() {
         return flip(FlipDirection.HORIZONTAL);
     }
 
@@ -211,7 +212,7 @@ public class ImageReference extends BaseReference {
      *
      * @return true if the flip was successful
      */
-    public boolean flipVertical() {
+    public CommandResult flipVertical() {
         return flip(FlipDirection.VERTICAL);
     }
 
@@ -225,7 +226,7 @@ public class ImageReference extends BaseReference {
      * @param color  the fill color
      * @return true if the operation was successful
      */
-    public boolean fillRegion(int x, int y, int width, int height, Color color) {
+    public CommandResult fillRegion(int x, int y, int width, int height, Color color) {
         ImageTransformRequest request = ImageTransformRequest.builder(objectRef)
                 .fillRegion(x, y, width, height, color)
                 .build();

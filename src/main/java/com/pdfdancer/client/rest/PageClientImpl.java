@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 class PageClientImpl {
     protected final PDFDancer root;
-    protected final int pageNumber;
+    protected int pageNumber;
 
     PageClientImpl(PDFDancer root, int pageNumber) {
         this.root = root;
@@ -31,12 +31,30 @@ class PageClientImpl {
         return root.toPathObject(root.find(ObjectType.PATH, position));
     }
 
+    public List<PathReference> selectPathsAt(double x, double y, double epsilon) {
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
+        List<ObjectRef> paths = root.collectObjectsByType(snapshot, Set.of(ObjectType.PATH));
+        return root.toPathObject(paths.stream()
+                .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                .collect(Collectors.toUnmodifiableList()));
+    }
+
     /**
      * Selects a single path at the specified coordinates.
      * @return Optional containing the first path found at the position, or empty if none found
      */
     public Optional<PathReference> selectPathAt(double x, double y) {
         List<PathReference> paths = selectPathsAt(x, y);
+        return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
+    }
+
+    public Optional<PathReference> selectPathAt(double x, double y, double epsilon) {
+        List<PathReference> paths = selectPathsAt(x, y, epsilon);
+        return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
+    }
+
+    public Optional<PathReference> selectPath() {
+        List<PathReference> paths = selectPaths();
         return paths.isEmpty() ? Optional.empty() : Optional.of(paths.get(0));
     }
 
@@ -71,6 +89,11 @@ class PageClientImpl {
      */
     public Optional<ImageReference> selectImageAt(double x, double y, double epsilon) {
         List<ImageReference> images = selectImagesAt(x, y, epsilon);
+        return images.isEmpty() ? Optional.empty() : Optional.of(images.get(0));
+    }
+
+    public Optional<ImageReference> selectImage() {
+        List<ImageReference> images = selectImages();
         return images.isEmpty() ? Optional.empty() : Optional.of(images.get(0));
     }
 
@@ -132,6 +155,11 @@ class PageClientImpl {
         return forms.isEmpty() ? Optional.empty() : Optional.of(forms.get(0));
     }
 
+    public Optional<FormXObjectReference> selectForm() {
+        List<FormXObjectReference> forms = selectForms();
+        return forms.isEmpty() ? Optional.empty() : Optional.of(forms.get(0));
+    }
+
     public List<FormFieldReference> selectFormFields() {
         List<FormFieldRef> formFields = root.collectFormFieldRefsFromPage(pageNumber);
         return root.toFormFieldObject(formFields);
@@ -165,6 +193,11 @@ class PageClientImpl {
         return formFields.isEmpty() ? Optional.empty() : Optional.of(formFields.get(0));
     }
 
+    public Optional<FormFieldReference> selectFormField() {
+        List<FormFieldReference> fields = selectFormFields();
+        return fields.isEmpty() ? Optional.empty() : Optional.of(fields.get(0));
+    }
+
     /**
      * Selects all form fields on this page with the specified name.
      * @param name the name of the form fields to find
@@ -194,6 +227,24 @@ class PageClientImpl {
     public PathBuilder newPath() { return new PathBuilder(root, pageNumber); }
 
     public LineBuilder newLine() { return new LineBuilder(root, pageNumber); }
+
+    public RectangleBuilder newRectangle() { return new RectangleBuilder(root, pageNumber); }
+
+    public ImageBuilder newImage() { return new ImageBuilder(root, pageNumber); }
+
+    public PageSnapshot getSnapshot() { return root.getPageSnapshot(pageNumber); }
+
+    public PageSnapshot getSnapshot(String types) { return root.getPageSnapshot(pageNumber, types); }
+
+    public List<ObjectRef> selectElements() { return getSnapshot().elements(); }
+
+    public List<ObjectRef> selectElements(String types) { return getSnapshot(types).elements(); }
+
+    public boolean moveTo(int targetPageNumber) {
+        boolean moved = root.movePage(pageNumber, targetPageNumber);
+        if (moved) pageNumber = targetPageNumber;
+        return moved;
+    }
 
     public PageTextClient text() {
         return new PageTextClient(root, pageNumber);

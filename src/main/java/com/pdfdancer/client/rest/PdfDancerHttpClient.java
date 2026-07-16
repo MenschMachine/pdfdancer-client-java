@@ -10,7 +10,6 @@ import com.pdfdancer.client.http.MediaType;
 import com.pdfdancer.client.http.MultipartBody;
 import com.pdfdancer.client.http.MutableHttpRequest;
 import com.pdfdancer.common.model.ErrorResponse;
-import com.pdfdancer.common.model.FontNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,7 @@ import static java.net.http.HttpResponse.BodyHandlers;
  */
 public final class PdfDancerHttpClient {
 
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
     private static final String DEFAULT_API_VERSION = "2";
     private static final String DEFAULT_API_PATH_PREFIX = "/v2";
     private static final String CLIENT_VERSION = loadClientVersion();
@@ -125,7 +124,7 @@ public final class PdfDancerHttpClient {
 
                     // Check if we should retry based on status code
                     if (attempt < maxAttempts &&
-                        error instanceof PdfDancerClientException &&
+                        error instanceof HttpClientException &&
                         retryConfig.isRetryableStatusCode(status)) {
                         lastException = error;
                         sleep(calculateDelay(attempt, status, response));
@@ -158,8 +157,10 @@ public final class PdfDancerHttpClient {
                 Thread.currentThread().interrupt();
                 throw new PdfDancerClientException("HTTP request interrupted", e);
             } catch (IOException e) {
-                // Check if we should retry on connection error
-                if (attempt < maxAttempts && retryConfig.isRetryOnConnectionError()) {
+                boolean retryTransportError = e instanceof java.net.http.HttpTimeoutException
+                        ? retryConfig.isRetryOnTimeout()
+                        : retryConfig.isRetryOnConnectionError();
+                if (attempt < maxAttempts && retryTransportError) {
                     lastException = new PdfDancerClientException("HTTP request failed", e);
                     sleep(calculateDelay(attempt, 0, null));
                     continue;
@@ -375,6 +376,12 @@ public final class PdfDancerHttpClient {
 
         String message = error.map(ErrorResponse::message)
                 .orElseGet(() -> "Unexpected HTTP status: " + status);
+        if (status == 429) {
+            Duration retryAfter = response.headers().firstValue("Retry-After")
+                    .map(this::parseRetryAfter)
+                    .orElse(null);
+            return new RateLimitException(message, retryAfter);
+        }
         return new PdfDancerClientException(status, message);
     }
 

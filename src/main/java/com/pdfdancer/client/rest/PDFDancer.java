@@ -8,6 +8,7 @@ import com.pdfdancer.client.rest.text.TextEditingService;
 import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.DocumentSnapshot;
+import com.pdfdancer.common.response.CommandResult;
 import com.pdfdancer.common.response.PageSnapshot;
 import com.pdfdancer.common.response.TextEditResponse;
 
@@ -413,6 +414,14 @@ public class PDFDancer {
         );
     }
 
+    /** Returns page-scoped clients in document order. */
+    public List<PageClient> pages() {
+        List<PageRef> refs = getPages();
+        return java.util.stream.IntStream.range(0, refs.size())
+                .mapToObj(index -> new PageClient(this, index + 1))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     /**
      * Retrieves a reference to a specific page by its page number.
      * This method returns an object reference for the specified page,
@@ -625,6 +634,16 @@ public class PDFDancer {
         return new ImageBuilder(this);
     }
 
+    public ImageBuilder newImage(int pageNumber) { return new ImageBuilder(this, pageNumber); }
+
+    public PathBuilder newPath(int pageNumber) { return new PathBuilder(this, pageNumber); }
+
+    public LineBuilder newLine(int pageNumber) { return new LineBuilder(this, pageNumber); }
+
+    public BezierBuilder newBezier(int pageNumber) { return new BezierBuilder(this, pageNumber); }
+
+    public RectangleBuilder newRectangle(int pageNumber) { return new RectangleBuilder(this, pageNumber); }
+
     public void save(String filePath) {
         try {
             writeBytesToFile(this.getFileBytes(), filePath);
@@ -692,10 +711,10 @@ public class PDFDancer {
         return Boolean.TRUE.equals(result);
     }
 
-    protected boolean modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
-        boolean success = modification.modifyPath(ref, strokeColor, fillColor);
+    protected CommandResult modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
+        CommandResult result = modification.modifyPath(ref, strokeColor, fillColor);
         invalidateSnapshotCaches();
-        return success;
+        return result;
     }
 
     public List<PathReference> selectPaths() {
@@ -852,10 +871,10 @@ public class PDFDancer {
      * Transforms an image in the PDF document.
      *
      * @param request the transformation request
-     * @return true if the transformation was successful
+     * @return the server command result
      */
-    protected boolean transformImage(ImageTransformRequest request) {
-        boolean result = modification.transformImage(request);
+    protected CommandResult transformImage(ImageTransformRequest request) {
+        CommandResult result = modification.transformImage(request);
         invalidateSnapshotCaches();
         return result;
     }
