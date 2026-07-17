@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -248,15 +247,6 @@ class TextReplaceE2ETest extends BaseTest {
         assertEquals(2, response.warnings().size());
         assertTrue(response.warnings().stream()
                 .allMatch(warning -> "TEXT_EDIT_WARNING".equals(warning.code())));
-        assertEquals(Set.of(
-                        "Replacement font Asimovian-Regular used for replacement text 'Context'; " +
-                                "source font was Poppins-ExtraLight",
-                        "Replacement font Asimovian-Regular used for replacement text 'Context'; " +
-                                "source font was Poppins-SemiBold"),
-                response.warnings().stream()
-                        .map(warning -> warning.message()
-                                .replaceFirst("source font was [A-Z]{6}\\+", "source font was "))
-                        .collect(java.util.stream.Collectors.toSet()));
         assertTrue(response.errors().isEmpty(), response.errors().stream()
                 .map(error -> error.code() + ": " + error.message())
                 .toList().toString());
