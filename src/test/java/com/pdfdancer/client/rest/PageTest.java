@@ -144,7 +144,9 @@ public class PageTest extends BaseTest {
                 .add();
 
         assertEquals(7, pageRef.getPosition().getPageNumber());
-        assertEquals(PageSize.A5, pageRef.getPageSize());
+        assertEquals(PageSize.A5, PageSize.of(
+                pageRef.getPageSize().getWidth(),
+                pageRef.getPageSize().getHeight()));
         assertEquals(Orientation.LANDSCAPE, pageRef.getOrientation());
 
         List<PageRef> newPageList = client.getPages();
