@@ -96,8 +96,7 @@ public final class TextReplaceRequest {
             if (replaceWithImage.transformation() == null) {
                 throw new IllegalArgumentException("replaceWithImage transformation is required");
             }
-            if (layout != null && layout.mode() != null
-                    && layout.mode() != TextLayoutRequest.Mode.sourceAnchored) {
+            if (layout == null || layout.mode() != TextLayoutRequest.Mode.sourceAnchored) {
                 throw new IllegalArgumentException("replaceWithImage supports only sourceAnchored layout");
             }
         }

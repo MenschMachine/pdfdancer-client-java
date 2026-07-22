@@ -255,6 +255,7 @@ PdfAffineTransform placement = PdfAffineTransform.builder()
 pdf.text().replace(TextReplaceRequest.builder()
         .literal("{{logo}}")
         .replaceWithImage(new File("logo.png"), placement)
+        .sourceAnchored()
         .build());
 
 pdf.save("output.pdf");

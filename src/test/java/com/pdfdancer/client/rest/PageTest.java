@@ -128,7 +128,7 @@ public class PageTest extends BaseTest {
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
         new PDFAssertions(client)
-                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.LANDSCAPE, 7)
+                .assertPageDimension(PageSize.A5.getHeight(), PageSize.A5.getWidth(), Orientation.LANDSCAPE, 7)
                 .assertTotalNumberOfElements(0, 7);
     }
 
@@ -151,7 +151,7 @@ public class PageTest extends BaseTest {
         assertEquals(13, newPageList.size());
 
         new PDFAssertions(client)
-                .assertPageDimension(PageSize.A5.getWidth(), PageSize.A5.getHeight(), Orientation.LANDSCAPE, 7)
+                .assertPageDimension(PageSize.A5.getHeight(), PageSize.A5.getWidth(), Orientation.LANDSCAPE, 7)
                 .assertTotalNumberOfElements(0, 7);
     }
 
@@ -169,7 +169,7 @@ public class PageTest extends BaseTest {
         List<PageRef> newPageList = client.getPages();
         assertEquals(13, newPageList.size());
         new PDFAssertions(client)
-                .assertPageDimension(400, 600, Orientation.LANDSCAPE, 13);
+                .assertPageDimension(600, 400, Orientation.LANDSCAPE, 13);
     }
 
     @Test

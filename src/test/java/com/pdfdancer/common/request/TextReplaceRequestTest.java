@@ -169,7 +169,8 @@ class TextReplaceRequestTest {
                   "replaceWithImage": {
                     "data": "AQID",
                     "transformationMatrix": [20, 0, 5, 10, 3, -2]
-                  }
+                  },
+                  "layout": {"mode": "sourceAnchored"}
                 }
                 """;
 
@@ -197,12 +198,17 @@ class TextReplaceRequestTest {
         assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
                 .literal("token")
                 .replaceWithImage(image, identity)
+                .build());
+        assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
+                .literal("token")
+                .replaceWithImage(image, identity)
                 .reflowWhenSupported(TextLayoutRequest.Profile.DEFAULT)
                 .build());
         assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
                 .literal("token")
                 .replaceWithImage(image, identity)
                 .font("Helvetica")
+                .sourceAnchored()
                 .build());
     }
 

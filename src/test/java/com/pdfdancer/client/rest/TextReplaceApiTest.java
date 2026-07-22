@@ -106,6 +106,7 @@ class TextReplaceApiTest {
                 .literal("{{logo}}")
                 .replaceWithImage(image, PdfAffineTransform.fromPdfMatrix(
                         new double[]{20, 0, 5, 10, 3, -2}))
+                .sourceAnchored()
                 .build());
 
         assertEquals(URI.create("https://example.test/v2/pdf/text/replace"), delegate.lastRequest.uri());
@@ -130,6 +131,7 @@ class TextReplaceApiTest {
                 .literal("{{logo}}")
                 .pages(9)
                 .replaceWithImage(image, PdfAffineTransform.builder().translate(3, -2).build())
+                .sourceAnchored()
                 .build());
 
         JsonNode json = mapper.readTree(delegate.lastBody);

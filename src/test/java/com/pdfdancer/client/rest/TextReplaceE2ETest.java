@@ -162,6 +162,7 @@ class TextReplaceE2ETest extends BaseTest {
                                         .scale(20, 10)
                                         .translate(3, -2)
                                         .build())
+                        .sourceAnchored()
                         .build());
 
         assertEquals(1, response.matched());
@@ -207,7 +208,7 @@ class TextReplaceE2ETest extends BaseTest {
         assertEquals(1, response.errors().size());
         assertEquals("TEXT_REPLACE_FAILED", response.errors().get(0).code());
         assertTrue(response.errors().get(0).message()
-                .startsWith("No decoded replacement font can roundtrip text:"));
+                .startsWith("No available font can render requested Unicode text for 'SourceSans3-Regular':"));
         new PDFAssertions(pdf)
                 .assertPdfTextContains("Before we begin")
                 .assertPdfTextDoesNotContain("\uF020");

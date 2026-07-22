@@ -94,6 +94,7 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
                         PdfAffineTransform.builder()
                                 .scale(64, 24)
                                 .build())
+                .sourceAnchored()
                 .build());
 
         ImageReference brandMark = generatedImage(pdf, response, "{{brand_mark}}");
@@ -140,6 +141,7 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
                                 .scale(42, 42)
                                 .translate(8, -24)
                                 .build())
+                .sourceAnchored()
                 .build());
 
         ImageReference accessBadge = generatedImage(pdf, response, "{{access_badge}}");
