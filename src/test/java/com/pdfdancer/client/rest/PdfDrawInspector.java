@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 final class PdfDrawInspector {
     private static final double DEFAULT_TOLERANCE = 0.5;
-    private static final double TEXT_TOLERANCE = 2.0;
     private static final Set<String> PAINT_OPERATORS = Set.of("S", "s", "f", "F", "f*", "B", "B*", "b", "b*");
     private static final Set<String> PATH_OPERATORS = Set.of("m", "l", "c", "v", "y", "h", "re");
 
@@ -80,33 +79,6 @@ final class PdfDrawInspector {
         return best.clipped;
     }
 
-    boolean textLineHasClipping(String text, int pageNumber) {
-        List<TextLineReference> lines = pdf.page(pageNumber).selectTextLinesStartingWith(text);
-        assertFalse(lines.isEmpty(), "No text line starting with " + text);
-        return textAtHasClipping(lines.get(0).getPosition(), pageNumber);
-    }
-
-    boolean paragraphHasClipping(String text, int pageNumber) {
-        List<TextParagraphReference> paragraphs = pdf.page(pageNumber).selectParagraphsStartingWith(text);
-        assertFalse(paragraphs.isEmpty(), "No paragraph starting with " + text);
-        return textAtHasClipping(paragraphs.get(0).getPosition(), pageNumber);
-    }
-
-    private boolean textAtHasClipping(com.pdfdancer.common.model.Position position, int pageNumber) {
-        Double x = position.getX();
-        Double y = position.getY();
-        assertNotNull(x, "Text object has no x position");
-        assertNotNull(y, "Text object has no y position");
-        List<DrawEvent> matches = getPageDrawEvents(pageNumber).texts.stream()
-                .filter(event -> containsPoint(event.bbox, x, y, TEXT_TOLERANCE))
-                .collect(Collectors.toList());
-        assertFalse(matches.isEmpty(), "No text draw event found near (" + x + ", " + y + ")");
-        DrawEvent best = matches.stream()
-                .min((left, right) -> Double.compare(centerDistance(left.bbox, x, y), centerDistance(right.bbox, x, y)))
-                .orElseThrow();
-        return best.clipped;
-    }
-
     private DrawEvents getPageDrawEvents(int pageNumber) {
         return pageCache.computeIfAbsent(pageNumber, this::parsePageDrawEvents);
     }
@@ -114,8 +86,6 @@ final class PdfDrawInspector {
     private DrawEvents parsePageDrawEvents(int pageNumber) {
         List<DrawEvent> pathEvents = new ArrayList<>();
         List<DrawEvent> imageEvents = new ArrayList<>();
-        List<DrawEvent> textEvents = new ArrayList<>();
-
         try (PDDocument document = Loader.loadPDF(savedPdfFile)) {
             PDPage page = document.getPage(pageNumber - 1);
             ArrayDeque<GraphicsState> stateStack = new ArrayDeque<>();
@@ -170,64 +140,6 @@ final class PdfDrawInspector {
                             currentPathPoints.clear();
                             operands.clear();
                             break;
-                        case "BT":
-                            state.inText = true;
-                            state.textMatrix = Matrix2D.identity();
-                            state.textLineMatrix = Matrix2D.identity();
-                            operands.clear();
-                            break;
-                        case "ET":
-                            state.inText = false;
-                            operands.clear();
-                            break;
-                        case "Tf": {
-                            double[] tfValues = numberOperands(operands, 1);
-                            if (tfValues != null) {
-                                state.fontSize = Math.abs(tfValues[0]);
-                            }
-                            operands.clear();
-                            break;
-                        }
-                        case "Tm": {
-                            double[] tmValues = numberOperands(operands, 6);
-                            if (tmValues != null) {
-                                state.textMatrix = Matrix2D.of(tmValues);
-                                state.textLineMatrix = state.textMatrix.copy();
-                            }
-                            operands.clear();
-                            break;
-                        }
-                        case "Td":
-                        case "TD": {
-                            double[] tdValues = numberOperands(operands, 2);
-                            if (tdValues != null) {
-                                Matrix2D translation = new Matrix2D(1, 0, 0, 1, tdValues[0], tdValues[1]);
-                                state.textLineMatrix = Matrix2D.multiply(translation, state.textLineMatrix);
-                                state.textMatrix = state.textLineMatrix.copy();
-                                if ("TD".equals(name)) {
-                                    state.textLeading = -tdValues[1];
-                                }
-                            }
-                            operands.clear();
-                            break;
-                        }
-                        case "T*":
-                            moveTextToNextLine(state);
-                            operands.clear();
-                            break;
-                        case "'":
-                        case "\"":
-                            moveTextToNextLine(state);
-                            textEvents.add(textEvent(state));
-                            operands.clear();
-                            break;
-                        case "Tj":
-                        case "TJ":
-                            if (state.inText) {
-                                textEvents.add(textEvent(state));
-                            }
-                            operands.clear();
-                            break;
                         case "Do":
                             imageEvents.add(imageEvent(state));
                             operands.clear();
@@ -257,22 +169,7 @@ final class PdfDrawInspector {
             throw new RuntimeException("Failed to inspect saved PDF draw events", e);
         }
 
-        return new DrawEvents(pathEvents, imageEvents, textEvents);
-    }
-
-    private static void moveTextToNextLine(GraphicsState state) {
-        Matrix2D translation = new Matrix2D(1, 0, 0, 1, 0, -state.textLeading);
-        state.textLineMatrix = Matrix2D.multiply(translation, state.textLineMatrix);
-        state.textMatrix = state.textLineMatrix.copy();
-    }
-
-    private static DrawEvent textEvent(GraphicsState state) {
-        Point origin = state.ctm.apply(state.textMatrix.e, state.textMatrix.f);
-        double padding = Math.max(4.0, state.fontSize * 0.5);
-        return new DrawEvent(
-                new BBox(origin.x - padding, origin.y - padding, origin.x + padding, origin.y + padding),
-                state.hasClip || state.pendingClip
-        );
+        return new DrawEvents(pathEvents, imageEvents);
     }
 
     private static DrawEvent imageEvent(GraphicsState state) {
@@ -378,21 +275,13 @@ final class PdfDrawInspector {
         return Math.max(0, bbox.maxX - bbox.minX) * Math.max(0, bbox.maxY - bbox.minY);
     }
 
-    private static double centerDistance(BBox bbox, double x, double y) {
-        double centerX = (bbox.minX + bbox.maxX) / 2.0;
-        double centerY = (bbox.minY + bbox.maxY) / 2.0;
-        return Math.hypot(centerX - x, centerY - y);
-    }
-
     private static final class DrawEvents {
         private final List<DrawEvent> paths;
         private final List<DrawEvent> images;
-        private final List<DrawEvent> texts;
 
-        private DrawEvents(List<DrawEvent> paths, List<DrawEvent> images, List<DrawEvent> texts) {
+        private DrawEvents(List<DrawEvent> paths, List<DrawEvent> images) {
             this.paths = paths;
             this.images = images;
-            this.texts = texts;
         }
     }
 
@@ -434,18 +323,10 @@ final class PdfDrawInspector {
         private boolean hasClip;
         private boolean pendingClip;
         private Matrix2D ctm;
-        private boolean inText;
-        private Matrix2D textMatrix;
-        private Matrix2D textLineMatrix;
-        private double textLeading;
-        private double fontSize;
 
         private static GraphicsState initial() {
             GraphicsState state = new GraphicsState();
             state.ctm = Matrix2D.identity();
-            state.textMatrix = Matrix2D.identity();
-            state.textLineMatrix = Matrix2D.identity();
-            state.fontSize = 12.0;
             return state;
         }
 
@@ -454,11 +335,6 @@ final class PdfDrawInspector {
             copy.hasClip = hasClip;
             copy.pendingClip = pendingClip;
             copy.ctm = ctm.copy();
-            copy.inText = inText;
-            copy.textMatrix = textMatrix.copy();
-            copy.textLineMatrix = textLineMatrix.copy();
-            copy.textLeading = textLeading;
-            copy.fontSize = fontSize;
             return copy;
         }
     }

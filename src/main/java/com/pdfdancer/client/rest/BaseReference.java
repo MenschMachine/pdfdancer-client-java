@@ -1,11 +1,8 @@
 package com.pdfdancer.client.rest;
 
-import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.ObjectType;
 import com.pdfdancer.common.model.Position;
-
-import java.util.List;
 
 public abstract class BaseReference {
     protected final PDFDancer client;
@@ -50,46 +47,5 @@ public abstract class BaseReference {
 
     public ObjectType type() {
         return objectRef.getType();
-    }
-
-    /**
-     * Redacts this object from the PDF using default replacement text "[REDACTED]".
-     *
-     * @return true if redaction was successful
-     */
-    public boolean redact() {
-        return redact("[REDACTED]", Color.BLACK);
-    }
-
-    /**
-     * Redacts this object from the PDF with custom replacement text.
-     *
-     * @param replacement the replacement text for text content
-     * @return true if redaction was successful
-     */
-    public boolean redact(String replacement) {
-        return redact(replacement, Color.BLACK);
-    }
-
-    /**
-     * Redacts this object from the PDF with custom placeholder color.
-     * Useful for images and paths.
-     *
-     * @param placeholderColor the color for image/path placeholders
-     * @return true if redaction was successful
-     */
-    public boolean redact(Color placeholderColor) {
-        return redact("[REDACTED]", placeholderColor);
-    }
-
-    /**
-     * Redacts this object from the PDF with custom replacement text and placeholder color.
-     *
-     * @param replacement      the replacement text for text content
-     * @param placeholderColor the color for image/path placeholders
-     * @return true if redaction was successful
-     */
-    public boolean redact(String replacement, Color placeholderColor) {
-        return client.redact(List.of(this), replacement, placeholderColor).success();
     }
 }

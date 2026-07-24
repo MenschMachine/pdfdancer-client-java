@@ -18,7 +18,7 @@ version = versionProps.getProperty("version") ?: "UNKNOWN"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
     withSourcesJar()
     withJavadocJar()
@@ -42,11 +42,20 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    failFast = true
+    failFast = false
+}
+
+tasks.register<JavaExec>("generateSyntheticTextReplacementFixture") {
+    group = "verification"
+    description = "Regenerates the committed synthetic text-replacement PDF fixture"
+    dependsOn(tasks.testClasses)
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("com.pdfdancer.client.rest.fixtures.SyntheticTextReplacementFixtureGenerator")
 }
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    options.release.set(17)
 }
 
 tasks.processResources {

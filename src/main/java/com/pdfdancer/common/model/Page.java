@@ -1,9 +1,6 @@
 package com.pdfdancer.common.model;
 
 import com.pdfdancer.common.model.path.PathSegment;
-import com.pdfdancer.common.model.text.Paragraph;
-import com.pdfdancer.common.model.text.TextElement;
-
 import java.util.List;
 
 /**
@@ -25,17 +22,6 @@ public class Page extends PDFObject {
      * Physical dimensions of the page including width and height.
      */
     private PageSize size;
-    /**
-     * Individual character elements present on this page.
-     */
-    private List<TextElement> PDFChars;
-    /**
-     * Paragraph-level text blocks identified on this page.
-     */
-    private List<Paragraph> paragraphs;
-    /**
-     * Image elements embedded in or overlaid on this page.
-     */
     private List<Image> images;
     /**
      * Vector path segments representing shapes and graphics on this page.
@@ -90,14 +76,6 @@ public class Page extends PDFObject {
 
     public void setSize(PageSize size) {
         this.size = size;
-    }
-
-    public List<Paragraph> getParagraphs() {
-        return paragraphs;
-    }
-
-    public void setParagraphs(List<Paragraph> paragraphs) {
-        this.paragraphs = paragraphs;
     }
 
     public List<Image> getImages() {

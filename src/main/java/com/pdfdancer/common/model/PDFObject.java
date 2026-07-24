@@ -2,11 +2,9 @@ package com.pdfdancer.common.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pdfdancer.common.model.path.Bezier;
 import com.pdfdancer.common.model.path.Line;
 import com.pdfdancer.common.model.path.Path;
-import com.pdfdancer.common.model.text.Paragraph;
-import com.pdfdancer.common.model.text.TextLine;
-import com.pdfdancer.common.model.path.Bezier;
 
 /**
  * Abstract base class for all PDF objects that can be manipulated within the API.
@@ -30,10 +28,6 @@ import com.pdfdancer.common.model.path.Bezier;
         @JsonSubTypes.Type(value = Path.class, name = "PATH"),
         @JsonSubTypes.Type(value = Form.class, name = "form"),
         @JsonSubTypes.Type(value = Form.class, name = "FORM"),
-        @JsonSubTypes.Type(value = Paragraph.class, name = "paragraph"),
-        @JsonSubTypes.Type(value = Paragraph.class, name = "PARAGRAPH"),
-        @JsonSubTypes.Type(value = TextLine.class, name = "textLine"),
-        @JsonSubTypes.Type(value = TextLine.class, name = "TEXT_LINE"),
         @JsonSubTypes.Type(value = Line.class, name = "line"),
         @JsonSubTypes.Type(value = Line.class, name = "LINE"),
         @JsonSubTypes.Type(value = Bezier.class, name = "bezier"),

@@ -101,6 +101,8 @@ public class PageSize {
      * @param height the height dimension
      */
     public PageSize(String name, double width, double height) {
+        validateDimension("width", width);
+        validateDimension("height", height);
         this.name = name;
         this.width = width;
         this.height = height;
@@ -118,6 +120,8 @@ public class PageSize {
     }
 
     public static PageSize of(double pageWidth, double pageHeight) {
+        validateDimension("pageWidth", pageWidth);
+        validateDimension("pageHeight", pageHeight);
         // Allow small floating point differences (e.g., from rounding or rotation)
         final double tolerance = 0.5;
         // List of known standard sizes
@@ -155,6 +159,7 @@ public class PageSize {
     }
 
     public void setWidth(double width) {
+        validateDimension("width", width);
         this.width = width;
     }
 
@@ -163,7 +168,14 @@ public class PageSize {
     }
 
     public void setHeight(double height) {
+        validateDimension("height", height);
         this.height = height;
+    }
+
+    private static void validateDimension(String name, double value) {
+        if (!Double.isFinite(value) || value <= 0) {
+            throw new IllegalArgumentException(name + " must be a finite positive number, got " + value);
+        }
     }
 
     @JsonIgnore

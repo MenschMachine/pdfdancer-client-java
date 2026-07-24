@@ -10,7 +10,6 @@ import com.pdfdancer.client.http.MediaType;
 import com.pdfdancer.client.http.MultipartBody;
 import com.pdfdancer.client.http.MutableHttpRequest;
 import com.pdfdancer.common.model.ErrorResponse;
-import com.pdfdancer.common.model.FontNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,8 +39,9 @@ import static java.net.http.HttpResponse.BodyHandlers;
  */
 public final class PdfDancerHttpClient {
 
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(60);
-    private static final String DEFAULT_API_VERSION = "1";
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
+    private static final String DEFAULT_API_VERSION = "2";
+    private static final String DEFAULT_API_PATH_PREFIX = "/v2";
     private static final String CLIENT_VERSION = loadClientVersion();
 
     private static String loadClientVersion() {
@@ -61,44 +61,38 @@ public final class PdfDancerHttpClient {
     private final URI baseUrl;
     private final ObjectMapper objectMapper;
     private final RetryConfig retryConfig;
-    private final String apiVersion;
 
-    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper, RetryConfig retryConfig, String apiVersion) {
+    private PdfDancerHttpClient(HttpClient delegate, URI baseUrl, ObjectMapper objectMapper, RetryConfig retryConfig) {
         this.delegate = delegate;
         this.baseUrl = baseUrl;
         this.objectMapper = objectMapper;
         this.retryConfig = retryConfig != null ? retryConfig : RetryConfig.defaultConfig();
-        this.apiVersion = apiVersion != null ? apiVersion : DEFAULT_API_VERSION;
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), null, null);
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), null);
     }
 
     public static PdfDancerHttpClient createDefault(URI baseUrl, RetryConfig retryConfig) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(DEFAULT_TIMEOUT)
                 .build();
-        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), retryConfig, null);
+        return new PdfDancerHttpClient(client, baseUrl, createObjectMapper(), retryConfig);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper(), null, null);
+        return new PdfDancerHttpClient(httpClient, baseUrl, createObjectMapper(), null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, null, null);
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, null);
     }
 
     public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper, RetryConfig retryConfig) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig, null);
-    }
-
-    public static PdfDancerHttpClient create(HttpClient httpClient, URI baseUrl, ObjectMapper mapper, RetryConfig retryConfig, String apiVersion) {
-        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig, apiVersion);
+        return new PdfDancerHttpClient(httpClient, baseUrl, mapper == null ? createObjectMapper() : mapper, retryConfig);
     }
 
     private static ObjectMapper createObjectMapper() {
@@ -130,7 +124,7 @@ public final class PdfDancerHttpClient {
 
                     // Check if we should retry based on status code
                     if (attempt < maxAttempts &&
-                        error instanceof PdfDancerClientException &&
+                        error instanceof HttpClientException &&
                         retryConfig.isRetryableStatusCode(status)) {
                         lastException = error;
                         sleep(calculateDelay(attempt, status, response));
@@ -163,8 +157,10 @@ public final class PdfDancerHttpClient {
                 Thread.currentThread().interrupt();
                 throw new PdfDancerClientException("HTTP request interrupted", e);
             } catch (IOException e) {
-                // Check if we should retry on connection error
-                if (attempt < maxAttempts && retryConfig.isRetryOnConnectionError()) {
+                boolean retryTransportError = e instanceof java.net.http.HttpTimeoutException
+                        ? retryConfig.isRetryOnTimeout()
+                        : retryConfig.isRetryOnConnectionError();
+                if (attempt < maxAttempts && retryTransportError) {
                     lastException = new PdfDancerClientException("HTTP request failed", e);
                     sleep(calculateDelay(attempt, 0, null));
                     continue;
@@ -269,12 +265,11 @@ public final class PdfDancerHttpClient {
     }
 
     private HttpRequest toJavaRequest(MutableHttpRequest<?> request) {
-        URI target = baseUrl.resolve(request.path());
+        URI target = baseUrl.resolve(versionedPath(request.path()));
         HttpRequest.Builder builder = HttpRequest.newBuilder(target)
                 .timeout(DEFAULT_TIMEOUT);
 
-        // Add API version header
-        builder.header("X-API-VERSION", apiVersion);
+        builder.header("X-API-VERSION", DEFAULT_API_VERSION);
         builder.header("X-PDFDancer-Client", CLIENT_VERSION);
 
         request.headers().forEach(builder::header);
@@ -311,6 +306,33 @@ public final class PdfDancerHttpClient {
         builder.header("Content-Type", contentType);
         builder.method(request.method(), BodyPublishers.ofByteArray(json));
         return builder.build();
+    }
+
+    private static String versionedPath(String path) {
+        URI uri = URI.create(path);
+        if (uri.isAbsolute()) {
+            return path;
+        }
+
+        String rawPath = uri.getRawPath();
+        if (rawPath == null || rawPath.isEmpty()) {
+            rawPath = "/";
+        }
+        if (!rawPath.startsWith("/")) {
+            rawPath = "/" + rawPath;
+        }
+        if (!rawPath.equals(DEFAULT_API_PATH_PREFIX) && !rawPath.startsWith(DEFAULT_API_PATH_PREFIX + "/")) {
+            rawPath = DEFAULT_API_PATH_PREFIX + rawPath;
+        }
+
+        StringBuilder result = new StringBuilder(rawPath);
+        if (uri.getRawQuery() != null) {
+            result.append('?').append(uri.getRawQuery());
+        }
+        if (uri.getRawFragment() != null) {
+            result.append('#').append(uri.getRawFragment());
+        }
+        return result.toString();
     }
 
     private java.net.http.HttpRequest.BodyPublisher multipartPublisher(MultipartBody multipart) {
@@ -354,6 +376,12 @@ public final class PdfDancerHttpClient {
 
         String message = error.map(ErrorResponse::message)
                 .orElseGet(() -> "Unexpected HTTP status: " + status);
+        if (status == 429) {
+            Duration retryAfter = response.headers().firstValue("Retry-After")
+                    .map(this::parseRetryAfter)
+                    .orElse(null);
+            return new RateLimitException(message, retryAfter);
+        }
         return new PdfDancerClientException(status, message);
     }
 

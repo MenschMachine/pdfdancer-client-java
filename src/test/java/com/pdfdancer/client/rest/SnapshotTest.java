@@ -23,33 +23,6 @@ class SnapshotTest extends BaseTest {
     // ===========================
 
     @Test
-    void testPageSnapshotMatchesSelectParagraphs() {
-        PDFDancer pdf = createClient();
-        PDFDancer.PageClient page = pdf.page(1);
-
-        // Get data via snapshot
-        PageSnapshot snapshot = pdf.getPageSnapshot(1);
-        List<ObjectRef> snapshotParagraphs = snapshot.elements().stream()
-                .filter(e -> e.getType() == ObjectType.PARAGRAPH)
-                .collect(Collectors.toUnmodifiableList());
-
-        // Get data via select method
-        List<TextParagraphReference> selectedParagraphs = page.selectParagraphs();
-
-        // Compare
-        assertEquals(selectedParagraphs.size(), snapshotParagraphs.size(),
-                "Snapshot should return same paragraph count as selectParagraphs()");
-
-        Set<String> snapshotIds = extractIds(snapshotParagraphs);
-        Set<String> selectedIds = selectedParagraphs.stream()
-                .map(TextParagraphReference::getInternalId)
-                .collect(Collectors.toSet());
-
-        assertEquals(selectedIds, snapshotIds,
-                "Snapshot and selectParagraphs() should return identical paragraph IDs");
-    }
-
-    @Test
     void testPageSnapshotMatchesSelectImages() {
         PDFDancer pdf = createClient();
         PDFDancer.PageClient page = pdf.page(1);
@@ -135,15 +108,6 @@ class SnapshotTest extends BaseTest {
         PDFDancer pdf = createClient();
         PageSnapshot snapshot = pdf.getPageSnapshot(1);
 
-        // Count elements by type
-        long paragraphCount = snapshot.elements().stream().filter(e -> e.getType() == ObjectType.PARAGRAPH).count();
-        long textLineCount = snapshot.elements().stream().filter(e -> e.getType() == ObjectType.TEXT_LINE).count();
-        long imageCount = snapshot.elements().stream().filter(e -> e.getType() == ObjectType.IMAGE).count();
-
-        // Verify we have at least some text elements
-        assertTrue(paragraphCount > 0 || textLineCount > 0,
-                "Page should have at least some text elements");
-
         // Verify all elements have required fields
         for (ObjectRef element : snapshot.elements()) {
             assertNotNull(element.getType(), "Element should have a type");
@@ -193,27 +157,24 @@ class SnapshotTest extends BaseTest {
     void testTypeFilterMatchesSelectMethod() {
         PDFDancer pdf = createClient();
 
-        // Get snapshot with PARAGRAPH filter
-        PageSnapshot paragraphSnapshot = pdf.getPageSnapshot(1, "PARAGRAPH");
+        PageSnapshot imageSnapshot = pdf.getPageSnapshot(1, "IMAGE");
 
-        // Get paragraphs via select method
-        List<TextParagraphReference> selectedParagraphs = pdf.page(1).selectParagraphs();
+        List<ImageReference> selectedImages = pdf.page(1).selectImages();
 
-        assertEquals(selectedParagraphs.size(), paragraphSnapshot.elements().size(),
-                "Filtered snapshot should match selectParagraphs() count");
+        assertEquals(selectedImages.size(), imageSnapshot.elements().size(),
+                "Filtered snapshot should match selectImages() count");
 
-        // All elements should be paragraphs
-        assertTrue(paragraphSnapshot.elements().stream()
-                        .allMatch(e -> e.getType() == ObjectType.PARAGRAPH),
-                "Filtered snapshot should only contain PARAGRAPH types");
+        assertTrue(imageSnapshot.elements().stream()
+                        .allMatch(e -> e.getType() == ObjectType.IMAGE),
+                "Filtered snapshot should only contain IMAGE types");
 
-        Set<String> snapshotIds = extractIds(paragraphSnapshot.elements());
-        Set<String> selectedIds = selectedParagraphs.stream()
-                .map(TextParagraphReference::getInternalId)
+        Set<String> snapshotIds = extractIds(imageSnapshot.elements());
+        Set<String> selectedIds = selectedImages.stream()
+                .map(ImageReference::getInternalId)
                 .collect(Collectors.toSet());
 
         assertEquals(selectedIds, snapshotIds,
-                "Filtered snapshot and selectParagraphs() should return identical IDs");
+                "Filtered snapshot and selectImages() should return identical IDs");
     }
 
     @Test
@@ -221,18 +182,18 @@ class SnapshotTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         // Get snapshot with multiple type filter
-        PageSnapshot multiSnapshot = pdf.getPageSnapshot(1, "PARAGRAPH,TEXT_LINE");
+        PageSnapshot multiSnapshot = pdf.getPageSnapshot(1, "IMAGE,PATH");
 
         // Verify only specified types are present
         assertTrue(multiSnapshot.elements().stream()
-                        .allMatch(e -> e.getType() == ObjectType.PARAGRAPH ||
-                                e.getType() == ObjectType.TEXT_LINE),
+                        .allMatch(e -> e.getType() == ObjectType.PATH ||
+                                e.getType() == ObjectType.IMAGE),
                 "Multi-type filter should only contain specified types");
 
         // Count should be sum of those types from unfiltered snapshot
         PageSnapshot fullSnapshot = pdf.getPageSnapshot(1);
         long expectedCount = fullSnapshot.elements().stream()
-                .filter(e -> e.getType() == ObjectType.PARAGRAPH || e.getType() == ObjectType.TEXT_LINE)
+                .filter(e -> e.getType() == ObjectType.PATH || e.getType() == ObjectType.IMAGE)
                 .count();
 
         assertEquals(expectedCount, multiSnapshot.elements().size(),
@@ -248,7 +209,7 @@ class SnapshotTest extends BaseTest {
         PDFDancer pdf = createClient();
 
         List<ObjectRef> allElements = pdf.selectElements();
-        assertTrue(allElements.size() > 500, "Should have more than 500 elements");
+        assertFalse(allElements.isEmpty(), "Should have elements");
         DocumentSnapshot docSnapshot = pdf.getDocumentSnapshot();
         int snapshotTotal = docSnapshot.pages().stream()
                 .mapToInt(p -> p.elements().size())

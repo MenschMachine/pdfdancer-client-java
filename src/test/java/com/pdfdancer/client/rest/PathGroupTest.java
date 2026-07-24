@@ -25,6 +25,7 @@ public class PathGroupTest extends BaseTest {
 
         assertNotNull(group.getGroupId());
         assertEquals(2, group.getPathCount());
+        assertEquals(1, group.getPageNumber());
         assertNotNull(group.getBoundingBox());
 
         // Grouping without move should not change the PDF

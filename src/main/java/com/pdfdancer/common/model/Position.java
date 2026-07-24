@@ -1,10 +1,5 @@
 package com.pdfdancer.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Represents spatial positioning and location information for PDF objects.
  * This class encapsulates various ways to specify object locations within PDF documents,
@@ -30,8 +25,6 @@ public class Position {
      * Bounding rectangle defining the spatial extent of this getPosition.
      */
     private BoundingRect boundingRect;
-    private String textStartsWith;
-    private String textPattern;
 
     /**
      * Default constructor for serialization frameworks.
@@ -119,14 +112,6 @@ public class Position {
         this.boundingRect = new BoundingRect(point2D.x(), point2D.y(), 0, 0);
     }
 
-    public String getTextStartsWith() {
-        return textStartsWith;
-    }
-
-    public void setTextStartsWith(String textStartsWith) {
-        this.textStartsWith = textStartsWith;
-    }
-
     public void moveX(double xOffset) {
         atPosition(new Point(getX() + xOffset, getY()));
     }
@@ -148,25 +133,9 @@ public class Position {
         this.name = name;
     }
 
-    public String getTextPattern() {
-        return this.textPattern;
-    }
-
-    public void setTextPattern(String pattern) {
-        this.textPattern = pattern;
-    }
-
-    public boolean textMatches(String text) {
-        Pattern p = Pattern.compile(this.textPattern, Pattern.DOTALL);
-        Matcher m = p.matcher(text);
-        return m.matches();
-    }
-
     public Position copy() {
         Position p = new Position(pageNumber, boundingRect, mode);
-        p.textStartsWith = textStartsWith;
         p.shape = shape;
-        p.textPattern = textPattern;
         return p;
     }
 
@@ -209,15 +178,6 @@ public class Position {
      */
     public Integer getPageNumber() {
         return pageNumber;
-    }
-
-    /**
-     * Use {@link #getPageNumber()} instead.
-     */
-    @Deprecated
-    @JsonIgnore
-    public Integer getPageIndex() {
-        return pageNumber != null ? pageNumber - 1 : null;
     }
 
     /**

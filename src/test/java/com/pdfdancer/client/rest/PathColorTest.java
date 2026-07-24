@@ -34,7 +34,7 @@ public class PathColorTest extends BaseTest {
         Color newStrokeColor = new Color(255, 0, 0);
         boolean result = path.edit()
                 .strokeColor(newStrokeColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Path color modification should succeed");
 
@@ -58,7 +58,7 @@ public class PathColorTest extends BaseTest {
         Color newFillColor = new Color(0, 0, 255);
         boolean result = path.edit()
                 .fillColor(newFillColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Path color modification should succeed");
 
@@ -86,7 +86,7 @@ public class PathColorTest extends BaseTest {
         Color newStrokeColor = new Color(255, 0, 0);
         boolean result = path.edit()
                 .strokeColor(newStrokeColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Path color modification should succeed");
 
@@ -132,7 +132,7 @@ public class PathColorTest extends BaseTest {
         boolean result = path.edit()
                 .strokeColor(newStrokeColor)
                 .fillColor(newFillColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Path color modification should succeed");
 
@@ -157,7 +157,7 @@ public class PathColorTest extends BaseTest {
         Color newStrokeColor = new Color(255, 0, 0, 128);
         boolean result = path.edit()
                 .strokeColor(newStrokeColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Path color modification with alpha should succeed");
 
@@ -182,7 +182,7 @@ public class PathColorTest extends BaseTest {
         Color newStrokeColor = new Color(128, 128, 128);
         boolean result = firstPath.edit()
                 .strokeColor(newStrokeColor)
-                .apply();
+                .apply().success();
 
         assertTrue(result, "Modifying first path should succeed");
 
@@ -212,7 +212,7 @@ public class PathColorTest extends BaseTest {
         Color originalFillColor = path.getFillColor();
 
         // Call apply() without setting any colors - should be a no-op
-        boolean result = path.edit().apply();
+        boolean result = path.edit().apply().success();
 
         assertTrue(result, "No-op path edit (no colors set) should succeed");
 

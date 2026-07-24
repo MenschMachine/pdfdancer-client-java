@@ -15,10 +15,10 @@ import com.fasterxml.jackson.annotation.*;
         property = "objectRefType"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = TextTypeObjectRef.class, name = "PARAGRAPH"),
-        @JsonSubTypes.Type(value = TextTypeObjectRef.class, name = "TEXT_LINE"),
-        @JsonSubTypes.Type(value = TextTypeObjectRef.class, name = "TEXT_ELEMENT"),
-        @JsonSubTypes.Type(value = TextTypeObjectRef.class, name = "textElement"),
+        @JsonSubTypes.Type(value = ObjectRef.class, name = "TEXT_LINE"),
+        @JsonSubTypes.Type(value = ObjectRef.class, name = "TEXT_ELEMENT"),
+        @JsonSubTypes.Type(value = ObjectRef.class, name = "WORD"),
+        @JsonSubTypes.Type(value = ObjectRef.class, name = "textElement"),
         @JsonSubTypes.Type(value = PageRef.class, name = "PAGE"),
         @JsonSubTypes.Type(value = FormFieldRef.class, name = "FORM_FIELD"),
         @JsonSubTypes.Type(value = FormFieldRef.class, name = "TEXT_FIELD"),

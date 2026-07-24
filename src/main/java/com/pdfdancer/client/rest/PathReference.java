@@ -3,6 +3,7 @@ package com.pdfdancer.client.rest;
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.PathObjectRef;
+import com.pdfdancer.common.response.CommandResult;
 
 public class PathReference extends BaseReference {
 
@@ -59,7 +60,7 @@ public class PathReference extends BaseReference {
             return this;
         }
 
-        public boolean apply() {
+        public CommandResult apply() {
             Color strokeColorToUse = strokeColor != null ? strokeColor : pathRef.getStrokeColor();
             Color fillColorToUse = fillColor != null ? fillColor : pathRef.getFillColor();
             return client.modifyPath(pathRef, strokeColorToUse, fillColorToUse);

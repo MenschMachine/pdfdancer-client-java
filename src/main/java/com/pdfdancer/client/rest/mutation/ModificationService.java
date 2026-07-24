@@ -7,15 +7,11 @@ import com.pdfdancer.client.rest.PdfDancerHttpClient;
 import com.pdfdancer.common.model.*;
 import com.pdfdancer.common.request.*;
 import com.pdfdancer.common.response.CommandResult;
-import com.pdfdancer.common.response.RedactResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates all mutation HTTP operations. Stateless and reusable per session.
  */
 public final class ModificationService {
-    private static final Logger log = LoggerFactory.getLogger(ModificationService.class);
     private final String token;
     private final String sessionId;
     private final PdfDancerHttpClient.Blocking blocking;
@@ -92,52 +88,6 @@ public final class ModificationService {
         );
     }
 
-    public boolean modifyParagraph(ObjectRef ref, com.pdfdancer.common.model.text.Paragraph newParagraph) {
-        String path = "/pdf/modify";
-        MutableHttpRequest<ModifyRequest> request = HttpRequest.PUT(path, new ModifyRequest(ref, newParagraph))
-                .contentType(MediaType.APPLICATION_JSON_TYPE)
-                .bearerAuth(token)
-                .header("X-Session-Id", sessionId);
-        CommandResult result = blocking.retrieve(request, CommandResult.class);
-        return result.success();
-    }
-
-    public boolean modifyTextLine(ObjectRef ref, String newTextLine) {
-        String path = "/pdf/text/line";
-        CommandResult result = blocking.retrieve(
-                HttpRequest.PUT(path, new ModifyTextRequest(ref, newTextLine))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                CommandResult.class
-        );
-        return result.success();
-    }
-
-    public boolean modifyTextLine(ObjectRef ref, com.pdfdancer.common.model.text.TextLine newTextLine) {
-        String path = "/pdf/modify";
-        CommandResult result = blocking.retrieve(
-                HttpRequest.PUT(path, new ModifyRequest(ref, newTextLine))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                CommandResult.class
-        );
-        return result.success();
-    }
-
-    public boolean modifyParagraph(ObjectRef ref, String newText) {
-        String path = "/pdf/text/paragraph";
-        CommandResult result = blocking.retrieve(
-                HttpRequest.PUT(path, new ModifyTextRequest(ref, newText))
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                CommandResult.class
-        );
-        return result.success();
-    }
-
     public Boolean changeFormField(FormFieldRef objectRef, String value) {
         String path = "/pdf/modify/formField";
         MutableHttpRequest<ChangeFormFieldRequest> request = HttpRequest.PUT(path, new ChangeFormFieldRequest(objectRef, value))
@@ -147,14 +97,13 @@ public final class ModificationService {
         return blocking.retrieve(request, Boolean.class);
     }
 
-    public boolean modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
+    public CommandResult modifyPath(ObjectRef ref, Color strokeColor, Color fillColor) {
         String path = "/pdf/modify/path";
         MutableHttpRequest<ModifyPathRequest> request = HttpRequest.PUT(path, new ModifyPathRequest(ref, strokeColor, fillColor))
                 .contentType(MediaType.APPLICATION_JSON_TYPE)
                 .bearerAuth(token)
                 .header("X-Session-Id", sessionId);
-        CommandResult result = blocking.retrieve(request, CommandResult.class);
-        return result.success();
+        return blocking.retrieve(request, CommandResult.class);
     }
 
     public PageRef addPage(AddPageRequest request) {
@@ -179,27 +128,15 @@ public final class ModificationService {
         );
     }
 
-    public RedactResponse redact(RedactRequest request) {
-        String path = "/pdf/redact";
-        return blocking.retrieve(
-                HttpRequest.POST(path, request)
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                RedactResponse.class
-        );
-    }
-
-    public boolean transformImage(ImageTransformRequest request) {
+    public CommandResult transformImage(ImageTransformRequest request) {
         String path = "/pdf/image/transform";
-        CommandResult result = blocking.retrieve(
+        return blocking.retrieve(
                 HttpRequest.PUT(path, request)
                         .contentType(MediaType.APPLICATION_JSON_TYPE)
                         .bearerAuth(token)
                         .header("X-Session-Id", sessionId),
                 CommandResult.class
         );
-        return result.success();
     }
 
     public PathGroupInfo createPathGroup(CreatePathGroupRequest request) {
@@ -257,16 +194,4 @@ public final class ModificationService {
         );
     }
 
-    public boolean replaceTemplates(TemplateReplaceRequest request) {
-        String path = "/template/replace";
-        log.debug("Replacing templates with {} replacements", request.replacements().size());
-        Boolean result = blocking.retrieve(
-                HttpRequest.POST(path, request)
-                        .contentType(MediaType.APPLICATION_JSON_TYPE)
-                        .bearerAuth(token)
-                        .header("X-Session-Id", sessionId),
-                Boolean.class
-        );
-        return Boolean.TRUE.equals(result);
-    }
 }

@@ -27,7 +27,7 @@ public class Color {
     /**
      * Alpha (transparency) component (0-255, where 255 is fully opaque).
      */
-    private int alpha;
+    private int alpha = 255;
 
     /**
      * Default constructor creating a transparent black color.
@@ -56,6 +56,10 @@ public class Color {
      * @param alpha alpha component (0-255, where 255 is fully opaque)
      */
     public Color(int red, int green, int blue, int alpha) {
+        validate(red);
+        validate(green);
+        validate(blue);
+        validate(alpha);
         this.red = red;
         this.green = green;
         this.blue = blue;
@@ -67,6 +71,7 @@ public class Color {
     }
 
     public void setRed(int red) {
+        validate(red);
         this.red = red;
     }
 
@@ -75,6 +80,7 @@ public class Color {
     }
 
     public void setGreen(int green) {
+        validate(green);
         this.green = green;
     }
 
@@ -83,6 +89,7 @@ public class Color {
     }
 
     public void setBlue(int blue) {
+        validate(blue);
         this.blue = blue;
     }
 
@@ -91,7 +98,14 @@ public class Color {
     }
 
     public void setAlpha(int alpha) {
+        validate(alpha);
         this.alpha = alpha;
+    }
+
+    private static void validate(int component) {
+        if (component < 0 || component > 255) {
+            throw new IllegalArgumentException("Color component must be between 0 and 255, got " + component);
+        }
     }
 
     @Override

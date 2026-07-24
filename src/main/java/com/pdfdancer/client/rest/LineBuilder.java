@@ -21,7 +21,7 @@ import com.pdfdancer.common.model.path.Path;
  *   <li>{@link #dash(double...)} and {@link #dashWithPhase(double, double...)} — dash pattern and phase, in user space units.</li>
  * </ul>
  *
- * <p>Defaults: if color/width are not set explicitly, backend defaults apply (typically black, width 1.0).</p>
+ * <p>Defaults: black stroke with a width of 1 point.</p>
  *
  * <p>Thread-safety: instances are not thread-safe. Intended usage is single-threaded, typically as
  * part of a fluent chain per line.</p>
@@ -32,8 +32,8 @@ public class LineBuilder {
     private final int pageNumber;
     private Point from;
     private Point to;
-    private Color strokeColor;
-    private Double strokeWidth;
+    private Color strokeColor = Color.BLACK;
+    private Double strokeWidth = 1.0;
     private double[] dashArray;
     private Double dashPhase;
 
@@ -100,6 +100,9 @@ public class LineBuilder {
      * @return this builder for chaining
      */
     public LineBuilder lineWidth(double width) {
+        if (!Double.isFinite(width) || width < 0) {
+            throw new IllegalArgumentException("Line width must be finite and nonnegative");
+        }
         this.strokeWidth = width;
         return this;
     }

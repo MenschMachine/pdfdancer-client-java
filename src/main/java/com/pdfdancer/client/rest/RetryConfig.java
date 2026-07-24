@@ -49,7 +49,11 @@ public final class RetryConfig {
      * @return a RetryConfig with maxAttempts = 1 (no retries)
      */
     public static RetryConfig noRetry() {
-        return builder().maxAttempts(1).build();
+        Builder builder = builder().maxAttempts(1)
+                .retryOnTimeout(false)
+                .retryOnConnectionError(false);
+        builder.retryableStatusCodes.clear();
+        return builder.build();
     }
 
     /**
@@ -169,13 +173,14 @@ public final class RetryConfig {
      * Builder for constructing RetryConfig instances.
      */
     public static final class Builder {
-        private int maxAttempts = 1;
-        private Duration initialDelay = Duration.ofMillis(100);
+        private int maxAttempts = 3;
+        private Duration initialDelay = Duration.ofSeconds(1);
         private double backoffMultiplier = 2.0;
-        private Duration maxDelay = Duration.ofSeconds(10);
-        private Set<Integer> retryableStatusCodes = new HashSet<>();
-        private boolean retryOnTimeout = false;
-        private boolean retryOnConnectionError = false;
+        private Duration maxDelay = Duration.ofSeconds(5);
+        private Set<Integer> retryableStatusCodes = new HashSet<>(
+                Set.of(408, 429, 500, 502, 503, 504, 520));
+        private boolean retryOnTimeout = true;
+        private boolean retryOnConnectionError = true;
 
         private Builder() {
         }

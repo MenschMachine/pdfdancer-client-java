@@ -2,6 +2,8 @@ package com.pdfdancer.client.rest;
 
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.PageRef;
+import com.pdfdancer.common.request.PdfColorRequest;
+import com.pdfdancer.common.request.TextInsertRequest;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -36,13 +38,7 @@ public class CoordinateSystemTest extends BaseTest {
                     .lineWidth(0.5)
                     .add();
 
-            // Numeric label above the tick
-            pdf.newParagraph()
-                    .text(String.valueOf((int) x))
-                    .font("Courier", 6)
-                    .color(Color.BLACK)
-                    .at(1, x + 2, tickLen + 6)
-                    .add();
+            addTextLabel(pdf, String.valueOf((int) x), x + 2, tickLen + 6, 6, PdfColorRequest.gray(0));
         }
 
         // Y-axis ticks and labels (horizontal ticks right from x=0)
@@ -54,13 +50,7 @@ public class CoordinateSystemTest extends BaseTest {
                     .lineWidth(0.5)
                     .add();
 
-            // Numeric label right of the tick
-            pdf.newParagraph()
-                    .text(String.valueOf((int) y))
-                    .font("Courier", 6)
-                    .color(Color.BLACK)
-                    .at(1, tickLen + 6, y + 2)
-                    .add();
+            addTextLabel(pdf, String.valueOf((int) y), tickLen + 6, y + 2, 6, PdfColorRequest.gray(0));
         }
         // Very tiny coordinate grid lines (faint), ~10pt spacing, ~20% opacity if supported
         double gridStep = 10.0;
@@ -85,16 +75,11 @@ public class CoordinateSystemTest extends BaseTest {
         }
 
         // -- Text markers at key positions --
-        pdf.newParagraph().text("TOP-LEFT").font("Courier", 9).color(new Color(200, 0, 0))
-                .at(1, 4, height - 12).add();
-        pdf.newParagraph().text("TOP-RIGHT").font("Courier", 9).color(new Color(0, 120, 200))
-                .at(1, Math.max(0, width - 100), height - 12).add();
-        pdf.newParagraph().text("BOTTOM-LEFT").font("Courier", 9).color(new Color(0, 160, 0))
-                .at(1, 4, 4).add();
-        pdf.newParagraph().text("BOTTOM-RIGHT").font("Courier", 9).color(new Color(120, 0, 160))
-                .at(1, Math.max(0, width - 110), 4).add();
-        pdf.newParagraph().text("CENTER").font("Courier", 10).color(Color.BLACK)
-                .at(1, width / 2, height / 2).add();
+        addTextLabel(pdf, "TOP-LEFT", 4, height - 12, 9, PdfColorRequest.rgb(0.78, 0, 0));
+        addTextLabel(pdf, "TOP-RIGHT", Math.max(0, width - 100), height - 12, 9, PdfColorRequest.rgb(0, 0.47, 0.78));
+        addTextLabel(pdf, "BOTTOM-LEFT", 4, 4, 9, PdfColorRequest.rgb(0, 0.63, 0));
+        addTextLabel(pdf, "BOTTOM-RIGHT", Math.max(0, width - 110), 4, 9, PdfColorRequest.rgb(0.47, 0, 0.63));
+        addTextLabel(pdf, "CENTER", width / 2, height / 2, 10, PdfColorRequest.gray(0));
 
         // -- Images at various positions (80x80 logo) --
         File logo = new File("src/test/resources/fixtures/logo-80.png");
@@ -109,10 +94,13 @@ public class CoordinateSystemTest extends BaseTest {
         // Center
         pdf.newImage().fromFile(logo).at(1, Math.max(0, width / 2 - 40), Math.max(0, height / 2 - 40)).add();
 
-        // Spot-check text and image placements
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("TOP-LEFT").isEmpty(), "Missing TOP-LEFT text");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("CENTER").isEmpty(), "Missing CENTER text");
-        // Images: count
+        new PDFAssertions(pdf)
+                .assertPdfTextContains("TOP-LEFT")
+                .assertPdfTextContains("TOP-RIGHT")
+                .assertPdfTextContains("BOTTOM-LEFT")
+                .assertPdfTextContains("BOTTOM-RIGHT")
+                .assertPdfTextContains("CENTER")
+                .assertPdfTextContains("50");
         assertEquals(5, pdf.page(1).selectImages().size(), "Expected 5 images at corners and center");
 
 
@@ -121,10 +109,23 @@ public class CoordinateSystemTest extends BaseTest {
         assertFalse(pdf.page(1).selectPathsAt(50, 0).isEmpty(), "Missing X tick at x=50");
         assertFalse(pdf.page(1).selectPathsAt(0, 50).isEmpty(), "Missing Y tick at y=50");
         assertFalse(pdf.page(1).selectPathsAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("50").isEmpty(), "Missing '50' label(s)");
 
         // Save for visual inspection
         pdf.save("/tmp/coordinate-system.pdf");
     }
-}
 
+    private static void addTextLabel(PDFDancer pdf,
+                                     String text,
+                                     double x,
+                                     double y,
+                                     double size,
+                                     PdfColorRequest color) {
+        pdf.page(1).text().insert(TextInsertRequest.builder()
+                .coordinate(x, y)
+                .insert(text)
+                .font("Courier")
+                .size(size)
+                .fillColor(color)
+                .build());
+    }
+}

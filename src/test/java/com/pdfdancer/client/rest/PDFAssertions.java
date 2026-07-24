@@ -4,10 +4,16 @@ import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Orientation;
 import com.pdfdancer.common.model.PageRef;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.TextPosition;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -57,189 +63,6 @@ public class PDFAssertions {
     public void assertElementMatches(Predicate<? super ObjectRef> predicate, int pageIndex) {
         boolean found = pdf.getPageSnapshot(pageIndex).elements().stream().anyMatch(predicate);
         assertTrue(found, "Element not found");
-    }
-
-    // ===========================
-    // Text Assertions
-    // ===========================
-
-    public PDFAssertions assertTextHasColor(String text, Color color, int page) {
-        assertTextlineHasColor(text, color, page);
-
-        return withParagraphDump(page, () -> {
-            List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(text);
-            assertEquals(1, paragraphs.size(),
-                    String.format("Expected 1 paragraph but got %d", paragraphs.size()));
-
-            TextParagraphReference ref = paragraphs.get(0);
-            assertTrue(ref.getText().contains(text));
-            assertEquals(color, ref.getColor(),
-                    String.format("%s != %s", color, ref.getColor()));
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextHasFont(String text, String fontName, double fontSize, int page) {
-        assertTextlineHasFont(text, fontName, fontSize, page);
-
-        return withParagraphDump(page, () -> {
-            List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
-            assertEquals(1, paragraphs.size(),
-                    String.format("Expected 1 paragraph but got %d", paragraphs.size()));
-
-            TextParagraphReference ref = paragraphs.get(0);
-            assertEquals(fontName, ref.getFontName(),
-                    String.format("Expected %s to match %s", ref.getFontName(), fontName));
-            assertEquals(fontSize, ref.getFontSize(), 0.001);
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertParagraphIsAt(String text, double x, double y, int page) {
-        return assertParagraphIsAt(text, x, y, page, 2d); // adjust for baseline vs. bounding box differences
-    }
-
-    public PDFAssertions assertParagraphIsAt(String text, double x, double y, int page, double epsilon) {
-        List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
-        assertEquals(1, paragraphs.size(),
-                String.format("Expected 1 paragraph but got %d", paragraphs.size()));
-
-        TextParagraphReference ref = paragraphs.get(0);
-        assertEquals(x, ref.getPosition().getX(), epsilon,
-                String.format("%f != %f", x, ref.getPosition().getX()));
-        assertEquals(y, ref.getPosition().getY(), epsilon,
-                String.format("%f != %f", y, ref.getPosition().getY()));
-
-        List<TextParagraphReference> byPosition = pdf.page(page).selectParagraphsAt(x, y, epsilon);
-        assertEquals(1, byPosition.size(),
-                String.format("Expected 1 paragraph but got %d", byPosition.size()));
-        assertEquals(paragraphs.get(0).getInternalId(), byPosition.get(0).getInternalId());
-
-        return this;
-    }
-
-    public PDFAssertions assertTextHasFontMatching(String text, String fontName, double fontSize, int page) {
-        assertTextlineHasFontMatching(text, fontName, fontSize, page);
-
-        List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
-        assertEquals(1, paragraphs.size(),
-                String.format("Expected 1 paragraph but got %d", paragraphs.size()));
-
-        TextParagraphReference ref = paragraphs.get(0);
-        assertTrue(ref.getFontName().contains(fontName),
-                String.format("Expected %s to match %s", ref.getFontName(), fontName));
-        assertEquals(fontSize, ref.getFontSize(), 0.001);
-
-        return this;
-    }
-
-    // ===========================
-    // Text Line Assertions
-    // ===========================
-
-    public PDFAssertions assertTextlineHasColor(String text, Color color, int page) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
-            assertEquals(1, lines.size(),
-                    String.format("Expected 1 line but got %d", lines.size()));
-
-            TextLineReference ref = lines.get(0);
-            assertEquals(color, ref.getColor(),
-                    String.format("%s != %s", color, ref.getColor()));
-            assertTrue(ref.getText().contains(text));
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineHasFont(String text, String fontName, double fontSize, int page) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
-            assertEquals(1, lines.size(),
-                    String.format("Expected 1 line but got %d", lines.size()));
-
-            TextLineReference ref = lines.get(0);
-            assertEquals(fontName, ref.getFontName(),
-                    String.format("Expected %s but got %s", fontName, ref.getFontName()));
-            assertEquals(fontSize, ref.getFontSize(), 0.001,
-                    String.format("%f != %f", fontSize, ref.getFontSize()));
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineHasFontMatching(String text, String fontName, double fontSize, int page) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
-            assertEquals(1, lines.size(),
-                    String.format("Expected 1 line but got %d", lines.size()));
-
-            TextLineReference ref = lines.get(0);
-            assertTrue(ref.getFontName().contains(fontName),
-                    String.format("Expected %s to match %s", ref.getFontName(), fontName));
-            assertEquals(fontSize, ref.getFontSize(), 0.001);
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineIsAt(String text, double x, double y, int page) {
-        return assertTextlineIsAt(text, x, y, page, 1e-6);
-    }
-
-    public PDFAssertions assertTextlineIsAt(String text, double x, double y, int page, double epsilon) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
-            assertEquals(1, lines.size());
-
-            TextLineReference ref = lines.get(0);
-            assertEquals(x, ref.getPosition().getX(), epsilon,
-                    String.format("%f != %f", x, ref.getPosition().getX()));
-            assertEquals(y, ref.getPosition().getY(), epsilon,
-                    String.format("%f != %f", y, ref.getPosition().getY()));
-
-            List<TextLineReference> byPosition = pdf.page(page).selectTextLinesAt(x, y, epsilon);
-            assertEquals(1, byPosition.size());
-            assertEquals(lines.get(0).getInternalId(), byPosition.get(0).getInternalId());
-
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineDoesNotExist(String text, int page) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesStartingWith(text);
-            assertEquals(0, lines.size());
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineExists(String pattern, int page) {
-        return withTextLineDump(page, () -> {
-            List<TextLineReference> lines = pdf.page(page).selectTextLinesMatching(".*" + pattern + ".*");
-            assert (!lines.isEmpty());
-            return this;
-        });
-    }
-
-    public PDFAssertions assertParagraphExists(String text, int page) {
-        return withParagraphDump(page, () -> {
-            List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
-            assertEquals(1, paragraphs.size(),
-                    String.format("No paragraphs starting with %s found on page %d", text, page));
-            return this;
-        });
-    }
-
-    public PDFAssertions assertParagraphNotExists(String text, int page) {
-        return withParagraphDump(page, () -> {
-            List<TextParagraphReference> paragraphs = pdf.page(page).selectParagraphsMatching(".*" + text + ".*");
-            assertEquals(0, paragraphs.size(),
-                    String.format("Paragraphs starting with %s found on page %d", text, page));
-            return this;
-        });
     }
 
     // ===========================
@@ -416,6 +239,122 @@ public class PDFAssertions {
     }
 
     // ===========================
+    // PDF Text Content Assertions
+    // ===========================
+
+    public PDFAssertions assertPdfTextContains(String text) {
+        assertTrue(extractPdfText().contains(text),
+                String.format("Expected saved PDF text to contain '%s'", text));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextContains(String text, int page) {
+        assertTrue(extractPdfText(page, page).contains(text),
+                String.format("Expected saved PDF page %d text to contain '%s'", page, text));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextDoesNotContain(String text) {
+        assertFalse(extractPdfText().contains(text),
+                String.format("Expected saved PDF text not to contain '%s'", text));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextDoesNotContain(String text, int page) {
+        assertFalse(extractPdfText(page, page).contains(text),
+                String.format("Expected saved PDF page %d text not to contain '%s'", page, text));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextOccurrenceCount(String text, int expectedCount) {
+        assertEquals(expectedCount, countOccurrences(extractPdfText(), text),
+                String.format("Expected saved PDF text to contain '%s' %d times", text, expectedCount));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextOccurrenceCount(String text, int expectedCount, int page) {
+        assertEquals(expectedCount, countOccurrences(extractPdfText(page, page), text),
+                String.format("Expected saved PDF page %d text to contain '%s' %d times", page, text, expectedCount));
+        return this;
+    }
+
+    public PDFAssertions assertPdfTextUsesFont(String text, String expectedFontName, int page) {
+        try (PDDocument document = Loader.loadPDF(savedPdfFile)) {
+            TextFontCollector collector = new TextFontCollector();
+            collector.setStartPage(page);
+            collector.setEndPage(page);
+            collector.getText(document);
+
+            int occurrence = collector.text.indexOf(text);
+            assertTrue(occurrence >= 0,
+                    String.format("Expected saved PDF page %d to contain '%s'", page, text));
+
+            Set<String> actualFontNames = new LinkedHashSet<>();
+            for (int i = occurrence; i < occurrence + text.length(); i++) {
+                if (!Character.isWhitespace(collector.text.charAt(i))) {
+                    actualFontNames.add(removeSubsetPrefix(collector.fontNames.get(i)));
+                }
+            }
+            assertEquals(Set.of(expectedFontName), actualFontNames,
+                    String.format("Fonts used by '%s' on saved PDF page %d", text, page));
+            return this;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to inspect text fonts in saved PDF", e);
+        }
+    }
+
+    private static String removeSubsetPrefix(String fontName) {
+        return fontName != null && fontName.matches("^[A-Z]{6}\\+.+")
+                ? fontName.substring(7)
+                : fontName;
+    }
+
+    private static final class TextFontCollector extends PDFTextStripper {
+        private final StringBuilder text = new StringBuilder();
+        private final List<String> fontNames = new java.util.ArrayList<>();
+
+        private TextFontCollector() throws IOException {
+        }
+
+        @Override
+        protected void writeString(String value, List<TextPosition> positions) {
+            for (TextPosition position : positions) {
+                String unicode = position.getUnicode();
+                String fontName = position.getFont().getName();
+                text.append(unicode);
+                for (int i = 0; i < unicode.length(); i++) {
+                    fontNames.add(fontName);
+                }
+            }
+        }
+    }
+
+    private String extractPdfText() {
+        return extractPdfText(1, Integer.MAX_VALUE);
+    }
+
+    private String extractPdfText(int startPage, int endPage) {
+        try (PDDocument document = Loader.loadPDF(savedPdfFile)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            stripper.setStartPage(startPage);
+            stripper.setEndPage(endPage);
+            return stripper.getText(document);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to extract text from saved PDF", e);
+        }
+    }
+
+    private int countOccurrences(String text, String needle) {
+        int count = 0;
+        int index = 0;
+        while ((index = text.indexOf(needle, index)) >= 0) {
+            count++;
+            index += needle.length();
+        }
+        return count;
+    }
+
+    // ===========================
     // Image Assertions
     // ===========================
 
@@ -468,6 +407,20 @@ public class PDFAssertions {
 
     public PDFAssertions assertImageSize(double x, double y, int page, double expectedWidth, double expectedHeight) {
         return assertImageSize(x, y, page, expectedWidth, expectedHeight, 1.0);
+    }
+
+    public PDFAssertions assertImageSize(String internalId, double expectedWidth, double expectedHeight,
+                                         int page, double epsilon) {
+        ImageReference image = pdf.page(page).selectImages().stream()
+                .filter(candidate -> internalId.equals(candidate.getInternalId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Image with ID " + internalId + " not found on page " + page));
+        assertEquals(expectedWidth, image.getWidth(), epsilon,
+                String.format("Image %s width: expected %f but got %f", internalId, expectedWidth, image.getWidth()));
+        assertEquals(expectedHeight, image.getHeight(), epsilon,
+                String.format("Image %s height: expected %f but got %f", internalId, expectedHeight, image.getHeight()));
+        return this;
     }
 
     public PDFAssertions assertImageWidthChanged(double x, double y, int page, double originalWidth, double epsilon) {
@@ -557,12 +510,10 @@ public class PDFAssertions {
 
     private int getNumberOfElements(int pageNumber) {
         int total = 0;
-        total += pdf.page(pageNumber).selectParagraphs().size();
         total += pdf.page(pageNumber).selectFormFields().size();
         total += pdf.page(pageNumber).selectForms().size();
         total += pdf.page(pageNumber).selectImages().size();
         total += pdf.page(pageNumber).selectPaths().size();
-        total += pdf.page(pageNumber).selectTextLines().size();
         return total;
     }
 
@@ -627,136 +578,4 @@ public class PDFAssertions {
         return this;
     }
 
-    public void assertParagraphHasColor(String text, Color color, int pageNumber) {
-        TextParagraphReference paragraph = pdf.page(pageNumber).selectParagraphsStartingWith(text).get(0);
-        assertEquals(color, paragraph.getColor(),
-                String.format("%s != %s", color, paragraph.getColor()));
-    }
-
-    public PDFAssertions assertTextlineHasClipping(String text) {
-        return assertTextlineHasClipping(text, 1);
-    }
-
-    public PDFAssertions assertTextlineHasClipping(String text, int page) {
-        return withTextLineDump(page, () -> {
-            assertTrue(drawInspector.textLineHasClipping(text, page),
-                    "Expected text line starting with '" + text + "' to still be clipped");
-            return this;
-        });
-    }
-
-    public PDFAssertions assertTextlineHasNoClipping(String text) {
-        return assertTextlineHasNoClipping(text, 1);
-    }
-
-    public PDFAssertions assertTextlineHasNoClipping(String text, int page) {
-        return withTextLineDump(page, () -> {
-            assertFalse(drawInspector.textLineHasClipping(text, page),
-                    "Expected text line starting with '" + text + "' to have clipping removed");
-            return this;
-        });
-    }
-
-    public PDFAssertions assertParagraphHasClipping(String text) {
-        return assertParagraphHasClipping(text, 1);
-    }
-
-    public PDFAssertions assertParagraphHasClipping(String text, int page) {
-        return withParagraphDump(page, () -> {
-            assertTrue(drawInspector.paragraphHasClipping(text, page),
-                    "Expected paragraph starting with '" + text + "' to still be clipped");
-            return this;
-        });
-    }
-
-    public PDFAssertions assertParagraphHasNoClipping(String text) {
-        return assertParagraphHasNoClipping(text, 1);
-    }
-
-    public PDFAssertions assertParagraphHasNoClipping(String text, int page) {
-        return withParagraphDump(page, () -> {
-            assertFalse(drawInspector.paragraphHasClipping(text, page),
-                    "Expected paragraph starting with '" + text + "' to have clipping removed");
-            return this;
-        });
-    }
-
-    // ===========================
-    // Dump Helpers
-    // ===========================
-
-    private void dumpTextLines(int page) {
-        List<TextLineReference> allLines = pdf.page(page).selectTextLines();
-        System.err.printf("=== All TextLines on page %d (%d total) ===%n", page, allLines.size());
-        for (int i = 0; i < allLines.size(); i++) {
-            TextLineReference line = allLines.get(i);
-            System.err.printf("[%d] text='%s' pos=(%f, %f) font='%s' size=%f color=%s%n",
-                    i,
-                    line.getText(),
-                    line.getPosition().getX(),
-                    line.getPosition().getY(),
-                    line.getFontName(),
-                    line.getFontSize(),
-                    line.getColor());
-        }
-        System.err.println("=== End TextLines ===");
-    }
-
-    private void dumpParagraphs(int page) {
-        List<TextParagraphReference> allParagraphs = pdf.page(page).selectParagraphs();
-        System.err.printf("=== All Paragraphs on page %d (%d total) ===%n", page, allParagraphs.size());
-        for (int i = 0; i < allParagraphs.size(); i++) {
-            TextParagraphReference para = allParagraphs.get(i);
-            String textPreview = para.getText();
-            if (textPreview.length() > 50) {
-                textPreview = textPreview.substring(0, 50) + "...";
-            }
-            textPreview = textPreview.replace("\n", "\\n");
-            System.err.printf("[%d] text='%s' pos=(%f, %f) font='%s' size=%f color=%s%n",
-                    i,
-                    textPreview,
-                    para.getPosition().getX(),
-                    para.getPosition().getY(),
-                    para.getFontName(),
-                    para.getFontSize(),
-                    para.getColor());
-        }
-        System.err.println("=== End Paragraphs ===");
-    }
-
-    private <T> T withTextLineDump(int page, java.util.function.Supplier<T> assertion) {
-        try {
-            return assertion.get();
-        } catch (AssertionError e) {
-            dumpTextLines(page);
-            throw e;
-        }
-    }
-
-    private <T> T withParagraphDump(int page, java.util.function.Supplier<T> assertion) {
-        try {
-            return assertion.get();
-        } catch (AssertionError e) {
-            dumpParagraphs(page);
-            throw e;
-        }
-    }
-
-    public TextLineReference findTextLine(String text, int page) {
-        for (TextLineReference line : pdf.page(page).selectTextLines()) {
-            if (line.getText().equals(text)) {
-                return line;
-            }
-        }
-        return null;
-    }
-
-    public TextLineReference findTextLineStartingWith(String text, int page) {
-        for (TextLineReference line : pdf.page(page).selectTextLines()) {
-            if (line.getText().startsWith(text)) {
-                return line;
-            }
-        }
-        return null;
-    }
 }

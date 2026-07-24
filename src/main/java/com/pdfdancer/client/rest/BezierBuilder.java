@@ -24,9 +24,9 @@ public class BezierBuilder {
     private Point c2; // control 2
     private Point p3; // end
 
-    private Color strokeColor;
+    private Color strokeColor = Color.BLACK;
     private Color fillColor;
-    private Double strokeWidth;
+    private Double strokeWidth = 1.0;
     private double[] dashArray;
     private Double dashPhase;
     private Boolean evenOddFill; // null -> default (nonzero)
@@ -62,6 +62,9 @@ public class BezierBuilder {
     }
 
     public BezierBuilder lineWidth(double width) {
+        if (!Double.isFinite(width) || width < 0) {
+            throw new IllegalArgumentException("Line width must be finite and nonnegative");
+        }
         this.strokeWidth = width;
         return this;
     }
@@ -110,4 +113,3 @@ public class BezierBuilder {
         return client.addObject(path);
     }
 }
-

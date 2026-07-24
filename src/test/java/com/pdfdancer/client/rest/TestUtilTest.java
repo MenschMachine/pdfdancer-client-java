@@ -15,9 +15,8 @@ public class TestUtilTest extends BaseTest {
         TestUtil.drawCoordinateGrid(pdf);
 
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn coordinate grid paths");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("TOP-LEFT").isEmpty(), "Missing TOP-LEFT marker");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("CENTER").isEmpty(), "Missing CENTER marker");
-        assertFalse(pdf.page(1).selectParagraphsStartingWith("50").isEmpty(), "Missing numeric labels");
+        assertFalse(pdf.page(1).selectPathsAt(50, 0).isEmpty(), "Missing X tick at x=50");
+        assertFalse(pdf.page(1).selectPathsAt(0, 50).isEmpty(), "Missing Y tick at y=50");
 
         pdf.save("/tmp/test-util-coordinate-grid.pdf");
     }
@@ -29,7 +28,7 @@ public class TestUtilTest extends BaseTest {
         TestUtil.drawCoordinateGrid(pdf, 1);
 
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn coordinate grid paths");
-        assertFalse(pdf.page(1).selectParagraphsMatching(".*BOTTOM-RIGHT.*").isEmpty(), "Missing BOTTOM-RIGHT marker");
+        assertFalse(pdf.page(1).selectPathsAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
 
         pdf.save("/tmp/test-util-coordinate-grid-page0.pdf");
     }

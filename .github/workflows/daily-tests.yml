@@ -2,7 +2,7 @@ name: Daily Tests
 
 on:
   schedule:
-    # Run daily at 10:00 PM UTC
+    # Run daily at 17:04 UTC
     - cron: '4 17 * * *'
   workflow_dispatch:  # Allow manual triggering
 
@@ -17,22 +17,22 @@ jobs:
       max-parallel: 2
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        java: [ 11, 17, 21, 25 ]
+        java: [ 17, 21, 25 ]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           submodules: true
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
 
       - name: Cache Gradle wrapper
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.gradle/wrapper
@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-gradle-wrapper-
 
       - name: Cache Gradle dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.gradle/caches
@@ -53,9 +53,7 @@ jobs:
         id: gradle-version
         shell: bash
         run: |
-          if [ "${{ matrix.java }}" = "11" ]; then
-            echo "version=8.5" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.java }}" = "25" ]; then
+          if [ "${{ matrix.java }}" = "25" ]; then
             echo "version=9.2.1" >> $GITHUB_OUTPUT
           else
             echo "version=8.10.2" >> $GITHUB_OUTPUT
@@ -69,7 +67,7 @@ jobs:
           echo "distributionUrl=https\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" > gradle-wrapper.properties
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
 
       - name: Make gradlew executable
         if: runner.os != 'Windows'
@@ -80,7 +78,7 @@ jobs:
         run: ./gradlew build
         env:
           PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
+          PDFDANCER_API_TOKEN: 42
 
       - name: Run build and tests (Windows)
         if: runner.os == 'Windows'
@@ -88,10 +86,10 @@ jobs:
         run: gradlew.bat build
         env:
           PDFDANCER_BASE_URL: https://api-staging.pdfdancer.com
-          PDFDANCER_TOKEN: 42
+          PDFDANCER_API_TOKEN: 42
 
       - name: Collect PDF artifacts
-        if: always()
+        if: always() && runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p build/pdf-artifacts
@@ -105,7 +103,7 @@ jobs:
           copy %TEMP%\*.pdf build\pdf-artifacts\ 2>nul || exit 0
 
       - name: Upload test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: test-reports-${{ github.run_number }}-${{ matrix.os }}-jdk${{ matrix.java }}
@@ -113,14 +111,19 @@ jobs:
             build/reports/
             build/test-results/
             build/pdf-artifacts/
-          retention-days: 3
+          if-no-files-found: ignore
+          retention-days: 7
 
   notify:
     needs: daily-test
     runs-on: ubuntu-latest
-    if: failure()
+    if: always() && needs.daily-test.result == 'failure'
+    permissions:
+      contents: read
     steps:
-      - name: Notify on failure
+      - name: Summarize failure
         run: |
-          echo "Daily tests failed! Check the workflow run for details."
-          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "## Daily Tests Failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Java SDK daily tests failed on $(date -u +%F)." >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> "$GITHUB_STEP_SUMMARY"

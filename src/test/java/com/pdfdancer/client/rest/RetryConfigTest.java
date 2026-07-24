@@ -43,7 +43,7 @@ class RetryConfigTest {
 
         assertTrue(config.isRetryableStatusCode(500));
         assertTrue(config.isRetryableStatusCode(503));
-        assertFalse(config.isRetryableStatusCode(502));
+        assertTrue(config.isRetryableStatusCode(502));
         assertFalse(config.isRetryableStatusCode(404));
     }
 
@@ -121,13 +121,13 @@ class RetryConfigTest {
     void testBuilderDefaults() {
         RetryConfig config = RetryConfig.builder().build();
 
-        assertEquals(1, config.getMaxAttempts());
-        assertEquals(Duration.ofMillis(100), config.getInitialDelay());
+        assertEquals(3, config.getMaxAttempts());
+        assertEquals(Duration.ofSeconds(1), config.getInitialDelay());
         assertEquals(2.0, config.getBackoffMultiplier());
-        assertEquals(Duration.ofSeconds(10), config.getMaxDelay());
-        assertFalse(config.isRetryOnTimeout());
-        assertFalse(config.isRetryOnConnectionError());
-        assertTrue(config.getRetryableStatusCodes().isEmpty());
+        assertEquals(Duration.ofSeconds(5), config.getMaxDelay());
+        assertTrue(config.isRetryOnTimeout());
+        assertTrue(config.isRetryOnConnectionError());
+        assertEquals(Set.of(408, 429, 500, 502, 503, 504, 520), config.getRetryableStatusCodes());
     }
 
     @Test

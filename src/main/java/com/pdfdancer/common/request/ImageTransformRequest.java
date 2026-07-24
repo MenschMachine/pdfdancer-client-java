@@ -287,6 +287,9 @@ public final class ImageTransformRequest {
         }
 
         public Builder opacity(double opacity) {
+            if (!Double.isFinite(opacity) || opacity < 0 || opacity > 1) {
+                throw new IllegalArgumentException("Opacity must be finite and between 0 and 1");
+            }
             this.transformType = TransformType.OPACITY;
             this.opacity = opacity;
             return this;
