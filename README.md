@@ -4,6 +4,8 @@
 
 # PDFDancer Java Client
 
+This README documents `pdfdancer-client-java` version `3.0.0`.
+
 ## Overview
 
 ### PDF used to be hard to automate. We fixed that.
@@ -33,7 +35,7 @@ languages when you need it.
 
 ## Installation
 
-Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The current version matches `version.properties` (e.g., `0.2.5`).
+Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`.
 
 ### Maven
 
@@ -41,14 +43,14 @@ Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`. The 
 <dependency>
   <groupId>com.pdfdancer.client</groupId>
   <artifactId>pdfdancer-client-java</artifactId>
-  <version>0.2.5</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("com.pdfdancer.client:pdfdancer-client-java:0.2.5")
+implementation("com.pdfdancer.client:pdfdancer-client-java:3.0.0")
 ```
 
 ## Requirements
