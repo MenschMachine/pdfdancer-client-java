@@ -131,7 +131,6 @@ public class BezierShowcaseTest extends BaseTest {
         assertFalse(pdf.page(1).selectPathsAt(cx, cy + r).isEmpty());
 
         // Save for visual inspection
-        pdf.save("/tmp/bezier-Showcase.pdf");
+        pdf.save("build/test-output/bezier-Showcase.pdf");
     }
 }
-

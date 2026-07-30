@@ -111,7 +111,7 @@ public class CoordinateSystemTest extends BaseTest {
         assertFalse(pdf.page(1).selectPathsAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
 
         // Save for visual inspection
-        pdf.save("/tmp/coordinate-system.pdf");
+        pdf.save("build/test-output/coordinate-system.pdf");
     }
 
     private static void addTextLabel(PDFDancer pdf,

@@ -78,7 +78,6 @@ public class LineShowcaseTest extends BaseTest {
         assertFalse(pdf.page(1).selectPathsAt(left + 50, 50).isEmpty()); // vertical line start
 
         // Save for visual inspection
-        pdf.save("/tmp/line-Showcase.pdf");
+        pdf.save("build/test-output/line-Showcase.pdf");
     }
 }
-

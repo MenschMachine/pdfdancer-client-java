@@ -18,7 +18,7 @@ public class TestUtilTest extends BaseTest {
         assertFalse(pdf.page(1).selectPathsAt(50, 0).isEmpty(), "Missing X tick at x=50");
         assertFalse(pdf.page(1).selectPathsAt(0, 50).isEmpty(), "Missing Y tick at y=50");
 
-        pdf.save("/tmp/test-util-coordinate-grid.pdf");
+        pdf.save("build/test-output/test-util-coordinate-grid.pdf");
     }
 
     @Test
@@ -30,6 +30,6 @@ public class TestUtilTest extends BaseTest {
         assertFalse(pdf.selectPaths().isEmpty(), "Should have drawn coordinate grid paths");
         assertFalse(pdf.page(1).selectPathsAt(10, 10).isEmpty(), "Missing grid intersection at (10,10)");
 
-        pdf.save("/tmp/test-util-coordinate-grid-page0.pdf");
+        pdf.save("build/test-output/test-util-coordinate-grid-page0.pdf");
     }
 }

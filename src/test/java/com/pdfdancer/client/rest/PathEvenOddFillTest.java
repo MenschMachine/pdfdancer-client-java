@@ -25,7 +25,6 @@ public class PathEvenOddFillTest extends BaseTest {
                 .add();
 
         assertEquals(1, pdf.selectPaths().size(), "One path should be present");
-        pdf.save("/tmp/path-evenodd.pdf");
+        pdf.save("build/test-output/path-evenodd.pdf");
     }
 }
-

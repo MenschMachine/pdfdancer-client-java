@@ -112,7 +112,7 @@ public class PathTest extends BaseTest {
         List<PathReference> paths = pdf.page(1).selectPathsAt(100, 201.5);
         assertEquals(1, paths.size());
         assertEquals("PATH_0_000001", paths.get(0).getInternalId());
-        pdf.save("/tmp/addPath.pdf");
+        pdf.save("build/test-output/addPath.pdf");
     }
 
 }

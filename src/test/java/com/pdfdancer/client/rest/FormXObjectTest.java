@@ -57,7 +57,7 @@ public class FormXObjectTest extends BaseTest {
         byte[] pdfBytes = pdf.getFileBytes();
         assertNotNull(pdfBytes);
         assertTrue(pdfBytes.length > 0);
-        pdf.save("/tmp/test.pdf");
+        pdf.save("build/test-output/test.pdf");
     }
 
     @Test

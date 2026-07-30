@@ -46,7 +46,6 @@ public class PathConvenienceMethodsTest extends BaseTest {
                 .add();
 
         assertEquals(3, pdf.selectPaths().size(), "Three paths should be present");
-        pdf.save("/tmp/path-convenience.pdf");
+        pdf.save("build/test-output/path-convenience.pdf");
     }
 }
-

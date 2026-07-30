@@ -49,7 +49,6 @@ public class PathBuilderShowcaseTest extends BaseTest {
         // Assertions
         assertEquals(2, pdf.selectPaths().size(), "Two paths should be present");
 
-        pdf.save("/tmp/pathbuilder-Showcase.pdf");
+        pdf.save("build/test-output/pathbuilder-Showcase.pdf");
     }
 }
-
