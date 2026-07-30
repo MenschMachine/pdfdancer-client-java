@@ -4,7 +4,7 @@
 
 # PDFDancer Java Client
 
-This README documents `pdfdancer-client-java` version `3.0.0`.
+This README documents `pdfdancer-client-java` version `3.0.1`.
 
 ## Overview
 
@@ -43,14 +43,14 @@ Artifacts are published under `com.pdfdancer.client:pdfdancer-client-java`.
 <dependency>
   <groupId>com.pdfdancer.client</groupId>
   <artifactId>pdfdancer-client-java</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
 </dependency>
 ```
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-implementation("com.pdfdancer.client:pdfdancer-client-java:3.0.0")
+implementation("com.pdfdancer.client:pdfdancer-client-java:3.0.1")
 ```
 
 ## Requirements
