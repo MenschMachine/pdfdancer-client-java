@@ -6,5 +6,5 @@ msg_source_cmd = 'gommit -A -n --diff-base "$AUTOSNAP_DIFF_BASE"'
 log_max_bytes = 1048576
 
 [watch]
-mode = "recursive"
+mode = "poll"
 poll_interval = "5s"

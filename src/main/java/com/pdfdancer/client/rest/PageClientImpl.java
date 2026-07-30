@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.pdfdancer.common.response.ReadingUnitPageAnalysis;
 
 /**
  * Top-level implementation of page-scoped operations extracted from PDFDancer.PageClient.
@@ -25,6 +26,8 @@ class PageClientImpl {
     }
 
     public int getPageNumber() { return pageNumber; }
+
+    public ReadingUnitPageAnalysis analyzeReadingUnits() { return root.analyzeReadingUnits(pageNumber); }
 
     public List<PathReference> selectPathsAt(double x, double y) {
         Position position = new PositionBuilder().onPage(pageNumber).atCoordinates(x, y).build();

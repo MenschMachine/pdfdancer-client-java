@@ -35,8 +35,11 @@ public class FileUtils {
     public static File writeBytesToFile(byte[] data, String filePath) throws IOException {
         File file = new File(filePath);
 
-        // Make sure parent directories exist
-        file.getParentFile().mkdirs();
+        // A bare filename, such as "output.pdf", has no parent File.
+        File parentDirectory = file.getParentFile();
+        if (parentDirectory != null) {
+            Files.createDirectories(parentDirectory.toPath());
+        }
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(data);

@@ -11,6 +11,8 @@ import com.pdfdancer.common.response.DocumentSnapshot;
 import com.pdfdancer.common.response.CommandResult;
 import com.pdfdancer.common.response.PageSnapshot;
 import com.pdfdancer.common.response.TextEditResponse;
+import com.pdfdancer.common.response.ReadingUnitDocumentAnalysis;
+import com.pdfdancer.common.response.ReadingUnitPageAnalysis;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -661,6 +663,19 @@ public class PDFDancer {
      */
     public DocumentSnapshot getDocumentSnapshot() {
         return getDocumentSnapshotCached(null);
+    }
+
+    /** Analyzes the current session PDF into semantic reading units. */
+    public ReadingUnitDocumentAnalysis analyzeReadingUnits() {
+        return blockingClient.retrieve(HttpRequest.GET("/pdf/document/reading-units")
+                .bearerAuth(token).header("X-Session-Id", sessionId), ReadingUnitDocumentAnalysis.class);
+    }
+
+    /** Analyzes one one-based page of the current session PDF into reading units. */
+    public ReadingUnitPageAnalysis analyzeReadingUnits(int pageNumber) {
+        if (pageNumber < 1) throw new IllegalArgumentException("Page number must be >= 1 (1-based indexing)");
+        return blockingClient.retrieve(HttpRequest.GET("/pdf/page/" + pageNumber + "/reading-units")
+                .bearerAuth(token).header("X-Session-Id", sessionId), ReadingUnitPageAnalysis.class);
     }
 
     /**
