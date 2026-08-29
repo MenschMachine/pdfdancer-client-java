@@ -15,3 +15,5 @@ out/
 .env
 .propagate*md
 /.last-message.txt
+/.zed
+/bin
