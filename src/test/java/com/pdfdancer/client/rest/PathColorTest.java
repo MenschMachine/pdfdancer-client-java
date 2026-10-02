@@ -27,8 +27,8 @@ public class PathColorTest extends BaseTest {
         assertEquals(1, paths.size(), "Should find exactly one path at (80, 720)");
 
         PathReference path = paths.get(0);
-        String internalId = path.getInternalId();
-        assertNotNull(internalId, "Path should have an internal ID");
+        var originalBounds = path.getPosition().getBoundingRect();
+        assertNotNull(originalBounds, "Path should have bounds");
 
         // Modify stroke color to red
         Color newStrokeColor = new Color(255, 0, 0);
@@ -40,7 +40,7 @@ public class PathColorTest extends BaseTest {
 
         // Verify using PDFAssertions
         new PDFAssertions(client)
-                .assertPathHasStrokeColor(internalId, newStrokeColor, 1);
+                .assertPathHasStrokeColor(originalBounds, newStrokeColor, 1);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class PathColorTest extends BaseTest {
         assertEquals(1, paths.size());
 
         PathReference path = paths.get(0);
-        String internalId = path.getInternalId();
+        var originalBounds = path.getPosition().getBoundingRect();
 
         // Modify fill color to blue
         Color newFillColor = new Color(0, 0, 255);
@@ -64,7 +64,7 @@ public class PathColorTest extends BaseTest {
 
         // Verify using PDFAssertions
         new PDFAssertions(client)
-                .assertPathHasFillColor(internalId, newFillColor, 1);
+                .assertPathHasFillColor(originalBounds, newFillColor, 1);
     }
 
     @Test
@@ -76,8 +76,8 @@ public class PathColorTest extends BaseTest {
         assertEquals(1, paths.size(), "Should find exactly one path at (80, 720)");
 
         PathReference path = paths.get(0);
-        String internalId = path.getInternalId();
-        assertNotNull(internalId, "Path should have an internal ID");
+        var originalBounds = path.getPosition().getBoundingRect();
+        assertNotNull(originalBounds, "Path should have bounds");
 
         // Capture original fill color before modification
         Color originalFillColor = path.getFillColor();
@@ -92,7 +92,7 @@ public class PathColorTest extends BaseTest {
 
         // Verify stroke color was changed
         new PDFAssertions(client)
-                .assertPathHasStrokeColor(internalId, newStrokeColor, 1);
+                .assertPathHasStrokeColor(originalBounds, newStrokeColor, 1);
 
         // Verify fill color is unchanged (not cleared) - reload to get fresh state
         PDFDancer freshClient = createClient();
@@ -124,7 +124,7 @@ public class PathColorTest extends BaseTest {
         assertEquals(1, paths.size());
 
         PathReference path = paths.get(0);
-        String internalId = path.getInternalId();
+        var originalBounds = path.getPosition().getBoundingRect();
 
         // Modify both stroke and fill colors
         Color newStrokeColor = new Color(255, 0, 0);
@@ -138,8 +138,8 @@ public class PathColorTest extends BaseTest {
 
         // Verify using PDFAssertions
         new PDFAssertions(client)
-                .assertPathHasStrokeColor(internalId, newStrokeColor, 1)
-                .assertPathHasFillColor(internalId, newFillColor, 1);
+                .assertPathHasStrokeColor(originalBounds, newStrokeColor, 1)
+                .assertPathHasFillColor(originalBounds, newFillColor, 1);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class PathColorTest extends BaseTest {
         assertEquals(1, paths.size());
 
         PathReference path = paths.get(0);
-        String internalId = path.getInternalId();
+        var originalBounds = path.getPosition().getBoundingRect();
 
         // Modify stroke color with alpha
         Color newStrokeColor = new Color(255, 0, 0, 128);
@@ -163,7 +163,7 @@ public class PathColorTest extends BaseTest {
 
         // Verify using PDFAssertions
         new PDFAssertions(client)
-                .assertPathHasStrokeColor(internalId, newStrokeColor, 1);
+                .assertPathHasStrokeColor(originalBounds, newStrokeColor, 1);
     }
 
     @Test
@@ -177,7 +177,7 @@ public class PathColorTest extends BaseTest {
 
         // Modify the first path's stroke color
         PathReference firstPath = allPaths.get(0);
-        String firstPathId = firstPath.getInternalId();
+        var originalBounds = firstPath.getPosition().getBoundingRect();
         int firstPathPage = firstPath.getPosition().getPageNumber();
         Color newStrokeColor = new Color(128, 128, 128);
         boolean result = firstPath.edit()
@@ -192,7 +192,7 @@ public class PathColorTest extends BaseTest {
 
         // Verify using PDFAssertions on the correct page
         new PDFAssertions(client)
-                .assertPathHasStrokeColor(firstPathId, newStrokeColor, firstPathPage);
+                .assertPathHasStrokeColor(originalBounds, newStrokeColor, firstPathPage);
     }
 
     @Test

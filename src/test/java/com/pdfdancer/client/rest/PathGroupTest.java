@@ -20,7 +20,8 @@ public class PathGroupTest extends BaseTest {
         List<PathReference> paths = pdf.page(1).selectPaths();
         assertTrue(paths.size() >= 2);
 
-        List<String> pathIds = List.of(paths.get(0).getInternalId(), paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
 
         assertNotNull(group.getGroupId());
@@ -39,7 +40,8 @@ public class PathGroupTest extends BaseTest {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
 
-        List<String> pathIds = List.of(paths.get(0).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0));
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
 
         assertNotNull(group.getGroupId());
@@ -82,7 +84,8 @@ public class PathGroupTest extends BaseTest {
     public void groupAndMove() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        List<String> pathIds = List.of(paths.get(0).getInternalId(), paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
         assertTrue(group.moveTo(200.0, 300.0));
@@ -102,7 +105,8 @@ public class PathGroupTest extends BaseTest {
     public void groupAndRemove() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        List<String> pathIds = List.of(paths.get(0).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0));
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
 
@@ -124,11 +128,12 @@ public class PathGroupTest extends BaseTest {
     public void scalePathGroup() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        String pathId = paths.get(0).getInternalId();
-        List<String> pathIds = List.of(pathId, paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         // Record original bounds of first path
-        BoundingRect originalBounds = paths.get(0).getPosition().getBoundingRect();
+        BoundingRect originalBounds = PathTestSupport.pathWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0)).getPosition().getBoundingRect();
         double origW = originalBounds.getWidth();
         double origH = originalBounds.getHeight();
 
@@ -138,14 +143,15 @@ public class PathGroupTest extends BaseTest {
         // After scaling 2x, path bounds should roughly double
         new PDFAssertions(pdf)
                 .assertNumberOfPaths(9, 1)
-                .assertPathHasBounds(pathId, origW * 2, origH * 2, 1, 2.0);
+                .assertPathHasBounds(origW * 2, origH * 2, 1, 2.0);
     }
 
     @Test
     public void rotatePathGroup() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        List<String> pathIds = List.of(paths.get(0).getInternalId(), paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
         assertTrue(group.rotate(90.0));
@@ -160,11 +166,12 @@ public class PathGroupTest extends BaseTest {
     public void resizePathGroup() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        String pathId = paths.get(0).getInternalId();
-        List<String> pathIds = List.of(pathId, paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         // Record original bounds
-        BoundingRect originalBounds = paths.get(0).getPosition().getBoundingRect();
+        BoundingRect originalBounds = PathTestSupport.pathWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0)).getPosition().getBoundingRect();
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
         assertTrue(group.resize(50.0, 50.0));
@@ -175,22 +182,26 @@ public class PathGroupTest extends BaseTest {
 
         // Verify the path's bounding rect actually changed
         List<PathReference> reloadedPaths = assertions.getPdf().page(1).selectPaths();
-        PathReference reloaded = reloadedPaths.stream()
-                .filter(p -> pathId.equals(p.getInternalId()))
-                .findFirst().orElseThrow();
+        List<PathReference> horizontalLines = reloadedPaths.stream()
+                .filter(p -> Math.abs(p.getPosition().getBoundingRect().getHeight()) < 0.1)
+                .toList();
+        assertEquals(1, horizontalLines.size(), "Expected one horizontal line path");
+        PathReference reloaded = horizontalLines.get(0);
         BoundingRect newBounds = reloaded.getPosition().getBoundingRect();
-        assertNotEquals(originalBounds, newBounds, "Path bounds should change after resize");
+        assertNotEquals(originalBounds.getWidth(), newBounds.getWidth(), 0.1,
+                "The horizontal line width should change after resize");
     }
 
     @Test
     public void scaleViaReference() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        String pathId = paths.get(0).getInternalId();
-        List<String> pathIds = List.of(pathId, paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         // Record original bounds
-        BoundingRect originalBounds = paths.get(0).getPosition().getBoundingRect();
+        BoundingRect originalBounds = PathTestSupport.pathWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0)).getPosition().getBoundingRect();
         double origW = originalBounds.getWidth();
         double origH = originalBounds.getHeight();
 
@@ -200,14 +211,15 @@ public class PathGroupTest extends BaseTest {
         // After scaling 0.5x, path bounds should roughly halve
         new PDFAssertions(pdf)
                 .assertNumberOfPaths(9, 1)
-                .assertPathHasBounds(pathId, origW * 0.5, origH * 0.5, 1, 2.0);
+                .assertPathHasBounds(origW * 0.5, origH * 0.5, 1, 2.0);
     }
 
     @Test
     public void rotateViaReference() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        List<String> pathIds = List.of(paths.get(0).getInternalId(), paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
         assertTrue(group.rotate(45));
@@ -222,7 +234,8 @@ public class PathGroupTest extends BaseTest {
     public void moveAndRemoveViaReference() {
         PDFDancer pdf = createClient();
         List<PathReference> paths = pdf.page(1).selectPaths();
-        List<String> pathIds = List.of(paths.get(0).getInternalId(), paths.get(1).getInternalId());
+        List<String> pathIds = PathTestSupport.idsForPathsWithBounds(paths,
+                new BoundingRect(80, 720, 220, 0), new BoundingRect(80, 580, 220, 160));
 
         PathGroupReference group = pdf.page(1).groupPaths(pathIds);
         assertTrue(group.moveTo(150.0, 250.0));

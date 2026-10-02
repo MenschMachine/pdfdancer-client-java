@@ -1,5 +1,6 @@
 package com.pdfdancer.client.rest;
 
+import com.pdfdancer.common.model.BoundingRect;
 import com.pdfdancer.common.model.Color;
 import com.pdfdancer.common.model.ObjectRef;
 import com.pdfdancer.common.model.Orientation;
@@ -155,6 +156,20 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertPathHasBounds(double expectedWidth, double expectedHeight, int page, double epsilon) {
+        List<PathReference> matches = pdf.page(page).selectPaths().stream()
+                .filter(path -> {
+                    BoundingRect bounds = path.getPosition().getBoundingRect();
+                    return bounds != null
+                            && Math.abs(bounds.getWidth() - expectedWidth) <= epsilon
+                            && Math.abs(bounds.getHeight() - expectedHeight) <= epsilon;
+                })
+                .toList();
+        assertEquals(1, matches.size(), String.format(
+                "Expected one path with bounds %f x %f on page %d", expectedWidth, expectedHeight, page));
+        return this;
+    }
+
     public PDFAssertions assertPathHasClipping(String internalId) {
         return assertPathHasClipping(internalId, 1);
     }
@@ -212,6 +227,12 @@ public class PDFAssertions {
         return this;
     }
 
+    public PDFAssertions assertPathHasStrokeColor(BoundingRect expectedBounds, Color expectedColor, int page) {
+        PathReference ref = PathTestSupport.pathWithBounds(pdf.page(page).selectPaths(), expectedBounds);
+        assertColorEquals(ref.getStrokeColor(), expectedColor, "stroke", expectedBounds);
+        return this;
+    }
+
     public PDFAssertions assertPathHasFillColor(String internalId, Color expectedColor, int page) {
         return assertPathHasFillColor(internalId, expectedColor, page, 1e-6);
     }
@@ -236,6 +257,25 @@ public class PDFAssertions {
                 String.format("Path %s fill color alpha: expected %d but got %d", internalId, expectedColor.getAlpha(), actualColor.getAlpha()));
 
         return this;
+    }
+
+    public PDFAssertions assertPathHasFillColor(BoundingRect expectedBounds, Color expectedColor, int page) {
+        PathReference ref = PathTestSupport.pathWithBounds(pdf.page(page).selectPaths(), expectedBounds);
+        assertColorEquals(ref.getFillColor(), expectedColor, "fill", expectedBounds);
+        return this;
+    }
+
+    private static void assertColorEquals(Color actualColor, Color expectedColor, String colorType,
+                                          BoundingRect bounds) {
+        assertNotNull(actualColor, "Path with bounds " + bounds + " " + colorType + " color should not be null");
+        assertEquals(expectedColor.getRed(), actualColor.getRed(),
+                "Path " + colorType + " color red for bounds " + bounds);
+        assertEquals(expectedColor.getGreen(), actualColor.getGreen(),
+                "Path " + colorType + " color green for bounds " + bounds);
+        assertEquals(expectedColor.getBlue(), actualColor.getBlue(),
+                "Path " + colorType + " color blue for bounds " + bounds);
+        assertEquals(expectedColor.getAlpha(), actualColor.getAlpha(),
+                "Path " + colorType + " color alpha for bounds " + bounds);
     }
 
     // ===========================
