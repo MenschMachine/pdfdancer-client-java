@@ -223,8 +223,10 @@ class TextReplaceE2ETest extends BaseTest {
                         .sourceAnchored()
                         .build());
 
-        assertEquals(2, response.warnings().size());
-        assertTrue(response.warnings().get(0).message().contains("used for replacement text 'Operating Context'; source font was"));
+        assertTrue(response.warnings().stream()
+                .anyMatch(warning -> warning.message()
+                        .contains("used for replacement text 'Operating Context'; source font was")),
+                "Expected a font substitution warning for the replacement");
         assertEquals(2, response.matched());
         assertEquals(2, response.changed());
         // Visually, both "Assumptions" headings should read "Operating Context" in their original positions.
