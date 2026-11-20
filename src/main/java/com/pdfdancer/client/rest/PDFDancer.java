@@ -772,6 +772,21 @@ public class PDFDancer {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    /**
+     * Selects all text lines in the document. Lines can be moved with
+     * {@code moveTo}, {@code moveX} and {@code moveY}.
+     */
+    public List<TextLineReference> selectTextLines() {
+        DocumentSnapshot snapshot = getDocumentSnapshotCached(null);
+        return toTextLineObject(collectObjectsByType(snapshot, Set.of(ObjectType.TEXT_LINE)));
+    }
+
+    List<TextLineReference> toTextLineObject(List<ObjectRef> objectRefs) {
+        return objectRefs.stream()
+                .map(ref -> new TextLineReference(this, ref))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     List<FormXObjectReference> toFormXObject(List<ObjectRef> objectRefs) {
         return objectRefs.stream()
                 .map(ref -> new FormXObjectReference(this, ref))

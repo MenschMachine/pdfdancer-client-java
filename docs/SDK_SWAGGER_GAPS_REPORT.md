@@ -73,7 +73,7 @@ Coverage labels:
 |---|---:|---|
 | `POST /pdf/add` | Partial | Public wrappers cover images and path/line/bezier builders. |
 | `DELETE /pdf/delete` | Covered | `BaseReference.delete()` and typed references |
-| `PUT /pdf/move` | Covered | `BaseReference.moveTo(...)`, `moveX(...)`, `moveY(...)` |
+| `PUT /pdf/move` | Covered | `BaseReference.moveTo(...)`, `moveX(...)`, `moveY(...)` (images, paths, forms, form fields, `TextLineReference`); `PathGroupReference` has its own `moveTo/moveX/moveY` via `PUT /pdf/path-group/move` |
 | `PUT /pdf/modify` | Partial | Endpoint exists, but no current generic public wrapper was found for the current public object model |
 | `PUT /pdf/modify/formField` | Covered | `FormFieldReference.setValue(...)` |
 | `PUT /pdf/modify/path` | Covered | `PathReference.edit().apply()` |

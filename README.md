@@ -203,8 +203,28 @@ FormFieldReference signature = pdf.selectFormFieldsByName("signature").get(0);
 boolean changed = signature.setValue("Signed by Jane Doe");
 ```
 
-Selectors return typed references (`ImageReference`, `FormFieldReference`, `PathReference`, `PageClient`, …) with
-helpers such as `delete()`, `moveTo(x, y)`, `clearClipping()`, and type-specific mutation methods.
+Selectors return typed references (`ImageReference`, `FormFieldReference`, `PathReference`, `TextLineReference`,
+`PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `moveX(dx)`, `moveY(dy)`, `clearClipping()`, and
+type-specific mutation methods.
+
+### Moving Objects and Text Lines
+
+Selected images, paths, form XObjects, form fields, path groups, and text lines share the same movement helpers.
+`moveTo(x, y)` uses absolute page coordinates; `moveX(dx)` and `moveY(dy)` are relative offsets in PDF points. Each
+returns `true` when the object was moved, and successive relative moves compose.
+
+```java
+TextLineReference line = pdf.page(1).selectTextLines().get(0);
+System.out.println(line.getText());
+
+line.moveTo(100, 500);
+line.moveX(20);
+line.moveY(-15);
+```
+
+Text-line moves apply to whole lines. Use `pdf.text()` to edit the text itself. Lines are detected from the page
+content, so a line moved onto another line's baseline may be read back as one merged line, and text moved outside its
+clipping region is no longer detected.
 
 ## Text Editing
 

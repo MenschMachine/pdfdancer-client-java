@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.*;
         property = "objectRefType"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = ObjectRef.class, name = "TEXT_LINE"),
+        @JsonSubTypes.Type(value = TextObjectRef.class, name = "TEXT_LINE"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "TEXT_ELEMENT"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "WORD"),
         @JsonSubTypes.Type(value = ObjectRef.class, name = "textElement"),

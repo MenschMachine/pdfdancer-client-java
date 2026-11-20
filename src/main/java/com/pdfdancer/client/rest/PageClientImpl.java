@@ -79,6 +79,30 @@ class PageClientImpl {
     }
 
     /**
+     * Selects the text lines on this page.
+     */
+    public List<TextLineReference> selectTextLines() {
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
+        return root.toTextLineObject(root.collectObjectsByType(snapshot, Set.of(ObjectType.TEXT_LINE)));
+    }
+
+    public List<TextLineReference> selectTextLinesAt(double x, double y) {
+        return selectTextLinesAt(x, y, PDFDancer.DEFAULT_EPSILON);
+    }
+
+    /**
+     * Selects the text lines whose bounding box contains the given page coordinates.
+     */
+    public List<TextLineReference> selectTextLinesAt(double x, double y, double epsilon) {
+        PageSnapshot snapshot = root.getPageSnapshotCached(pageNumber, null);
+        List<ObjectRef> lines = root.collectObjectsByType(snapshot, Set.of(ObjectType.TEXT_LINE));
+        List<ObjectRef> filtered = lines.stream()
+                .filter(ref -> root.containsPoint(ref, x, y, epsilon))
+                .collect(Collectors.toUnmodifiableList());
+        return root.toTextLineObject(filtered);
+    }
+
+    /**
      * Selects a single image at the specified coordinates with default epsilon.
      * @return Optional containing the first image found at the position, or empty if none found
      */
