@@ -186,7 +186,7 @@ class SyntheticTextReplacementE2ETest extends BaseTest {
                         "Blue River Analytics employee",
                         "Blue River Analytics employee",
                         "Roboto-Regular",
-                        TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                        TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                                 .withHyphenationEnabled(true),
                         true),
                 new ReplacementCase(

@@ -18,6 +18,19 @@ public final class TextLayoutRequest {
     public enum Profile {
         DEFAULT("default"),
         BODY_TEXT("bodyText"),
+        /**
+         * Keeps every existing line break. Each line is still recomposed horizontally: following
+         * text shifts along the line to make room, nothing wraps onto a new line, and a line may
+         * grow beyond its original width.
+         */
+        KEEP_LINE_BREAKS("noReflow"),
+        /**
+         * @deprecated Renamed to {@link #KEEP_LINE_BREAKS}, because "no reflow" contradicted the
+         * {@code reflowWhenSupported} and {@code requireReflow} modes it is used with. Behaves
+         * identically. Declared after {@link #KEEP_LINE_BREAKS} so that {@link #fromValue(String)}
+         * returns the new constant.
+         */
+        @Deprecated
         NO_REFLOW("noReflow");
 
         private final String value;
@@ -90,7 +103,7 @@ public final class TextLayoutRequest {
     /**
      * Creates a layout.
      *
-     * <p>A layout with no mode and no profile gets {@link Profile#NO_REFLOW}. An omitted mode
+     * <p>A layout with no mode and no profile gets {@link Profile#KEEP_LINE_BREAKS}. An omitted mode
      * means {@code reflowWhenSupported} in the API, and that mode needs a profile. The SDK stores
      * this profile, so {@link #profile()}, {@code equals}, {@code hashCode}, {@code toString} and
      * the JSON that the SDK sends all show the same value.
@@ -101,7 +114,7 @@ public final class TextLayoutRequest {
                              @JsonProperty("hyphenationEnabled") Boolean hyphenationEnabled,
                              @JsonProperty("alignment") Alignment alignment) {
         this.mode = mode;
-        this.profile = profile == null && mode == null ? Profile.NO_REFLOW : profile;
+        this.profile = profile == null && mode == null ? Profile.KEEP_LINE_BREAKS : profile;
         this.hyphenationEnabled = hyphenationEnabled;
         this.alignment = alignment;
     }

@@ -36,7 +36,7 @@ class TextDeleteRequestTest {
     @Test
     void serializesRegexSelectorWithReflowLayout() {
         TextDeleteRequest request = TextDeleteRequest.regex("\\bDRAFT\\b")
-                .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                .reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                 .build();
 
         JsonNode json = mapper.valueToTree(request);

@@ -7,22 +7,42 @@ public class PathGroupReference {
     private final PDFDancer client;
     private final PathGroupInfo info;
     private final int pageNumber;
+    // Tracked locally (PathGroupInfo is immutable) so successive relative moves compose.
+    private double x;
+    private double y;
 
     public PathGroupReference(PDFDancer client, PathGroupInfo info, int pageNumber) {
         this.client = client;
         this.info = info;
         this.pageNumber = pageNumber;
+        this.x = info.getX();
+        this.y = info.getY();
     }
 
     public String getGroupId() { return info.getGroupId(); }
     public int getPathCount() { return info.getPathCount(); }
     public BoundingRect getBoundingBox() { return info.getBoundingBox(); }
-    public double getX() { return info.getX(); }
-    public double getY() { return info.getY(); }
+    public double getX() { return x; }
+    public double getY() { return y; }
     public int getPageNumber() { return pageNumber; }
 
     public boolean moveTo(double x, double y) {
-        return client.movePathGroup(pageNumber, info.getGroupId(), x, y);
+        boolean moved = client.movePathGroup(pageNumber, info.getGroupId(), x, y);
+        if (moved) {
+            this.x = x;
+            this.y = y;
+        }
+        return moved;
+    }
+
+    /** Moves this group horizontally by {@code xOffset} PDF points. */
+    public boolean moveX(double xOffset) {
+        return moveTo(getX() + xOffset, getY());
+    }
+
+    /** Moves this group vertically by {@code yOffset} PDF points. */
+    public boolean moveY(double yOffset) {
+        return moveTo(getX(), getY() + yOffset);
     }
 
     public boolean scale(double factor) {

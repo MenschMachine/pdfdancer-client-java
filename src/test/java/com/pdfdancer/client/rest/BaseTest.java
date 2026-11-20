@@ -2,8 +2,11 @@ package com.pdfdancer.client.rest;
 
 import org.junit.jupiter.api.BeforeAll;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 
@@ -64,9 +67,17 @@ public abstract class BaseTest {
         return TestPDFDancer.createAnon(httpClient, getPdfFile());
     }
 
+    /**
+     * Saves the document to a uniquely named temp file, so a file left behind by another
+     * run or user in the shared temp directory can never collide with this one.
+     */
     protected void saveTo(PDFDancer client, String fileName) {
-        Path out = Path.of(System.getProperty("java.io.tmpdir"), fileName);
-        client.save(out.toString());
-        System.out.println("Saved file: " + out);
+        try {
+            Path out = Files.createTempFile("pdfdancer-", "-" + fileName);
+            client.save(out.toString());
+            System.out.println("Saved file: " + out);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

@@ -203,8 +203,28 @@ FormFieldReference signature = pdf.selectFormFieldsByName("signature").get(0);
 boolean changed = signature.setValue("Signed by Jane Doe");
 ```
 
-Selectors return typed references (`ImageReference`, `FormFieldReference`, `PathReference`, `PageClient`, …) with
-helpers such as `delete()`, `moveTo(x, y)`, `clearClipping()`, and type-specific mutation methods.
+Selectors return typed references (`ImageReference`, `FormFieldReference`, `PathReference`, `TextLineReference`,
+`PageClient`, …) with helpers such as `delete()`, `moveTo(x, y)`, `moveX(dx)`, `moveY(dy)`, `clearClipping()`, and
+type-specific mutation methods.
+
+### Moving Objects and Text Lines
+
+Selected images, paths, form XObjects, form fields, path groups, and text lines share the same movement helpers.
+`moveTo(x, y)` uses absolute page coordinates; `moveX(dx)` and `moveY(dy)` are relative offsets in PDF points. Each
+returns `true` when the object was moved, and successive relative moves compose.
+
+```java
+TextLineReference line = pdf.page(1).selectTextLines().get(0);
+System.out.println(line.getText());
+
+line.moveTo(100, 500);
+line.moveX(20);
+line.moveY(-15);
+```
+
+Text-line moves apply to whole lines. Use `pdf.text()` to edit the text itself. Lines are detected from the page
+content, so a line moved onto another line's baseline may be read back as one merged line, and text moved outside its
+clipping region is no longer detected.
 
 ## Text Editing
 
@@ -248,7 +268,7 @@ pdf.text().replace(TextReplaceRequest.literal("Benefits", "International members
 ```
 
 `hyphenationEnabled(...)` is not valid with `sourceAnchored()`. With `reflowWhenSupported(...)` or `requireReflow(...)`,
-it applies to that layout. With no mode, the API uses `reflowWhenSupported`, and the SDK adds the `noReflow` profile.
+it applies to that layout. With no mode, the API uses `reflowWhenSupported`, and the SDK adds the `KEEP_LINE_BREAKS` profile.
 An insert at a coordinate (`TextInsertRequest.at(...)`) accepts only `sourceAnchored()`, so `build()` throws
 `IllegalArgumentException` for `hyphenationEnabled(...)` there. Lexical hyphens in the supplied text are unaffected.
 
@@ -273,7 +293,7 @@ boolean notHonored = response.errors() != null && response.errors().stream()
 // If notHonored is true, the text of the unit named in the error was not changed. Other matches can have changed.
 ```
 
-- `alignment(...)` alone uses `reflowWhenSupported` with the `noReflow` profile. The request always sends the mode
+- `alignment(...)` alone uses `reflowWhenSupported` with the `KEEP_LINE_BREAKS` profile. The request always sends the mode
   `reflowWhenSupported` with an alignment, also when you combine it with `hyphenationEnabled(...)`. You can combine it
   with `reflowWhenSupported(profile)` or `requireReflow(profile)` in any order. `layout(...)` keeps an alignment that
   you set with `alignment(...)`, unless the layout that you pass has its own alignment.
@@ -281,7 +301,8 @@ boolean notHonored = response.errors() != null && response.errors().stream()
   replaces the layout, and its alignment goes with it. `reflowWhenSupported(...)` and `requireReflow(...)` change only
   the mode and the profile, so they keep the alignment. A call of `alignment(...)` after `layout(...)` replaces the
   alignment of that layout.
-- A layout with no mode and no profile (for example, `hyphenationEnabled(false)` alone) uses the `noReflow` profile.
+- A layout with no mode and no profile (for example, `hyphenationEnabled(false)` alone) uses the `KEEP_LINE_BREAKS`
+  profile. `NO_REFLOW` is a deprecated alias of `KEEP_LINE_BREAKS`.
 - `replaceWithImage(...)` uses a `sourceAnchored` layout. If you do not set a layout, the SDK sets it when it creates
   the request, so `request.layout()` shows it.
 - `alignment(...)` is valid only for replace. With `sourceAnchored()` or `replaceWithImage(...)`, `build()` throws

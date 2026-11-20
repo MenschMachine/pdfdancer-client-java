@@ -771,11 +771,11 @@
         <article class="card">
           <p class="api-name">DETECTED LAYOUT PROFILE</p>
           <h3><code>DEFAULT</code></h3>
-          <p>Chooses a profile from the detected layout model. Paragraphs and lists use composition suited to their alignment; protected or fixed-layout units use the no-reflow profile.</p>
+          <p>Chooses a profile from the detected layout model. Paragraphs and lists use composition suited to their alignment; protected or fixed-layout units use the keep-line-breaks profile.</p>
           <div class="profile-map" aria-label="Examples of default profile selection">
             <div class="profile-map-row"><span>paragraph</span><b>→</b><span>body composition</span></div>
             <div class="profile-map-row"><span>list</span><b>→</b><span>list composition</span></div>
-            <div class="profile-map-row"><span>heading / table</span><b>→</b><span>no reflow</span></div>
+            <div class="profile-map-row"><span>heading / table</span><b>→</b><span>keep line breaks</span></div>
           </div>
           <p class="visual-caption">Protected units include headings, labels, tables, tables of contents, callouts, structured or preformatted text, headers, footers, footnotes, page numbers, watermarks, and unknown layouts.</p>
           <p class="result"><strong>Recommendation:</strong> choose <code>DEFAULT</code> when the selection may contain different layout types and PDFDancer should choose a profile for each detected unit.</p>
@@ -792,19 +792,19 @@
         </article>
         <article class="card">
           <p class="api-name">FIXED LINE BOUNDARIES</p>
-          <h3><code>NO_REFLOW</code></h3>
+          <h3><code>KEEP_LINE_BREAKS</code></h3>
           <p>Recomposes each existing line horizontally but preserves the original line boundaries. Following text moves to make room for a longer replacement; it never wraps onto a new line, and the line may extend beyond its original width.</p>
-          <div class="mini-page" aria-label="No reflow profile moves the words increased 18 percent to the right of the longer replacement while keeping everything on the original line" style="margin-top: 16px; min-height: 128px;">
+          <div class="mini-page" aria-label="The keep-line-breaks profile moves the words increased 18 percent to the right of the longer replacement while keeping everything on the original line" style="margin-top: 16px; min-height: 128px;">
             <div class="edit-row">Revenue in <span class="edit-token">First quarter</span> increased 18%.</div>
             <div class="text-row wide"></div>
             <div class="text-row medium"></div>
           </div>
-          <p class="result"><strong>Recommendation:</strong> choose <code>NO_REFLOW</code> when following text should move horizontally but every existing line break must remain unchanged. Inspect the right edge for overflow.</p>
+          <p class="result"><strong>Recommendation:</strong> choose <code>KEEP_LINE_BREAKS</code> when following text should move horizontally but every existing line break must remain unchanged. Inspect the right edge for overflow.</p>
         </article>
       </div>
       <div class="callout success">
         <h4>Result of replacing <code>Q1</code> with <code>First quarter</code></h4>
-        <p><code>sourceAnchored()</code>: following text stays fixed, so the replacement can overlap it. <code>NO_REFLOW</code>: following text moves right, but remains on the same original line. <code>BODY_TEXT</code>: following text moves and may wrap onto newly calculated lines.</p>
+        <p><code>sourceAnchored()</code>: following text stays fixed, so the replacement can overlap it. <code>KEEP_LINE_BREAKS</code>: following text moves right, but remains on the same original line. <code>BODY_TEXT</code>: following text moves and may wrap onto newly calculated lines.</p>
       </div>
       <div class="table-wrap" style="margin-top: 30px;">
         <table>
@@ -814,7 +814,7 @@
             <tr><td>Edit mixed document content and allow safe fallback</td><td><code>reflowWhenSupported(TextLayoutRequest.Profile.DEFAULT)</code></td><td>Adaptive profile selection plus source-anchored fallback with warnings.</td></tr>
             <tr><td>Edit known prose and allow safe fallback</td><td><code>reflowWhenSupported(TextLayoutRequest.Profile.BODY_TEXT)</code></td><td>Forces paragraph composition but still permits fallback.</td></tr>
             <tr><td>Guarantee that a prose edit is never saved without reflow</td><td><code>requireReflow(TextLayoutRequest.Profile.BODY_TEXT)</code></td><td>Forces paragraph composition and reports an error instead of falling back.</td></tr>
-            <tr><td>Move following text horizontally but preserve every existing line break</td><td><code>reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)</code></td><td>Recomposes the line without wrapping; the result may overflow its original width.</td></tr>
+            <tr><td>Move following text horizontally but preserve every existing line break</td><td><code>reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)</code></td><td>Recomposes the line without wrapping; the result may overflow its original width.</td></tr>
           </tbody>
         </table>
       </div>
