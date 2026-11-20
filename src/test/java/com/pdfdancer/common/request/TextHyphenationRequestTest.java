@@ -71,9 +71,13 @@ class TextHyphenationRequestTest {
                 .sourceAnchored()
                 .hyphenationEnabled(false)
                 .build());
-        assertThrows(IllegalArgumentException.class, () -> TextDeleteRequest.literal("x")
+        // Hyphenation alone has no mode. The API treats that as reflowWhenSupported.
+        JsonNode hyphenationOnly = mapper.valueToTree(TextDeleteRequest.literal("x")
                 .hyphenationEnabled(true)
                 .build());
+        assertEquals("noReflow", hyphenationOnly.at("/layout/profile").asText());
+        assertTrue(hyphenationOnly.at("/layout/hyphenationEnabled").asBoolean());
+        assertTrue(hyphenationOnly.at("/layout/mode").isMissingNode());
         assertThrows(IllegalArgumentException.class, () -> TextInsertRequest.after("x", "y")
                 .sourceAnchored()
                 .hyphenationEnabled(false)
@@ -107,5 +111,54 @@ class TextHyphenationRequestTest {
 
         assertEquals(layout, built);
         assertTrue(built.hyphenationEnabled());
+    }
+
+    @Test
+    void coordinateInsertRejectsHyphenationAndReflowLayouts() {
+        // For a coordinate target, the API ignores a layout with no mode without an error.
+        // It rejects an explicit reflow mode. The SDK rejects all of them.
+        for (boolean enabled : new boolean[]{true, false}) {
+            IllegalArgumentException noMode = assertThrows(IllegalArgumentException.class,
+                    () -> TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                            .hyphenationEnabled(enabled)
+                            .build());
+            assertTrue(noMode.getMessage().contains("target.coordinate"), noMode.getMessage());
+            assertTrue(noMode.getMessage().contains("hyphenationEnabled"), noMode.getMessage());
+        }
+        IllegalArgumentException reflow = assertThrows(IllegalArgumentException.class,
+                () -> TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                        .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                        .build());
+        assertEquals("layout.mode reflowWhenSupported is not valid with target.coordinate", reflow.getMessage());
+        IllegalArgumentException required = assertThrows(IllegalArgumentException.class,
+                () -> TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                        .requireReflow(TextLayoutRequest.Profile.BODY_TEXT)
+                        .build());
+        assertEquals("layout.mode requireReflow is not valid with target.coordinate", required.getMessage());
+        assertThrows(IllegalArgumentException.class,
+                () -> TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                        .layout(new TextLayoutRequest(null, TextLayoutRequest.Profile.BODY_TEXT))
+                        .build());
+    }
+
+    @Test
+    void coordinateInsertAcceptsNoLayoutAndSourceAnchoredAndAnchorInsertAcceptsHyphenationAlone() {
+        assertNull(TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12).build().layout());
+        assertEquals(TextLayoutRequest.sourceAnchored(),
+                TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                        .sourceAnchored()
+                        .build()
+                        .layout());
+        // A pending hyphenation value is cleared by sourceAnchored(), as for the other requests.
+        assertEquals(TextLayoutRequest.sourceAnchored(),
+                TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
+                        .hyphenationEnabled(true)
+                        .sourceAnchored()
+                        .build()
+                        .layout());
+        // The API treats an omitted mode as reflowWhenSupported for an insert at an anchor.
+        TextLayoutRequest anchor = TextInsertRequest.after("x", "y").hyphenationEnabled(true).build().layout();
+        assertTrue(anchor.hyphenationEnabled());
+        assertEquals(TextLayoutRequest.Profile.NO_REFLOW, anchor.profile());
     }
 }

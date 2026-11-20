@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,8 +86,30 @@ public final class TextInsertRequest {
             throw new IllegalArgumentException("insert must not be null or empty");
         }
         validateStyleForTarget(hasAnchor);
+        TextReplaceRequest.rejectAlignment(layout);
+        if (hasCoordinate) {
+            validateCoordinateLayout(layout);
+        }
         TextReplaceRequest.validateLayout(layout);
         return this;
+    }
+
+    /**
+     * A coordinate insert accepts only a {@code sourceAnchored} layout. The API rejects an
+     * explicit reflow mode. It ignores a layout with no mode without an error, because an omitted
+     * mode means {@code reflowWhenSupported}. The SDK rejects both, so that
+     * {@code hyphenationEnabled(...)} does not get lost.
+     */
+    private static void validateCoordinateLayout(TextLayoutRequest layout) {
+        if (layout == null || layout.mode() == TextLayoutRequest.Mode.sourceAnchored) {
+            return;
+        }
+        if (layout.mode() == null) {
+            throw new IllegalArgumentException(
+                    "A layout with no mode means reflowWhenSupported, which is not valid with target.coordinate."
+                            + " hyphenationEnabled(...) is not valid for an insert at a coordinate");
+        }
+        throw new IllegalArgumentException("layout.mode " + layout.mode() + " is not valid with target.coordinate");
     }
 
     private static void validateAnchorTarget(AnchorTarget anchor) {
@@ -222,7 +245,7 @@ public final class TextInsertRequest {
         public AnchorTarget(@JsonProperty("pages") List<Integer> pages,
                             @JsonProperty("select") TextSelectorRequest select,
                             @JsonProperty("caret") Caret caret) {
-            this.pages = pages == null ? null : List.copyOf(pages);
+            this.pages = TextReplaceRequest.copyPages(pages);
             this.select = select;
             this.caret = caret;
         }
@@ -409,12 +432,12 @@ public final class TextInsertRequest {
         }
 
         public Builder pages(Integer... pages) {
-            this.pages = pages == null ? null : List.of(pages);
+            this.pages = pages == null ? null : TextReplaceRequest.copyPages(Arrays.asList(pages));
             return this;
         }
 
         public Builder pages(List<Integer> pages) {
-            this.pages = pages == null ? null : List.copyOf(pages);
+            this.pages = TextReplaceRequest.copyPages(pages);
             return this;
         }
 
@@ -576,7 +599,8 @@ public final class TextInsertRequest {
                         ? null
                         : new TextLayoutRequest(null, null, hyphenationEnabled);
             }
-            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
+            return new TextLayoutRequest(
+                    layout.mode(), layout.profile(), hyphenationEnabled, layout.alignment());
         }
 
         private TextStylePatchRequest.Builder stylePatchBuilder() {

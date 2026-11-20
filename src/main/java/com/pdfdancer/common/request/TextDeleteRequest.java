@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +21,7 @@ public final class TextDeleteRequest {
     public TextDeleteRequest(@JsonProperty("pages") List<Integer> pages,
                              @JsonProperty("select") TextSelectorRequest select,
                              @JsonProperty("layout") TextLayoutRequest layout) {
-        this.pages = pages == null ? null : List.copyOf(pages);
+        this.pages = TextReplaceRequest.copyPages(pages);
         this.select = select;
         this.layout = layout;
     }
@@ -48,6 +49,7 @@ public final class TextDeleteRequest {
     public TextDeleteRequest validated() {
         TextReplaceRequest.validatePages(pages);
         TextReplaceRequest.validateSelector(select);
+        TextReplaceRequest.rejectAlignment(layout);
         TextReplaceRequest.validateLayout(layout);
         return this;
     }
@@ -89,12 +91,12 @@ public final class TextDeleteRequest {
         }
 
         public Builder pages(Integer... pages) {
-            this.pages = pages == null ? null : List.of(pages);
+            this.pages = pages == null ? null : TextReplaceRequest.copyPages(Arrays.asList(pages));
             return this;
         }
 
         public Builder pages(List<Integer> pages) {
-            this.pages = pages == null ? null : List.copyOf(pages);
+            this.pages = TextReplaceRequest.copyPages(pages);
             return this;
         }
 
@@ -163,7 +165,8 @@ public final class TextDeleteRequest {
                         ? null
                         : new TextLayoutRequest(null, null, hyphenationEnabled);
             }
-            return new TextLayoutRequest(layout.mode(), layout.profile(), hyphenationEnabled);
+            return new TextLayoutRequest(
+                    layout.mode(), layout.profile(), hyphenationEnabled, layout.alignment());
         }
     }
 }

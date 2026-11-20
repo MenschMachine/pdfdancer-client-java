@@ -42,20 +42,72 @@ public final class TextLayoutRequest {
         }
     }
 
+    /**
+     * Explicit alignment of each edited line. Valid only for text replace.
+     *
+     * <p>Each edited line keeps its original visible text extent as the reference:
+     * {@code LEFT} keeps the left edge, {@code RIGHT} keeps the right edge, {@code CENTERED}
+     * keeps the midpoint, and {@code JUSTIFIED} keeps both edges by changing the word gaps
+     * (the last line of a paragraph stays left-aligned).
+     */
+    public enum Alignment {
+        LEFT("left"),
+        RIGHT("right"),
+        CENTERED("centered"),
+        JUSTIFIED("justified");
+
+        private final String value;
+
+        Alignment(String value) {
+            this.value = value;
+        }
+
+        @JsonValue
+        public String value() {
+            return value;
+        }
+
+        @JsonCreator
+        public static Alignment fromValue(String value) {
+            for (Alignment alignment : values()) {
+                if (alignment.value.equals(value)) {
+                    return alignment;
+                }
+            }
+            throw new IllegalArgumentException("Unknown text layout alignment: " + value);
+        }
+    }
+
     @JsonProperty("mode")
     private final Mode mode;
     @JsonProperty("profile")
     private final Profile profile;
     @JsonProperty("hyphenationEnabled")
     private final Boolean hyphenationEnabled;
+    @JsonProperty("alignment")
+    private final Alignment alignment;
 
+    /**
+     * Creates a layout.
+     *
+     * <p>A layout with no mode and no profile gets {@link Profile#NO_REFLOW}. An omitted mode
+     * means {@code reflowWhenSupported} in the API, and that mode needs a profile. The SDK stores
+     * this profile, so {@link #profile()}, {@code equals}, {@code hashCode}, {@code toString} and
+     * the JSON that the SDK sends all show the same value.
+     */
     @JsonCreator
     public TextLayoutRequest(@JsonProperty("mode") Mode mode,
                              @JsonProperty("profile") Profile profile,
-                             @JsonProperty("hyphenationEnabled") Boolean hyphenationEnabled) {
+                             @JsonProperty("hyphenationEnabled") Boolean hyphenationEnabled,
+                             @JsonProperty("alignment") Alignment alignment) {
         this.mode = mode;
-        this.profile = profile;
+        this.profile = profile == null && mode == null ? Profile.NO_REFLOW : profile;
         this.hyphenationEnabled = hyphenationEnabled;
+        this.alignment = alignment;
+    }
+
+    public TextLayoutRequest(Mode mode, Profile profile, Boolean hyphenationEnabled) {
+        this(mode, profile, hyphenationEnabled, null);
     }
 
     public TextLayoutRequest(Mode mode, Profile profile) {
@@ -75,12 +127,18 @@ public final class TextLayoutRequest {
     }
 
     public TextLayoutRequest withHyphenationEnabled(boolean enabled) {
-        return new TextLayoutRequest(mode, profile, enabled);
+        return new TextLayoutRequest(mode, profile, enabled, alignment);
+    }
+
+    /** Sets the explicit alignment. Valid only for text replace. */
+    public TextLayoutRequest withAlignment(Alignment alignment) {
+        return new TextLayoutRequest(mode, profile, hyphenationEnabled, alignment);
     }
 
     public Mode mode() { return mode; }
     public Profile profile() { return profile; }
     public Boolean hyphenationEnabled() { return hyphenationEnabled; }
+    public Alignment alignment() { return alignment; }
 
     @Override
     public boolean equals(Object obj) {
@@ -89,12 +147,13 @@ public final class TextLayoutRequest {
         var that = (TextLayoutRequest) obj;
         return mode == that.mode &&
                 Objects.equals(profile, that.profile) &&
-                Objects.equals(hyphenationEnabled, that.hyphenationEnabled);
+                Objects.equals(hyphenationEnabled, that.hyphenationEnabled) &&
+                alignment == that.alignment;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mode, profile, hyphenationEnabled);
+        return Objects.hash(mode, profile, hyphenationEnabled, alignment);
     }
 
     @Override
@@ -102,6 +161,7 @@ public final class TextLayoutRequest {
         return "TextLayoutRequest[" +
                 "mode=" + mode + ", " +
                 "profile=" + profile + ", " +
-                "hyphenationEnabled=" + hyphenationEnabled + ']';
+                "hyphenationEnabled=" + hyphenationEnabled + ", " +
+                "alignment=" + alignment + ']';
     }
 }

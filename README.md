@@ -247,8 +247,49 @@ pdf.text().replace(TextReplaceRequest.literal("Benefits", "International members
         .build());
 ```
 
-`hyphenationEnabled(...)` is valid only with `reflowWhenSupported(...)` or `requireReflow(...)`; lexical hyphens in
-the supplied text are unaffected.
+`hyphenationEnabled(...)` is not valid with `sourceAnchored()`. With `reflowWhenSupported(...)` or `requireReflow(...)`,
+it applies to that layout. With no mode, the API uses `reflowWhenSupported`, and the SDK adds the `noReflow` profile.
+An insert at a coordinate (`TextInsertRequest.at(...)`) accepts only `sourceAnchored()`, so `build()` throws
+`IllegalArgumentException` for `hyphenationEnabled(...)` there. Lexical hyphens in the supplied text are unaffected.
+
+### Explicit Alignment
+
+Text replace can align each edited line explicitly with `TextLayoutRequest.Alignment`. Each edited line keeps its
+original visible text extent as the reference: `LEFT` keeps the left edge, `RIGHT` keeps the right edge, `CENTERED`
+keeps the midpoint, and `JUSTIFIED` keeps both edges by changing the word gaps. Without an alignment, the API detects
+the alignment from the source PDF.
+
+```java
+import com.pdfdancer.common.request.TextLayoutRequest;
+import com.pdfdancer.common.request.TextReplaceRequest;
+import com.pdfdancer.common.response.TextEditResponse;
+import com.pdfdancer.common.response.TextOperationDiagnostic;
+
+TextEditResponse response = pdf.text().replace(TextReplaceRequest.literal("<<account_number>>", "BC5502731")
+        .alignment(TextLayoutRequest.Alignment.RIGHT)
+        .build());
+boolean notHonored = response.errors() != null && response.errors().stream()
+        .anyMatch(e -> TextOperationDiagnostic.ALIGNMENT_NOT_HONORED.equals(e.code()));
+// If notHonored is true, the text of the unit named in the error was not changed. Other matches can have changed.
+```
+
+- `alignment(...)` alone uses `reflowWhenSupported` with the `noReflow` profile. The request always sends the mode
+  `reflowWhenSupported` with an alignment, also when you combine it with `hyphenationEnabled(...)`. You can combine it
+  with `reflowWhenSupported(profile)` or `requireReflow(profile)` in any order. `layout(...)` keeps an alignment that
+  you set with `alignment(...)`, unless the layout that you pass has its own alignment.
+- An alignment inside a layout object belongs to that layout. The next call of `layout(...)` or `sourceAnchored()`
+  replaces the layout, and its alignment goes with it. `reflowWhenSupported(...)` and `requireReflow(...)` change only
+  the mode and the profile, so they keep the alignment. A call of `alignment(...)` after `layout(...)` replaces the
+  alignment of that layout.
+- A layout with no mode and no profile (for example, `hyphenationEnabled(false)` alone) uses the `noReflow` profile.
+- `replaceWithImage(...)` uses a `sourceAnchored` layout. If you do not set a layout, the SDK sets it when it creates
+  the request, so `request.layout()` shows it.
+- `alignment(...)` is valid only for replace. With `sourceAnchored()` or `replaceWithImage(...)`, `build()` throws
+  `IllegalArgumentException`. The delete, insert, and style requests reject a layout that has an alignment.
+- If the API cannot apply the alignment (for example, the replacement adds or removes a line, or the profile re-wraps
+  the lines), the response has the error code `TextOperationDiagnostic.ALIGNMENT_NOT_HONORED`. The API does not change
+  the text of the unit named in the error. Other matches can still change. The SDK does not throw an exception for
+  this error. Check `response.errors()` together with `response.changed()`.
 
 ### Replace Text with an Image
 

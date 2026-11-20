@@ -9,6 +9,14 @@ import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public final class TextOperationDiagnostic {
+    /**
+     * Error code of a requested {@code layout.alignment} that the API could not apply. The API does
+     * not change the text of the unit named in the error. Other matches can still change. No
+     * exception is thrown; check {@link TextEditResponse#errors()} together with
+     * {@link TextEditResponse#changed()}.
+     */
+    public static final String ALIGNMENT_NOT_HONORED = "TEXT_ALIGNMENT_NOT_HONORED";
+
     @JsonProperty("page")
     private final Integer page;
     @JsonProperty("code")
@@ -54,5 +62,15 @@ public final class TextOperationDiagnostic {
     @Override
     public int hashCode() {
         return Objects.hash(page, code, message, elementIds, reflowUnitIds);
+    }
+
+    @Override
+    public String toString() {
+        return "TextOperationDiagnostic[" +
+                "page=" + page + ", " +
+                "code=" + code + ", " +
+                "message=" + message + ", " +
+                "elementIds=" + elementIds + ", " +
+                "reflowUnitIds=" + reflowUnitIds + ']';
     }
 }

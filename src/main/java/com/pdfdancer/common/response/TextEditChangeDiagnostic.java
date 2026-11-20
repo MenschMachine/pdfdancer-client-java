@@ -120,4 +120,20 @@ public final class TextEditChangeDiagnostic {
                 requestedLayoutProfile, effectiveHyphenationEnabled, appliedLayoutMode,
                 elementIds, generatedElementIds, reflowUnitIds);
     }
+
+    @Override
+    public String toString() {
+        return "TextEditChangeDiagnostic[" +
+                "page=" + page + ", " +
+                "operation=" + operation + ", " +
+                "sourceText=" + sourceText + ", " +
+                "resultText=" + resultText + ", " +
+                "requestedLayoutMode=" + requestedLayoutMode + ", " +
+                "requestedLayoutProfile=" + requestedLayoutProfile + ", " +
+                "effectiveHyphenationEnabled=" + effectiveHyphenationEnabled + ", " +
+                "appliedLayoutMode=" + appliedLayoutMode + ", " +
+                "elementIds=" + elementIds + ", " +
+                "generatedElementIds=" + generatedElementIds + ", " +
+                "reflowUnitIds=" + reflowUnitIds + ']';
+    }
 }

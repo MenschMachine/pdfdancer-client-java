@@ -61,4 +61,15 @@ public final class TextEditResponse {
     public int hashCode() {
         return Objects.hash(matched, changed, pagesChanged, change, warnings, errors);
     }
+
+    @Override
+    public String toString() {
+        return "TextEditResponse[" +
+                "matched=" + matched + ", " +
+                "changed=" + changed + ", " +
+                "pagesChanged=" + pagesChanged + ", " +
+                "change=" + change + ", " +
+                "warnings=" + warnings + ", " +
+                "errors=" + errors + ']';
+    }
 }

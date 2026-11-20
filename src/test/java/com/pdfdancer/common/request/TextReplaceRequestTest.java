@@ -6,6 +6,8 @@ import com.pdfdancer.common.model.Image;
 import com.pdfdancer.common.model.PdfAffineTransform;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -195,10 +197,13 @@ class TextReplaceRequestTest {
 
         Image image = new Image();
         image.setData(new byte[]{1});
-        assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
+        // Without a layout, the request gets a sourceAnchored layout.
+        TextReplaceRequest withoutLayout = TextReplaceRequest.builder()
                 .literal("token")
                 .replaceWithImage(image, identity)
-                .build());
+                .build();
+        assertEquals(TextLayoutRequest.sourceAnchored(), withoutLayout.layout());
+        assertEquals("sourceAnchored", mapper.valueToTree(withoutLayout).at("/layout/mode").asText());
         assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.builder()
                 .literal("token")
                 .replaceWithImage(image, identity)
@@ -254,5 +259,36 @@ class TextReplaceRequestTest {
                         new TextSelectorRequest("x", null, null, null, null),
                         "z",
                         new TextLayoutRequest(TextLayoutRequest.Mode.sourceAnchored, TextLayoutRequest.Profile.DEFAULT)).validated());
+    }
+
+    @Test
+    void pagesWithANullElementAreRejectedWithIllegalArgumentException() {
+        List<Integer> withNull = Arrays.asList(1, null);
+
+        for (Runnable build : List.<Runnable>of(
+                () -> TextReplaceRequest.literal("a", "b").pages(1, null).build(),
+                () -> TextReplaceRequest.literal("a", "b").pages(withNull).build(),
+                () -> TextDeleteRequest.literal("a").pages(1, null).build(),
+                () -> TextDeleteRequest.literal("a").pages(withNull).build(),
+                () -> TextStyleRequest.literal("a").size(12).pages(1, null).build(),
+                () -> TextStyleRequest.literal("a").size(12).pages(withNull).build(),
+                () -> TextInsertRequest.after("a", "b").pages(1, null).build(),
+                () -> TextInsertRequest.after("a", "b").pages(withNull).build())) {
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class, build::run);
+            assertEquals("pages must contain only page numbers >= 1", error.getMessage());
+        }
+    }
+
+    @Test
+    void pagesAreCopiedAndUnmodifiable() {
+        List<Integer> source = new ArrayList<>(List.of(1, 2));
+        TextReplaceRequest request = TextReplaceRequest.literal("a", "b").pages(source).build();
+
+        source.add(3);
+
+        assertEquals(List.of(1, 2), request.pages());
+        assertThrows(UnsupportedOperationException.class, () -> request.pages().add(4));
+        assertEquals(List.of(1, 2), TextReplaceRequest.literal("a", "b").pages(1, 2).build().pages());
+        assertNull(TextReplaceRequest.literal("a", "b").pages((List<Integer>) null).build().pages());
     }
 }
