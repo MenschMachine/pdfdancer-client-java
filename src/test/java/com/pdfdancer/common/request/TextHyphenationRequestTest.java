@@ -101,7 +101,7 @@ class TextHyphenationRequestTest {
     void explicitLayoutRetainsOverride() {
         TextLayoutRequest layout = new TextLayoutRequest(
                 TextLayoutRequest.Mode.reflowWhenSupported,
-                TextLayoutRequest.Profile.NO_REFLOW,
+                TextLayoutRequest.Profile.KEEP_LINE_BREAKS,
                 true);
 
         TextLayoutRequest built = TextInsertRequest.after("x", "y")
@@ -127,7 +127,7 @@ class TextHyphenationRequestTest {
         }
         IllegalArgumentException reflow = assertThrows(IllegalArgumentException.class,
                 () -> TextInsertRequest.at(1, 72, 144, "x").font("Helvetica").size(12)
-                        .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                        .reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                         .build());
         assertEquals("layout.mode reflowWhenSupported is not valid with target.coordinate", reflow.getMessage());
         IllegalArgumentException required = assertThrows(IllegalArgumentException.class,
@@ -159,6 +159,6 @@ class TextHyphenationRequestTest {
         // The API treats an omitted mode as reflowWhenSupported for an insert at an anchor.
         TextLayoutRequest anchor = TextInsertRequest.after("x", "y").hyphenationEnabled(true).build().layout();
         assertTrue(anchor.hyphenationEnabled());
-        assertEquals(TextLayoutRequest.Profile.NO_REFLOW, anchor.profile());
+        assertEquals(TextLayoutRequest.Profile.KEEP_LINE_BREAKS, anchor.profile());
     }
 }

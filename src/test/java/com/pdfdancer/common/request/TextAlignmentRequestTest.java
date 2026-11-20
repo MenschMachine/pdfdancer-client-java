@@ -25,8 +25,8 @@ class TextAlignmentRequestTest {
         return mapper.valueToTree(request).get("layout");
     }
 
-    private static TextLayoutRequest noReflow() {
-        return TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW);
+    private static TextLayoutRequest keepLineBreaks() {
+        return TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS);
     }
 
     @Test
@@ -40,7 +40,7 @@ class TextAlignmentRequestTest {
 
     @ParameterizedTest
     @EnumSource(TextLayoutRequest.Alignment.class)
-    void alignmentAloneImpliesReflowWithNoReflowProfile(TextLayoutRequest.Alignment alignment) {
+    void alignmentAloneImpliesReflowWithKeepLineBreaksProfile(TextLayoutRequest.Alignment alignment) {
         JsonNode layout = layoutOf(TextReplaceRequest.literal("a", "b").alignment(alignment).build());
 
         assertEquals(3, layout.size());
@@ -71,7 +71,7 @@ class TextAlignmentRequestTest {
     @Test
     void alignmentCombinesWithHyphenationAndExplicitLayout() {
         JsonNode layout = layoutOf(TextReplaceRequest.literal("a", "b")
-                .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                .reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                 .hyphenationEnabled(false)
                 .alignment(TextLayoutRequest.Alignment.CENTERED)
                 .build());
@@ -109,8 +109,8 @@ class TextAlignmentRequestTest {
 
     @Test
     void alignmentInsideALayoutObjectGoesWithLayoutAndSourceAnchoredButSurvivesReflowCalls() {
-        TextLayoutRequest withRight = noReflow().withAlignment(TextLayoutRequest.Alignment.RIGHT);
-        TextLayoutRequest plain = noReflow();
+        TextLayoutRequest withRight = keepLineBreaks().withAlignment(TextLayoutRequest.Alignment.RIGHT);
+        TextLayoutRequest plain = keepLineBreaks();
 
         // sourceAnchored() replaces the layout, and the alignment of that layout goes with it.
         TextLayoutRequest sourceAnchored = TextReplaceRequest.literal("a", "b")
@@ -158,7 +158,7 @@ class TextAlignmentRequestTest {
 
     @Test
     void alignmentSetWithAlignmentStillConflictsWithSourceAnchoredAfterALayoutCall() {
-        TextLayoutRequest plain = noReflow();
+        TextLayoutRequest plain = keepLineBreaks();
 
         assertThrows(IllegalArgumentException.class, () -> TextReplaceRequest.literal("a", "b")
                 .alignment(TextLayoutRequest.Alignment.RIGHT)
@@ -170,7 +170,7 @@ class TextAlignmentRequestTest {
     @Test
     void replaceWithoutAlignmentHasNoAlignmentKey() {
         JsonNode layout = layoutOf(TextReplaceRequest.literal("a", "b")
-                .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                .reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                 .build());
 
         assertTrue(layout.path("alignment").isMissingNode());
@@ -211,8 +211,8 @@ class TextAlignmentRequestTest {
 
     @Test
     void layoutMethodCarriesAndKeepsAlignment() {
-        TextLayoutRequest withAlignment = noReflow().withAlignment(TextLayoutRequest.Alignment.RIGHT);
-        TextLayoutRequest plain = noReflow();
+        TextLayoutRequest withAlignment = keepLineBreaks().withAlignment(TextLayoutRequest.Alignment.RIGHT);
+        TextLayoutRequest plain = keepLineBreaks();
 
         assertEquals(withAlignment, TextReplaceRequest.literal("a", "b").layout(withAlignment).build().layout());
         // layout() keeps an alignment that alignment() set, in any order.
@@ -232,7 +232,7 @@ class TextAlignmentRequestTest {
 
     @Test
     void layoutRequestAlignmentSerializationAndValidation() throws Exception {
-        TextLayoutRequest layout = noReflow().withAlignment(TextLayoutRequest.Alignment.RIGHT);
+        TextLayoutRequest layout = keepLineBreaks().withAlignment(TextLayoutRequest.Alignment.RIGHT);
 
         assertEquals(TextLayoutRequest.Alignment.RIGHT, layout.alignment());
         assertEquals("right", mapper.valueToTree(layout).get("alignment").asText());
@@ -247,20 +247,20 @@ class TextAlignmentRequestTest {
         TextLayoutRequest layout = new TextLayoutRequest(null, null, true, null);
 
         // The default profile is part of the object, so object and JSON show the same value.
-        assertEquals(TextLayoutRequest.Profile.NO_REFLOW, layout.profile());
-        assertTrue(layout.toString().contains("profile=NO_REFLOW"), layout.toString());
+        assertEquals(TextLayoutRequest.Profile.KEEP_LINE_BREAKS, layout.profile());
+        assertTrue(layout.toString().contains("profile=KEEP_LINE_BREAKS"), layout.toString());
         assertEquals("noReflow", mapper.valueToTree(layout).get("profile").asText());
         TextLayoutRequest roundTrip = mapper.readValue(mapper.writeValueAsString(layout), TextLayoutRequest.class);
         assertEquals(layout, roundTrip);
         assertEquals(layout.hashCode(), roundTrip.hashCode());
-        assertEquals(new TextLayoutRequest(null, TextLayoutRequest.Profile.NO_REFLOW, true, null), layout);
+        assertEquals(new TextLayoutRequest(null, TextLayoutRequest.Profile.KEEP_LINE_BREAKS, true, null), layout);
         // An explicit mode without a profile keeps a null profile. validateLayout asks for it.
         assertEquals(null, new TextLayoutRequest(TextLayoutRequest.Mode.requireReflow, null).profile());
     }
 
     @Test
     void withHyphenationEnabledKeepsAlignment() {
-        TextLayoutRequest layout = noReflow()
+        TextLayoutRequest layout = keepLineBreaks()
                 .withAlignment(TextLayoutRequest.Alignment.RIGHT)
                 .withHyphenationEnabled(true);
 
@@ -269,7 +269,7 @@ class TextAlignmentRequestTest {
 
     @Test
     void alignmentIsRejectedOnDeleteInsertAndStyle() {
-        TextLayoutRequest layout = noReflow().withAlignment(TextLayoutRequest.Alignment.RIGHT);
+        TextLayoutRequest layout = keepLineBreaks().withAlignment(TextLayoutRequest.Alignment.RIGHT);
         List<Supplier<Object>> builds = List.of(
                 () -> TextDeleteRequest.literal("a").layout(layout).build(),
                 () -> TextInsertRequest.after("a", "b").layout(layout).build(),
@@ -284,7 +284,7 @@ class TextAlignmentRequestTest {
     @Test
     void omittedModeMeansReflowWhenSupportedAsInTheApi() {
         TextLayoutRequest layout = new TextLayoutRequest(
-                null, TextLayoutRequest.Profile.NO_REFLOW, null, TextLayoutRequest.Alignment.RIGHT);
+                null, TextLayoutRequest.Profile.KEEP_LINE_BREAKS, null, TextLayoutRequest.Alignment.RIGHT);
 
         TextReplaceRequest.validateLayout(layout);
         JsonNode json = mapper.valueToTree(layout);
@@ -329,7 +329,7 @@ class TextAlignmentRequestTest {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> TextReplaceRequest.builder()
                         .literal("{{logo}}")
-                        .layout(new TextLayoutRequest(null, TextLayoutRequest.Profile.NO_REFLOW))
+                        .layout(new TextLayoutRequest(null, TextLayoutRequest.Profile.KEEP_LINE_BREAKS))
                         .replaceWithImage(image, PdfAffineTransform.builder().build())
                         .build());
 

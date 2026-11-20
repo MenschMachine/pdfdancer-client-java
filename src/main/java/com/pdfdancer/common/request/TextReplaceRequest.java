@@ -186,7 +186,7 @@ public final class TextReplaceRequest {
                 || mode == TextLayoutRequest.Mode.requireReflow)
                 && layout.profile() == null) {
             throw new IllegalArgumentException(
-                    mode + " profile must be one of default, bodyText, noReflow");
+                    mode + " profile must be one of DEFAULT, BODY_TEXT, KEEP_LINE_BREAKS");
         }
     }
 
@@ -369,7 +369,7 @@ public final class TextReplaceRequest {
          * Aligns each edited line explicitly. Valid only for text replace.
          *
          * <p>The request always sends an explicit {@code reflowWhenSupported} mode with this
-         * alignment. Without a layout, it uses the {@code noReflow} profile, the API default for
+         * alignment. Without a layout, it uses the {@code KEEP_LINE_BREAKS} profile, the API default for
          * an omitted layout. You can combine it with
          * {@link #reflowWhenSupported(TextLayoutRequest.Profile)} and
          * {@link #requireReflow(TextLayoutRequest.Profile)} in any order.
@@ -435,7 +435,7 @@ public final class TextReplaceRequest {
                 return resolved;
             }
             if (resolved == null) {
-                return TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                return TextLayoutRequest.reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                         .withAlignment(effectiveAlignment);
             }
             // An omitted mode means reflowWhenSupported in the API. Send it explicitly, so that

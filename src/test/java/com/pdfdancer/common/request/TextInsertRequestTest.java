@@ -54,7 +54,7 @@ class TextInsertRequestTest {
                 .reflowWhenSupported(TextLayoutRequest.Profile.BODY_TEXT)
                 .build();
         TextInsertRequest after = TextInsertRequest.afterRegex("\\bINV-[0-9]{6}\\b", " paid")
-                .reflowWhenSupported(TextLayoutRequest.Profile.NO_REFLOW)
+                .reflowWhenSupported(TextLayoutRequest.Profile.KEEP_LINE_BREAKS)
                 .build();
 
         JsonNode beforeJson = mapper.valueToTree(before);
